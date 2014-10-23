@@ -3,11 +3,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.10)
 # set project name
 PROJECT(flecc_in_c C)
 
-# enable assembler support
-ENABLE_LANGUAGE(ASM)
-
-#SET(DEFAULT_BUILD_TYPE MinSizeRel)
-SET (DEFAULT_BUILD_TYPE Debug)
+SET(DEFAULT_BUILD_TYPE MinSizeRel)
 
 SET(DEFAULT_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/static")
 SET(DEFAULT_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
@@ -16,13 +12,6 @@ SET(DEFAULT_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
 SET(DEFAULT_C_FLAGS_GCC "-Wall")
 SET(DEFAULT_ECLIPSE_SUPPORT_STATE "ON")
 SET(DEFAULT_32BIT_COMPILE_STATE "OFF")
-
-# activate Profiling
-IF (PROFILING)
-    SET(CMAKE_C_FLAGS          "${CMAKE_C_FLAGS} -g -fprofile-arcs -ftest-coverage")
-    SET(CMAKE_CXX_FLAGS        "${CMAKE_CXX_FLAGS} -g -fprofile-arcs -ftest-coverage")
-    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg -fprofile-arcs -ftest-coverage")
-ENDIF(PROFILING)
 
 # set default Architecture
 IF(NOT ARCHITECTURE)
@@ -38,8 +27,8 @@ SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 INCLUDE(setDefaultSettings)          # processes and applies the DEFAULT variables
 INCLUDE(forceOutOfSourceBuild)       # prohibit in-source builds
-INCLUDE(coverage)                    # generate code coverage statistics
-INCLUDE(testing)
+INCLUDE(testCoverage)                # adds coverage test targets
+INCLUDE(testing)                     # enables ctest and generates suite and check
 
 #------------------------------------------------------------------------------
 # Project config
@@ -69,10 +58,6 @@ FOREACH(loop ${FleccLibSources})
   get_filename_component(name "${loop}" NAME_WE)
   add_stdin_test("${name}" "testrunner" "${loop}")
 ENDFOREACH()
-
-IF(PROFILING)
-    SETUP_TARGET_FOR_COVERAGE(coverage ../../lcov_testrunner.zsh coverage)
-ENDIF(PROFILING)
 
 #------------------------------------------------------------------------------
 # Print help dialog (assuming make based build system)
