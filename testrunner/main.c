@@ -4,7 +4,6 @@
  Author      : Erich Wenger
  Version     :
  Copyright   : This is closed-domain source. Do not distribute.
- Description : Hello World in C, Ansi-style
  ============================================================================
  */
 
@@ -40,11 +39,9 @@
 #include "test_ser.h"
 
 int main(void) {
-	puts("!!!Hello World!!!"); /* prints !!!Hello World!!! */
-
 	//FILE *fp = fopen("tests/bigint.tst", "r");
 	io_init(stdin, stdout);
-	test_ser();
+	unsigned errors = test_ser();
 
-	return EXIT_SUCCESS;
+	return errors == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }

@@ -34,6 +34,6 @@
 #ifndef TEST_SER_H_
 #define TEST_SER_H_
 
-void test_ser();
+unsigned test_ser();
 
 #endif /* TEST_SER_H_ */

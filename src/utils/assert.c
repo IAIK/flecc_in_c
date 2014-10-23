@@ -60,14 +60,17 @@ int compare_bytes(const uint8_t *a, const uint8_t* b, const int length) {
  * given test_id and prints appropriate output.
  * @param test_id the test id
  * @param condition the condition to be checked
+ * @return false (=0) on success, true (!=0) on error
  */
-void assert(const char *test_id, const int condition) {
+int assert(const char *test_id, const int condition) {
     io_print("Test ");
     io_print(test_id);
     if(condition) {
         io_println(": success");
+        return 0;
     } else {
         io_println(": error");
+        return 1;
     }
 }
 
@@ -79,8 +82,9 @@ void assert(const char *test_id, const int condition) {
  * @param expected the expected bigint
  * @param to_test the bigint to be tested
  * @param length the length of the two big integers
+ * @return false (=0) on success, true (!=0) on error
  */
-void assert_bigint(const char *test_id, const uint_t *expected, const uint_t *to_test, const int length) {
+int assert_bigint(const char *test_id, const uint_t *expected, const uint_t *to_test, const int length) {
     int comp = bigint_compare_var(expected, to_test, length);
     assert(test_id, comp == 0);
     if(comp != 0) {
@@ -92,7 +96,9 @@ void assert_bigint(const char *test_id, const uint_t *expected, const uint_t *to
         io_print_bigint_var(to_test, length);
         io_print("    diff:     ");
         io_print_bigint_var(diff, length);
+        return 1;
     }
+    return 0;
 }
 
 /**
@@ -101,8 +107,9 @@ void assert_bigint(const char *test_id, const uint_t *expected, const uint_t *to
  * @param test_id the test id
  * @param expected the expected big integer
  * @param to_test the big integer that is being tested
+ * @return false (=0) on success, true (!=0) on error
  */
-void assert_integer(const char *test_id, const int expected, const int to_test) {
+int assert_integer(const char *test_id, const int expected, const int to_test) {
 	int comp = (expected == to_test);
 	assert(test_id, comp);
 	if (comp == 0) {
@@ -110,7 +117,9 @@ void assert_integer(const char *test_id, const int expected, const int to_test) 
         io_print_integer(expected);
         io_print("    actual:   ");
         io_print_integer(to_test);
+        return 1;
 	}
+	return 0;
 }
 
 /**
@@ -120,8 +129,9 @@ void assert_integer(const char *test_id, const int expected, const int to_test) 
  * @param expected the expected byte array
  * @param to_test the byte array that is being tested
  * @param length the length of the two byte arrays
+ * @return false (=0) on success, true (!=0) on error
  */
-void assert_byte_array(const char *test_id, const uint8_t* expected, const uint8_t* to_test, const int length) {
+int assert_byte_array(const char *test_id, const uint8_t* expected, const uint8_t* to_test, const int length) {
     int comp = compare_bytes(expected, to_test, length);
     assert(test_id, comp == 0);
     if(comp != 0) {
@@ -129,5 +139,7 @@ void assert_byte_array(const char *test_id, const uint8_t* expected, const uint8
         io_print_bytes_var(expected, length);
         io_print("    actual:   ");
         io_print_bytes_var(to_test, length);
+        return 1;
     }
+    return 0;
 }
