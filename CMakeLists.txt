@@ -19,14 +19,17 @@ IF(NOT ARCHITECTURE)
   CACHE STRING "ARCH_X86, ARCH_X86_64, ARCH_CORTEXA8, ARCH_CORTEXA9, ARCH_CORTEXA11,..." FORCE)
 ENDIF(NOT ARCHITECTURE)
 
+SET(DOXYGEN_CONFIG_IN_FILE "${PROJECT_SOURCE_DIR}/doc/template.doxy.in")
+
 #------------------------------------------------------------------------------
 # General config
 #------------------------------------------------------------------------------
 # add the project internal module directory to the module path
 SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
-INCLUDE(setDefaultSettings)          # processes and applies the DEFAULT variables
+INCLUDE(doxygenSupport)              # adds doxygen support
 INCLUDE(forceOutOfSourceBuild)       # prohibit in-source builds
+INCLUDE(setDefaultSettings)          # processes and applies the DEFAULT variables
 INCLUDE(testCoverage)                # adds coverage test targets
 INCLUDE(testing)                     # enables ctest and generates suite and check
 
