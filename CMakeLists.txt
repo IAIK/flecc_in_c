@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4) 
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.10) 
 
 # set project name
 PROJECT(flecc_in_c C)
@@ -45,6 +45,7 @@ SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 INCLUDE(setDefaultSettings)          # processes and applies the DEFAULT variables
 INCLUDE(forceOutOfSourceBuild)       # prohibit in-source builds
 INCLUDE(coverage)                    # generate code coverage statistics
+INCLUDE(testing)
 
 #------------------------------------------------------------------------------
 # Project config
@@ -65,9 +66,41 @@ ADD_EXECUTABLE("testrunner" ${TestrunnerSources})
 SET_TARGET_PROPERTIES("testrunner" PROPERTIES
   COMPILE_FLAGS "-DARCHITECTURE=${ARCHITECTURE}")
 TARGET_LINK_LIBRARIES("testrunner" "flecc_in_c")
+add_dependencies(suite "testrunner")
 
-
+# generate a test target
+#-----------------------------------------
+FILE(GLOB FleccLibSources "tests/*.tst")
+FOREACH(loop ${FleccLibSources})
+  get_filename_component(name "${loop}" NAME_WE)
+  add_stdin_test("${name}" "testrunner" "${loop}")
+ENDFOREACH()
 
 IF(PROFILING)
     SETUP_TARGET_FOR_COVERAGE(coverage ../../lcov_testrunner.zsh coverage)
 ENDIF(PROFILING)
+
+#------------------------------------------------------------------------------
+# Print help dialog (assuming make based build system)
+#------------------------------------------------------------------------------
+MESSAGE(STATUS "---------------------------------------------------------------------")
+MESSAGE(STATUS "Configuration for ${CMAKE_PROJECT_NAME} done.")
+MESSAGE(STATUS "INSTALL PREFIX:    ${CMAKE_INSTALL_PREFIX}")
+MESSAGE(STATUS "BUILD TYPE:        ${CMAKE_BUILD_TYPE}")
+MESSAGE(STATUS "")
+MESSAGE(STATUS "make..................Building the project.")
+MESSAGE(STATUS "make install..........Installing the project.")
+MESSAGE(STATUS "make suite............Building the test suite.")
+MESSAGE(STATUS "make check............Build and execute the test suite.")
+IF( DOXYGEN_FOUND )
+  MESSAGE(STATUS "make doxygen..........Build doxygen documentation.")
+ENDIF( )
+IF( COVERAGE_TEST_POSSIBLE AND TEST_COVERAGE)
+  MESSAGE(STATUS "make covReset.........Delete coverate counter files.")
+  MESSAGE(STATUS "make covGenerate......Analyze counter files and generate report.")
+  MESSAGE(STATUS "make coverage.........Reset Counters + run tests + generate report.")
+ENDIF( )
+IF( CLANGFORMAT_POSSIBLE )
+  MESSAGE(STATUS "make format...........Format the source files using clang-format.")
+ENDIF( )
+MESSAGE(STATUS "---------------------------------------------------------------------")
