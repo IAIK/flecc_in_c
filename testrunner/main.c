@@ -37,7 +37,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "io/io.h"
-#include "tests/test_ser.h"
+#include "test_ser.h"
 
 int main(void) {
 	puts("!!!Hello World!!!"); /* prints !!!Hello World!!! */

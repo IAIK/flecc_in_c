@@ -49,33 +49,25 @@ INCLUDE(coverage)                    # generate code coverage statistics
 #------------------------------------------------------------------------------
 # Project config
 #------------------------------------------------------------------------------
-#INCLUDE_DIRECTORIES("src")
+INCLUDE_DIRECTORIES( "src" "testrunner" )
 
-# build all source files into the target
+# build the flecc_in_c library
 #-----------------------------------------
-FILE(GLOB FleccLibSources "src/bi/*.c" "src/eccp/*.c" "src/gfp/*.c" "src/hash/*.c" "src/protocols/*.c" 
-                          "src/utils/*.c" "src/io/*.c" "src/arch/posix/io/*.c")
-FILE(GLOB TestSources "src/tests/*.c")
-FILE(GLOB ExecSources "src/main.c")
-
-foreach( sourceFile ${ExecSources} )
-    get_filename_component(exeName ${sourceFile} NAME_WE)
-    add_executable( ${exeName} ${sourceFile} ${FleccLibSources} ${TestSources})
-    # add preprocessor define for the target
-    SET_TARGET_PROPERTIES("${exeName}" PROPERTIES
+FILE(GLOB_RECURSE FleccLibSources "src/*.c")
+ADD_LIBRARY("flecc_in_c" ${sourceFile} ${FleccLibSources})
+SET_TARGET_PROPERTIES("flecc_in_c" PROPERTIES
         COMPILE_FLAGS "-DARCHITECTURE=${ARCHITECTURE}")
-endforeach( sourceFile ${ExecSources} )
 
-add_library( "flecc_in_c" ${sourceFile} ${FleccLibSources})
-    SET_TARGET_PROPERTIES("flecc_in_c" PROPERTIES
-        COMPILE_FLAGS "-DARCHITECTURE=${ARCHITECTURE}")
-        
-#add_custom_target(secp192r1test ${DEFAULT_RUNTIME_OUTPUT_DIRECTORY}/main  < ../../../flecc_in_c_tests/flecctests/secp192r1_bi.tst)
- 
-#add_custom_command(OUTPUT testlog.execution
-#                   COMMAND ../../executeTests.zsh)
-                   
-       
+# build the test runner
+#-----------------------------------------
+FILE(GLOB TestrunnerSources "testrunner/*.c")
+ADD_EXECUTABLE("testrunner" ${TestrunnerSources})
+SET_TARGET_PROPERTIES("testrunner" PROPERTIES
+  COMPILE_FLAGS "-DARCHITECTURE=${ARCHITECTURE}")
+TARGET_LINK_LIBRARIES("testrunner" "flecc_in_c")
+
+
+
 IF(PROFILING)
     SETUP_TARGET_FOR_COVERAGE(coverage ../../lcov_testrunner.zsh coverage)
 ENDIF(PROFILING)

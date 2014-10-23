@@ -32,16 +32,16 @@
  */ 
  
 #include <stdio.h>
-#include "../io/io.h"
-#include "../bi/bi.h"
-#include "../gfp/gfp.h"
-#include "../utils/param.h"
-#include "../utils/assert.h"
-#include "../eccp/eccp.h"
-#include "../utils/parse.h"
-#include "../protocols/protocols.h"
-#include "../hash/sha1.h"
-#include "../hash/sha2.h"
+#include "io/io.h"
+#include "bi/bi.h"
+#include "gfp/gfp.h"
+#include "utils/param.h"
+#include "utils/assert.h"
+#include "eccp/eccp.h"
+#include "utils/parse.h"
+#include "protocols/protocols.h"
+#include "hash/sha1.h"
+#include "hash/sha2.h"
 
 //#define READ_BUFFER_SIZE 4*BYTES_PER_GFP+2*WORDS_PER_GFP+10
 #define READ_BUFFER_SIZE 10000
