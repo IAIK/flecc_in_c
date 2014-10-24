@@ -29,23 +29,22 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */ 
+ */
 
 #ifndef RAND_H_
 #define RAND_H_
 
 #include "../types.h"
 
-void bigint_rand_fipsXXX_set_seed(uint_t *seed, const int length);
-void bigint_rand_fipsXXX(uint_t *dest, const int length);
+void bigint_rand_fipsXXX_set_seed( uint_t *seed, const int length );
+void bigint_rand_fipsXXX( uint_t *dest, const int length );
 
-void bigint_rand_insecure_var(uint_t *dest, const int length);
+void bigint_rand_insecure_var( uint_t *dest, const int length );
 
 /**
  * Writes a (pseudo) random integer string. Should use external entropy.
  */
-void bigint_rand_secure_var(uint_t *dest, const int length);
-void gfp_rand(gfp_t dest, const gfp_prime_data_t *prime_data);
-
+void bigint_rand_secure_var( uint_t *dest, const int length );
+void gfp_rand( gfp_t dest, const gfp_prime_data_t *prime_data );
 
 #endif /* RAND_H_ */

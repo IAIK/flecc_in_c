@@ -29,8 +29,8 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */ 
- 
+ */
+
 #include <stdlib.h>
 #include "rand.h"
 #include "../bi/bi.h"
@@ -40,33 +40,31 @@
  * @param dest
  * @param length the number of words to generate
  */
-void bigint_rand_insecure_var(uint_t *dest, const int length) {
+void bigint_rand_insecure_var( uint_t *dest, const int length ) {
     int word;
-    for(word = 0; word<length; word++) {
+    for( word = 0; word < length; word++ ) {
         *dest++ = rand();
     }
 }
-
 
 /**
  * Generate a number that is *smaller* than the given prime and larger than 0
  * @param dest       the number to generate
  * @param prime_data the upper bound
  */
-void gfp_rand(gfp_t dest, const gfp_prime_data_t *prime_data) {
+void gfp_rand( gfp_t dest, const gfp_prime_data_t *prime_data ) {
     int msb;
     uint_t mask;
-    msb = prime_data->bits & (BITS_PER_WORD - 1);
-    if(msb == 0)
+    msb = prime_data->bits & ( BITS_PER_WORD - 1 );
+    if( msb == 0 )
         mask = UINT_T_MAX;
     else
-        mask = (1 << msb) - 1;
+        mask = ( 1 << msb ) - 1;
     do {
-    	// TODO: to be replaced with an external library or something more secure
-        bigint_rand_insecure_var(dest, prime_data->words);
+        // TODO: to be replaced with an external library or something more secure
+        bigint_rand_insecure_var( dest, prime_data->words );
         /* speedup of this loop */
         dest[prime_data->words - 1] &= mask;
-    } while((bigint_compare_var(dest, prime_data->prime, prime_data->words) >= 0) &&
-    		(bigint_is_zero_var(dest, prime_data->words) == 0));
+    } while( ( bigint_compare_var( dest, prime_data->prime, prime_data->words ) >= 0 )
+             && ( bigint_is_zero_var( dest, prime_data->words ) == 0 ) );
 }
-

@@ -29,14 +29,17 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */ 
- 
+ */
+
 #ifndef ECDH_H_
 #define ECDH_H_
 
 #include "../types.h"
 
-void ecdh_phase_one(eccp_point_affine_t* res, const gfp_t scalar, const eccp_parameters_t *param);
-void ecdh_phase_two(eccp_point_affine_t* res, const gfp_t scalar, const eccp_point_affine_t* other_party_point, const eccp_parameters_t *param);
+void ecdh_phase_one( eccp_point_affine_t *res, const gfp_t scalar, const eccp_parameters_t *param );
+void ecdh_phase_two( eccp_point_affine_t *res,
+                     const gfp_t scalar,
+                     const eccp_point_affine_t *other_party_point,
+                     const eccp_parameters_t *param );
 
 #endif /* ECDH_H_ */

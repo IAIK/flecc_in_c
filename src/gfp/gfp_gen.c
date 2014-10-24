@@ -29,8 +29,8 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */ 
- 
+ */
+
 #include "gfp_gen.h"
 #include "../bi/bi.h"
 
@@ -42,13 +42,13 @@
  * @param b the second parameter to add
  * @param prime_data the prime number data to reduce the result
  */
-void gfp_gen_add(gfp_t res, const gfp_t a, const gfp_t b, const gfp_prime_data_t *prime_data) {
-    int carry = bigint_add_var(res, a, b, prime_data->words);
-    if (carry) {
-        bigint_subtract_var(res, res, prime_data->prime, prime_data->words);
+void gfp_gen_add( gfp_t res, const gfp_t a, const gfp_t b, const gfp_prime_data_t *prime_data ) {
+    int carry = bigint_add_var( res, a, b, prime_data->words );
+    if( carry ) {
+        bigint_subtract_var( res, res, prime_data->prime, prime_data->words );
     } else {
-        if(bigint_compare_var(res, prime_data->prime, prime_data->words) >= 0) {
-            bigint_subtract_var(res, res, prime_data->prime, prime_data->words);
+        if( bigint_compare_var( res, prime_data->prime, prime_data->words ) >= 0 ) {
+            bigint_subtract_var( res, res, prime_data->prime, prime_data->words );
         }
     }
 }
@@ -60,10 +60,10 @@ void gfp_gen_add(gfp_t res, const gfp_t a, const gfp_t b, const gfp_prime_data_t
  * @param res the difference
  * @param prime_data the prime number data to reduce the result
  */
-void gfp_gen_subtract(gfp_t res, const gfp_t a, const gfp_t b, const gfp_prime_data_t *prime_data) {
-    int carry = bigint_subtract_var(res, a, b, prime_data->words);
-    if(carry) {
-        bigint_add_var(res, res, prime_data->prime, prime_data->words);
+void gfp_gen_subtract( gfp_t res, const gfp_t a, const gfp_t b, const gfp_prime_data_t *prime_data ) {
+    int carry = bigint_subtract_var( res, a, b, prime_data->words );
+    if( carry ) {
+        bigint_add_var( res, res, prime_data->prime, prime_data->words );
     }
 }
 
@@ -75,14 +75,14 @@ void gfp_gen_subtract(gfp_t res, const gfp_t a, const gfp_t b, const gfp_prime_d
  * @param a the operand to divide
  * @param prime_data the prime number data to reduce the result
  */
-void gfp_gen_halving(gfp_t res, const gfp_t a, const gfp_prime_data_t *prime_data) {
+void gfp_gen_halving( gfp_t res, const gfp_t a, const gfp_prime_data_t *prime_data ) {
     uint_t carry;
-    if(BIGINT_IS_ODD(a)) {
-        carry = bigint_add_var(res, a, prime_data->prime, prime_data->words);
-        bigint_shift_right_one_var(res, res, prime_data->words);
-        res[prime_data->words-1] |= carry << (BITS_PER_WORD-1);
+    if( BIGINT_IS_ODD( a ) ) {
+        carry = bigint_add_var( res, a, prime_data->prime, prime_data->words );
+        bigint_shift_right_one_var( res, res, prime_data->words );
+        res[prime_data->words - 1] |= carry << ( BITS_PER_WORD - 1 );
     } else {
-        bigint_shift_right_one_var(res, a, prime_data->words);
+        bigint_shift_right_one_var( res, a, prime_data->words );
     }
 }
 
@@ -92,12 +92,12 @@ void gfp_gen_halving(gfp_t res, const gfp_t a, const gfp_prime_data_t *prime_dat
  * @param res the negated element
  * @param prime_data the prime number data to reduce the result
  */
-void gfp_gen_negate(gfp_t res, const gfp_t a, const gfp_prime_data_t *prime_data) {
-	if(bigint_is_zero_var(a, prime_data->words)) {
-		bigint_copy_var(res, a, prime_data->words);
-	} else {
-		bigint_subtract_var(res, prime_data->prime, a, prime_data->words);
-	}
+void gfp_gen_negate( gfp_t res, const gfp_t a, const gfp_prime_data_t *prime_data ) {
+    if( bigint_is_zero_var( a, prime_data->words ) ) {
+        bigint_copy_var( res, a, prime_data->words );
+    } else {
+        bigint_subtract_var( res, prime_data->prime, a, prime_data->words );
+    }
 }
 
 /**
@@ -107,17 +107,17 @@ void gfp_gen_negate(gfp_t res, const gfp_t a, const gfp_prime_data_t *prime_data
  * @param b second operand
  * @param prime_data the prime number data to reduce the result
  */
-void gfp_gen_multiply_div(gfp_t res, const gfp_t a, const gfp_t b, const gfp_prime_data_t *prime_data) {
-	uint_t product[2*WORDS_PER_GFP];
-	uint_t extended_prime[2*WORDS_PER_GFP];
-	uint_t quotient[2*WORDS_PER_GFP];
-	uint_t remainder[2*WORDS_PER_GFP];
+void gfp_gen_multiply_div( gfp_t res, const gfp_t a, const gfp_t b, const gfp_prime_data_t *prime_data ) {
+    uint_t product[2 * WORDS_PER_GFP];
+    uint_t extended_prime[2 * WORDS_PER_GFP];
+    uint_t quotient[2 * WORDS_PER_GFP];
+    uint_t remainder[2 * WORDS_PER_GFP];
 
-	bigint_multiply_var(product, a, b, prime_data->words, prime_data->words);
-	bigint_clear_var(extended_prime+prime_data->words, prime_data->words);
-	bigint_copy_var(extended_prime, prime_data->prime, prime_data->words);
-	bigint_divide_simple_var(quotient, remainder, product, extended_prime, prime_data->words);
-	bigint_copy_var(res, remainder, prime_data->words);
+    bigint_multiply_var( product, a, b, prime_data->words, prime_data->words );
+    bigint_clear_var( extended_prime + prime_data->words, prime_data->words );
+    bigint_copy_var( extended_prime, prime_data->prime, prime_data->words );
+    bigint_divide_simple_var( quotient, remainder, product, extended_prime, prime_data->words );
+    bigint_copy_var( res, remainder, prime_data->words );
 }
 
 /**
@@ -125,11 +125,8 @@ void gfp_gen_multiply_div(gfp_t res, const gfp_t a, const gfp_t b, const gfp_pri
  * @param a the parameter to reduce
  * @param prime_data the prime number data to reduce the result
  */
-void gfp_reduce(gfp_t a, const gfp_prime_data_t *prime_data) {
-    while(bigint_compare_var(a, prime_data->prime, prime_data->words) >= 0) {
-        bigint_subtract_var(a, a, prime_data->prime, prime_data->words);
+void gfp_reduce( gfp_t a, const gfp_prime_data_t *prime_data ) {
+    while( bigint_compare_var( a, prime_data->prime, prime_data->words ) >= 0 ) {
+        bigint_subtract_var( a, a, prime_data->prime, prime_data->words );
     }
 }
-
-
-

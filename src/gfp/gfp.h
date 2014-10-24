@@ -33,8 +33,8 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */ 
- 
+ */
+
 #ifndef GFP_H_
 #define GFP_H_
 
@@ -42,21 +42,22 @@
 #include "gfp_gen.h"
 #include "gfp_mont.h"
 
-#define gfp_add(res,a,b)                             gfp_gen_add(res,a,b,&param->prime_data)
-#define gfp_subtract(res,a,b)                        gfp_gen_subtract(res,a,b,&param->prime_data)
-#define gfp_halving(res,a)                           gfp_gen_halving(res,a,&param->prime_data)
-#define gfp_negate(res,a)                            gfp_gen_negate(res,a,&param->prime_data)
-#define gfp_multiply(res,a,b)                        gfp_mont_multiply_sos(res,a,b,&param->prime_data)
-#define gfp_square(res,a)                            gfp_mont_multiply_sos(res,a,a,&param->prime_data)
-#define gfp_inverse(res,a)                           gfp_mont_inverse(res,a,&param->prime_data)
-#define gfp_exponent(res,a,exponent,exponent_length) gfp_mont_exponent(res,a,exponent,exponent_length,&param->prime_data)
+#define gfp_add( res, a, b ) gfp_gen_add( res, a, b, &param->prime_data )
+#define gfp_subtract( res, a, b ) gfp_gen_subtract( res, a, b, &param->prime_data )
+#define gfp_halving( res, a ) gfp_gen_halving( res, a, &param->prime_data )
+#define gfp_negate( res, a ) gfp_gen_negate( res, a, &param->prime_data )
+#define gfp_multiply( res, a, b ) gfp_mont_multiply_sos( res, a, b, &param->prime_data )
+#define gfp_square( res, a ) gfp_mont_multiply_sos( res, a, a, &param->prime_data )
+#define gfp_inverse( res, a ) gfp_mont_inverse( res, a, &param->prime_data )
+#define gfp_exponent( res, a, exponent, exponent_length )                                                                        \
+    gfp_mont_exponent( res, a, exponent, exponent_length, &param->prime_data )
 
-#define gfp_clear(dest)                              bigint_clear_var(dest,param->prime_data.words)
-#define gfp_copy(dest,src)                           bigint_copy_var(dest,src,param->prime_data.words)
-#define gfp_compare(a,b)                             bigint_compare_var(a,b,param->prime_data.words)
-#define gfp_is_zero(a)                               bigint_is_zero_var(a,param->prime_data.words)
+#define gfp_clear( dest ) bigint_clear_var( dest, param->prime_data.words )
+#define gfp_copy( dest, src ) bigint_copy_var( dest, src, param->prime_data.words )
+#define gfp_compare( a, b ) bigint_compare_var( a, b, param->prime_data.words )
+#define gfp_is_zero( a ) bigint_is_zero_var( a, param->prime_data.words )
 
-// #define gfp_compare(a,b,prime_data) bigint_compare_var(a,b,(prime_data)->words)
-
+// #define gfp_compare(a,b,prime_data)
+// bigint_compare_var(a,b,(prime_data)->words)
 
 #endif /* GFP_H_ */

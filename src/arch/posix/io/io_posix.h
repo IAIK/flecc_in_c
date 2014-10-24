@@ -29,16 +29,16 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */ 
- 
+ */
+
 #ifndef IO_POSIX_H_
 #define IO_POSIX_H_
 
 #include <stdio.h>
 #include "../../../types.h"
 
-void 	io_posix_init(FILE *default_in, FILE *default_out);
+void io_posix_init( FILE *default_in, FILE *default_out );
 uint8_t io_posix_read_byte();
-void 	io_posix_write_byte(uint8_t byte);
+void io_posix_write_byte( uint8_t byte );
 
 #endif /* IO_POSIX_H_ */

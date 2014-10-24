@@ -29,68 +29,70 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */ 
- 
+ */
+
 #include "eccp_affine.h"
 #include "../gfp/gfp.h"
 
 /**
  * Tests if the given affine point fulfills the elliptic curve equation.
- * (Does not perform a cofactor multiplication to check the order of the given point.)
+ * (Does not perform a cofactor multiplication to check the order of the given
+ * point.)
  * @param A point to test
  * @param param elliptic curve parameters
  * @return 1 if point is valid, otherwise 0
  */
-int  eccp_affine_point_is_valid(const eccp_point_affine_t *A, const eccp_parameters_t *param) {
-	gfp_t left, right;
+int eccp_affine_point_is_valid( const eccp_point_affine_t *A, const eccp_parameters_t *param ) {
+    gfp_t left, right;
 
-	if(A->identity == 1)
-		return 1;
-	if(bigint_compare_var(A->x, param->prime_data.prime, param->prime_data.words) >= 0)
-		return 0;
-	if(bigint_compare_var(A->y, param->prime_data.prime, param->prime_data.words) >= 0)
-		return 0;
+    if( A->identity == 1 )
+        return 1;
+    if( bigint_compare_var( A->x, param->prime_data.prime, param->prime_data.words ) >= 0 )
+        return 0;
+    if( bigint_compare_var( A->y, param->prime_data.prime, param->prime_data.words ) >= 0 )
+        return 0;
 
     /* calculate the right side */
     /* use left as additional temp */
-    gfp_square(left, A->x);
-    gfp_multiply(right, A->x, left);           /* x^3 */
-    gfp_multiply(left, A->x, param->param_a);  /* a*x */
-    gfp_add(right, right, left);               /* x^3 + a*x */
-    gfp_add(right, right, param->param_b);     /* x^3 + a*x + b */
+    gfp_square( left, A->x );
+    gfp_multiply( right, A->x, left );          /* x^3 */
+    gfp_multiply( left, A->x, param->param_a ); /* a*x */
+    gfp_add( right, right, left );              /* x^3 + a*x */
+    gfp_add( right, right, param->param_b );    /* x^3 + a*x + b */
 
     /* calculate the left side */
-    gfp_square(left, A->y);
+    gfp_square( left, A->y );
 
     /* check if y^2 == x^3 + a*x + b */
-    if(gfp_compare(left, right) == 0)
+    if( gfp_compare( left, right ) == 0 )
         return 1;
     else
         return 0;
 }
 
 /**
- *  Compares the two given points for equality. (identity is smaller, the compare x and y coordinates)
+ *  Compares the two given points for equality. (identity is smaller, the
+ * compare x and y coordinates)
  *  @param A
  *  @param B
  *  @param param elliptic curve parameters
  *  @return -1 if A is smaller, 0 if equal, 1 if A is larger.
  */
-int  eccp_affine_point_compare(const eccp_point_affine_t *A, const eccp_point_affine_t *B, const eccp_parameters_t *param) {
+int eccp_affine_point_compare( const eccp_point_affine_t *A, const eccp_point_affine_t *B, const eccp_parameters_t *param ) {
     int compare;
-    if(A->identity == 1) {
-    	if(B->identity == 1)
-    		return 0;
-    	else
-    		return -1;
+    if( A->identity == 1 ) {
+        if( B->identity == 1 )
+            return 0;
+        else
+            return -1;
     }
-    if(B->identity == 1)
+    if( B->identity == 1 )
         return 1;
-    compare = gfp_compare(A->x, B->x);
-    if(compare != 0) {
+    compare = gfp_compare( A->x, B->x );
+    if( compare != 0 ) {
         return compare;
     } else {
-        return gfp_compare(A->y, B->y);
+        return gfp_compare( A->y, B->y );
     }
 }
 
@@ -100,10 +102,10 @@ int  eccp_affine_point_compare(const eccp_point_affine_t *A, const eccp_point_af
  *  @param src the source memory
  *  @param param elliptic curve parameters
  */
-void eccp_affine_point_copy(eccp_point_affine_t *dest, const eccp_point_affine_t *src, const eccp_parameters_t *param) {
-	dest->identity = src->identity;
-	gfp_copy(dest->x, src->x);
-	gfp_copy(dest->y, src->y);
+void eccp_affine_point_copy( eccp_point_affine_t *dest, const eccp_point_affine_t *src, const eccp_parameters_t *param ) {
+    dest->identity = src->identity;
+    gfp_copy( dest->x, src->x );
+    gfp_copy( dest->y, src->y );
 }
 
 /**
@@ -113,21 +115,24 @@ void eccp_affine_point_copy(eccp_point_affine_t *dest, const eccp_point_affine_t
  * @param B
  * @param param elliptic curve parameters
  */
-void eccp_affine_point_add(eccp_point_affine_t *res, const eccp_point_affine_t *A, const eccp_point_affine_t *B, const eccp_parameters_t *param) {
+void eccp_affine_point_add( eccp_point_affine_t *res,
+                            const eccp_point_affine_t *A,
+                            const eccp_point_affine_t *B,
+                            const eccp_parameters_t *param ) {
     gfp_t lambda, temp1, temp2;
 
-    if(A->identity == 1) {
-    	eccp_affine_point_copy(res, B, param);
+    if( A->identity == 1 ) {
+        eccp_affine_point_copy( res, B, param );
         return;
     }
-    if(B->identity == 1) {
-    	eccp_affine_point_copy(res, A, param);
+    if( B->identity == 1 ) {
+        eccp_affine_point_copy( res, A, param );
         return;
     }
-    if(gfp_compare(A->x, B->x) == 0) {
-        if(gfp_compare(A->y, B->y) == 0) {
+    if( gfp_compare( A->x, B->x ) == 0 ) {
+        if( gfp_compare( A->y, B->y ) == 0 ) {
             // CASE: A is equal to B
-        	eccp_affine_point_double(res, A, param);
+            eccp_affine_point_double( res, A, param );
             return;
         } else {
             // CASE: -A is equal to B
@@ -137,17 +142,17 @@ void eccp_affine_point_add(eccp_point_affine_t *res, const eccp_point_affine_t *
         }
     }
 
-    gfp_subtract(temp2, B->x, A->x);
-    gfp_inverse(temp1, temp2);
-    gfp_subtract(temp2, B->y, A->y);
-    gfp_multiply(lambda, temp1, temp2);  // (y2-y1) / (x2-x1)
-    gfp_square(temp1, lambda);
-    gfp_subtract(temp1, temp1, A->x);
-    gfp_subtract(temp1, temp1, B->x);    // L^2 - x1 - x2
-    gfp_subtract(temp2, A->x, temp1);    // (x1 - x3)
-    gfp_copy(res->x, temp1);
-    gfp_multiply(temp1, temp2, lambda);
-    gfp_subtract(res->y, temp1, A->y);   // L*(x1-x3)-y1
+    gfp_subtract( temp2, B->x, A->x );
+    gfp_inverse( temp1, temp2 );
+    gfp_subtract( temp2, B->y, A->y );
+    gfp_multiply( lambda, temp1, temp2 ); // (y2-y1) / (x2-x1)
+    gfp_square( temp1, lambda );
+    gfp_subtract( temp1, temp1, A->x );
+    gfp_subtract( temp1, temp1, B->x ); // L^2 - x1 - x2
+    gfp_subtract( temp2, A->x, temp1 ); // (x1 - x3)
+    gfp_copy( res->x, temp1 );
+    gfp_multiply( temp1, temp2, lambda );
+    gfp_subtract( res->y, temp1, A->y ); // L*(x1-x3)-y1
     res->identity = 0;
 }
 
@@ -157,34 +162,34 @@ void eccp_affine_point_add(eccp_point_affine_t *res, const eccp_point_affine_t *
  * @param A
  * @param param elliptic curve parameters
  */
-void eccp_affine_point_double(eccp_point_affine_t *res, const eccp_point_affine_t *A, const eccp_parameters_t *param) {
+void eccp_affine_point_double( eccp_point_affine_t *res, const eccp_point_affine_t *A, const eccp_parameters_t *param ) {
     gfp_t temp1, temp2, temp3;
 
-    if(A->identity == 1) {
+    if( A->identity == 1 ) {
         res->identity = 1;
         return;
     }
-    gfp_negate(temp1, A->y);
-    if(gfp_compare(temp1, A->y) == 0) {
+    gfp_negate( temp1, A->y );
+    if( gfp_compare( temp1, A->y ) == 0 ) {
         // this handles the special case of doubling a point of order 2
         res->identity = 1;
         return;
     }
 
-    gfp_add(temp1, A->y, A->y);
-    gfp_inverse(temp2, temp1);
-    gfp_square(temp1, A->x);
-    gfp_add(temp3, temp1, temp1);
-    gfp_add(temp3, temp3, temp1);       // 3*x1^2
-    gfp_add(temp3, temp3, param->param_a); // 3*x1^2 + a
-    gfp_multiply(temp1, temp2, temp3);  // lambda
-    gfp_square(temp3, temp1);
-    gfp_subtract(temp2, temp3, A->x);
-    gfp_subtract(temp2, temp2, A->x);   // x3 = L^2 - 2*x1
-    gfp_subtract(temp3, A->x, temp2);
-    gfp_copy(res->x, temp2);
-    gfp_multiply(temp2, temp1, temp3);
-    gfp_subtract(res->y, temp2, A->y);  // y3 = L * (x1-x3) - y1
+    gfp_add( temp1, A->y, A->y );
+    gfp_inverse( temp2, temp1 );
+    gfp_square( temp1, A->x );
+    gfp_add( temp3, temp1, temp1 );
+    gfp_add( temp3, temp3, temp1 );          // 3*x1^2
+    gfp_add( temp3, temp3, param->param_a ); // 3*x1^2 + a
+    gfp_multiply( temp1, temp2, temp3 );     // lambda
+    gfp_square( temp3, temp1 );
+    gfp_subtract( temp2, temp3, A->x );
+    gfp_subtract( temp2, temp2, A->x ); // x3 = L^2 - 2*x1
+    gfp_subtract( temp3, A->x, temp2 );
+    gfp_copy( res->x, temp2 );
+    gfp_multiply( temp2, temp1, temp3 );
+    gfp_subtract( res->y, temp2, A->y ); // y3 = L * (x1-x3) - y1
     res->identity = 0;
 }
 
@@ -194,9 +199,8 @@ void eccp_affine_point_double(eccp_point_affine_t *res, const eccp_point_affine_
  * @param P the point to negate
  * @param param elliptic curve parameters
  */
-void eccp_affine_point_negate(eccp_point_affine_t *res, const eccp_point_affine_t *P, const eccp_parameters_t *param) {
-	gfp_copy(res->x, P->x);
-	gfp_negate(res->y, P->y);
-	res->identity = P->identity;
+void eccp_affine_point_negate( eccp_point_affine_t *res, const eccp_point_affine_t *P, const eccp_parameters_t *param ) {
+    gfp_copy( res->x, P->x );
+    gfp_negate( res->y, P->y );
+    res->identity = P->identity;
 }
-

@@ -29,13 +29,13 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */ 
- 
+ */
+
 #ifndef ECKEYGEN_H_
 #define ECKEYGEN_H_
 
 #include "../types.h"
 
-void eckeygen(gfp_t private_key, eccp_point_affine_t *public_key, eccp_parameters_t *param);
+void eckeygen( gfp_t private_key, eccp_point_affine_t *public_key, eccp_parameters_t *param );
 
 #endif /* ECKEYGEN_H_ */

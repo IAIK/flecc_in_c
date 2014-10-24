@@ -31,17 +31,17 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */ 
- 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "io/io.h"
 #include "test_ser.h"
 
-int main(void) {
-	//FILE *fp = fopen("tests/bigint.tst", "r");
-	io_init(stdin, stdout);
-	unsigned errors = test_ser();
+int main( void ) {
+    // FILE *fp = fopen("tests/bigint.tst", "r");
+    io_init( stdin, stdout );
+    unsigned errors = test_ser();
 
-	return errors == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+    return errors == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }

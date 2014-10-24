@@ -29,8 +29,8 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */ 
- 
+ */
+
 #ifndef ARCH_H_
 #define ARCH_H_
 
@@ -47,13 +47,13 @@
 #define ARCH_MSP430 7
 #define ARCH_MSP430_FOR_IAR 7
 #define ARCH_MSP430_FOR_GCC 8
-#define ARCH_ARM    9
-#define ARCH_ARM_CORTEX_A9    9
-#define ARCH_ARM_CORTEX_M0_ARM_NONE_EABI_GCC    10
+#define ARCH_ARM 9
+#define ARCH_ARM_CORTEX_A9 9
+#define ARCH_ARM_CORTEX_M0_ARM_NONE_EABI_GCC 10
 
 /** This actually defines the used architecture. */
 #ifndef ARCHITECTURE
-	#define ARCHITECTURE ARCH_ARM_CORTEX_M0_ARM_NONE_EABI_GCC
+#define ARCHITECTURE ARCH_ARM_CORTEX_M0_ARM_NONE_EABI_GCC
 #endif
 
 #ifdef __i386__
@@ -87,29 +87,29 @@
 #endif
 
 #ifdef __CROSSWORKS
-  #ifdef __TARGET_PROCESSOR
-    #if __TARGET_PROCESSOR == ATmega128
-      #undef ARCHITECTURE
-      #define ARCHITECTURE ARCH_ATMEGA_FOR_CROSSWORKS
-    #endif
-  #endif
+#ifdef __TARGET_PROCESSOR
+#if __TARGET_PROCESSOR == ATmega128
+#undef ARCHITECTURE
+#define ARCHITECTURE ARCH_ATMEGA_FOR_CROSSWORKS
+#endif
+#endif
 #endif
 
 #ifdef __GNUC__
-    #ifdef __AVR_ATmega128__
-        #undef ARCHITECTURE
-        #define ARCHITECTURE ARCH_ATMEGA_FOR_GCC
-    #endif
+#ifdef __AVR_ATmega128__
+#undef ARCHITECTURE
+#define ARCHITECTURE ARCH_ATMEGA_FOR_GCC
+#endif
 
-    #ifdef __MSP430__
-        #undef ARCHITECTURE
-        #define ARCHITECTURE ARCH_MSP430_FOR_GCC
-    #endif
+#ifdef __MSP430__
+#undef ARCHITECTURE
+#define ARCHITECTURE ARCH_MSP430_FOR_GCC
+#endif
 
-    #ifdef __ARM_ARCH_6M__
-        #undef ARCHITECTURE
-        #define ARCHITECTURE ARCH_ARM_CORTEX_M0_ARM_NONE_EABI_GCC
-    #endif
+#ifdef __ARM_ARCH_6M__
+#undef ARCHITECTURE
+#define ARCHITECTURE ARCH_ARM_CORTEX_M0_ARM_NONE_EABI_GCC
+#endif
 #endif
 
 #endif /* ARCH_H_ */

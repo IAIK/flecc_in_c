@@ -29,8 +29,8 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */ 
- 
+ */
+
 #ifndef SHA1_H_
 #define SHA1_H_
 
@@ -45,10 +45,10 @@ typedef struct _hash_sha1_t_ {
     uint32_t H4;
 } hash_sha1_t;
 
-void hash_sha1_init(hash_sha1_t *state);
-void hash_sha1_update(hash_sha1_t *state, const uint8_t *message);
-void hash_sha1_final(hash_sha1_t *state, const uint8_t *message, const int remaining_length, const int total_length);
+void hash_sha1_init( hash_sha1_t *state );
+void hash_sha1_update( hash_sha1_t *state, const uint8_t *message );
+void hash_sha1_final( hash_sha1_t *state, const uint8_t *message, const int remaining_length, const int total_length );
 
-void hash_sha1_to_byte_array(uint8_t *hash, const hash_sha1_t *state);
+void hash_sha1_to_byte_array( uint8_t *hash, const hash_sha1_t *state );
 
 #endif /* SHA1_H_ */

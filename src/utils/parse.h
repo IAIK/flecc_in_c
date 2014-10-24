@@ -29,16 +29,15 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */ 
- 
+ */
+
 #ifndef PARSE_H_
 #define PARSE_H_
 
 #include "../types.h"
 
-int parse_integer(const char *buffer);
-uint8_t parse_hex_byte(const char *buffer);
-int parse_hex_message(char *message, const int max_message_length, const char *buffer, const int buffer_length);
-
+int parse_integer( const char *buffer );
+uint8_t parse_hex_byte( const char *buffer );
+int parse_hex_message( char *message, const int max_message_length, const char *buffer, const int buffer_length );
 
 #endif /* PARSE_H_ */
