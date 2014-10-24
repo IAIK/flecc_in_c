@@ -19,22 +19,10 @@ SET( CMAKE_CXX_LINK_EXECUTABLE
      "<CMAKE_CXX_COMPILER> <FLAGS> <CMAKE_CXX_LINK_FLAGS> -Wl,-Map,<TARGET>.map <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
 
 # set the ARCHITECTURE for the framework
-SET(ARCHITECTURE "ARCH_CORTEXM0"
+SET(ARCHITECTURE "ARCH_CORTEXA"
   CACHE STRING "ARCH_X86, ARCH_X86_64, ARCH_CORTEXM0, ARCH_CORTEXA" FORCE)
 
-# set the directory name for the assembler optimizations
-SET(ASM_ARCH_DIR "cortexm0/asm"
-  CACHE STRING "Name of the folder with the ASM optimizations." FORCE)
-
 # extend the compile flags with the needed parameters
-SET(ARCHITECTURE_ASM_FLAGS    "-mcpu=${CPU} -mthumb -ffunction-sections -fdata-sections")
-SET(ARCHITECTURE_C_FLAGS      "-mcpu=${CPU} -mthumb -ffunction-sections -fdata-sections")
-SET(ARCHITECTURE_CXX_FLAGS    "-mcpu=${CPU} -mthumb -ffunction-sections -fdata-sections")
-#SET(ARCHITECTURE_LINKER_FLAGS "-mcpu=${CPU}")
-SET(ARCHITECTURE_LINKER_FLAGS "-mcpu=${CPU} -mthumb -Wl,-gc-sections")
-
-# startup code for cortex m0
-#SET(ARCHITECTURE_C_SOURCES    "../src/cortexm0/startup.c")
-
-# -Wl,--start-group -lc -lm -lnosys -Wl,--end-group
-#-u _printf_float -u _scanf_float 
+SET(TOOLCHAIN_C_FLAGS       "-mcpu=${CPU} -mthumb -ffunction-sections -fdata-sections")
+SET(TOOLCHAIN_CXX_FLAGS     "-mcpu=${CPU} -mthumb -ffunction-sections -fdata-sections")
+SET(TOOLCHAIN_LINKER_FLAGS  "-mcpu=${CPU} -mthumb -Wl,-gc-sections")

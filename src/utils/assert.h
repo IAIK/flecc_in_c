@@ -36,9 +36,9 @@
 
 #include "../types.h"
 
-void assert(const char *test_id, const int condition);
-void assert_bigint(const char *test_id, const uint_t *expected, const uint_t *to_test, const int length);
-void assert_integer(const char *test_id, const int expected, const int to_test);
-void assert_byte_array(const char *test_id, const uint8_t* expected, const uint8_t* to_test, const int length);
+int assert(const char *test_id, const int condition);
+int assert_bigint(const char *test_id, const uint_t *expected, const uint_t *to_test, const int length);
+int assert_integer(const char *test_id, const int expected, const int to_test);
+int assert_byte_array(const char *test_id, const uint8_t* expected, const uint8_t* to_test, const int length);
 
 #endif /* ASSERT_H_ */
