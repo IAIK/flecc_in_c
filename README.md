@@ -55,14 +55,14 @@ The test suite related targets (`test`, `check`, `coverage`) can be used to run 
 $ <build-directory>/bin/testrunner < <source-directory>/tests/<test-vector>.tst
 ```
 
-## Using
+## Usage
 
 Using the library is straight forward given the header files and the static library (libflecc_in_c.a). The only point which has to be considered is that the user code has to be compiled with the same `ARCHITECTURE` preprocessor definition which has been used during compilation of the library.
 
 ## Further Reading
 
 * [Project Page](http://opensource.iaik.tugraz.at/software-projects/flecc_in_c/)
-* Link example: [Institute for Applied Information Processing and Communications (IAIK)](http://www.iaik.tugraz.at)
+* [Institute for Applied Information Processing and Communications (IAIK)](http://www.iaik.tugraz.at)
 
 ## Authors
 
