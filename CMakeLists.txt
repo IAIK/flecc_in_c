@@ -48,11 +48,11 @@ SET_TARGET_PROPERTIES("flecc_in_c" PROPERTIES
 # build the test runner
 #-----------------------------------------
 FILE(GLOB TestrunnerSources "testrunner/*.c")
-ADD_EXECUTABLE("testrunner" ${TestrunnerSources})
+ADD_EXECUTABLE("testrunner" EXCLUDE_FROM_ALL ${TestrunnerSources})
 SET_TARGET_PROPERTIES("testrunner" PROPERTIES
   COMPILE_FLAGS "-DARCHITECTURE=${ARCHITECTURE}")
 TARGET_LINK_LIBRARIES("testrunner" "flecc_in_c")
-add_dependencies(suite "testrunner")
+add_to_suite("testrunner")
 
 # generate a test target
 #-----------------------------------------
@@ -70,9 +70,9 @@ MESSAGE(STATUS "Configuration for ${CMAKE_PROJECT_NAME} done.")
 MESSAGE(STATUS "INSTALL PREFIX:    ${CMAKE_INSTALL_PREFIX}")
 MESSAGE(STATUS "BUILD TYPE:        ${CMAKE_BUILD_TYPE}")
 MESSAGE(STATUS "")
-MESSAGE(STATUS "make..................Building the project.")
-MESSAGE(STATUS "make install..........Installing the project.")
-MESSAGE(STATUS "make suite............Building the test suite.")
+MESSAGE(STATUS "make..................Build the library.")
+MESSAGE(STATUS "make install..........Installing the library.")
+MESSAGE(STATUS "make suite............Build the test suite.")
 MESSAGE(STATUS "make check............Build and execute the test suite.")
 IF( DOXYGEN_FOUND )
   MESSAGE(STATUS "make doxygen..........Build doxygen documentation.")
