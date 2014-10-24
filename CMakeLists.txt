@@ -30,6 +30,7 @@ SET(DOXYGEN_CONFIG_IN_FILE "${PROJECT_SOURCE_DIR}/doc/template.doxy.in")
 # add the project internal module directory to the module path
 SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
+INCLUDE(clangformat)                 # add support for batch code reformating
 INCLUDE(doxygenSupport)              # adds doxygen support
 INCLUDE(forceOutOfSourceBuild)       # prohibit in-source builds
 INCLUDE(installSupport)              # add uninstall target and install helpers
@@ -86,6 +87,10 @@ FOREACH(loop ${FleccLibSources})
   add_stdin_test("${name}" "testrunner" "${loop}")
 ENDFOREACH()
 
+# register all source files for reformating
+FILE(GLOB_RECURSE Sources "src/*.h" "src/*.c" "testrunner/*.h" "testrunner/*.c")
+add_file_to_format(${Sources})
+
 #------------------------------------------------------------------------------
 # Print help dialog (assuming make based build system)
 #------------------------------------------------------------------------------
@@ -95,7 +100,7 @@ MESSAGE(STATUS "INSTALL PREFIX:    ${CMAKE_INSTALL_PREFIX}")
 MESSAGE(STATUS "BUILD TYPE:        ${CMAKE_BUILD_TYPE}")
 MESSAGE(STATUS "")
 MESSAGE(STATUS "Available targets:")
-MESSAGE(STATUS "  all..................Build the library.")
+MESSAGE(STATUS "  all..............Build the library.")
 MESSAGE(STATUS "  install..........Installing the library.")
 MESSAGE(STATUS "  uninstall........Uninstall the previously installed library.")
 MESSAGE(STATUS "  package..........Build and pack the library.")
