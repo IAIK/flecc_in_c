@@ -29,24 +29,23 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */ 
- 
+ */
+
 #ifndef PARAM_H_
 #define PARAM_H_
 
 #include "../types.h"
 
 typedef struct _eccp_param_in_const_mem_t_ {
-	uint_t *prime;
-	uint_t prime_bits;
-	uint_t *order_n;
-	uint_t order_n_bits;
+    uint_t *prime;
+    uint_t prime_bits;
+    uint_t *order_n;
+    uint_t order_n_bits;
 } eccp_param_in_const_mem_t;
 
+curve_type_t param_get_curve_type_from_name( const char *buffer );
+void param_load( eccp_parameters_t *param, const curve_type_t type );
 
-curve_type_t param_get_curve_type_from_name(const char *buffer);
-void param_load(eccp_parameters_t *param, const curve_type_t type);
-
-void param_load_from_const_mem(eccp_parameters_t *param, eccp_param_in_const_mem_t *param_in_mem);
+void param_load_from_const_mem( eccp_parameters_t *param, eccp_param_in_const_mem_t *param_in_mem );
 
 #endif /* PARAM_H_ */

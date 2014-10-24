@@ -29,18 +29,15 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */ 
- 
+ */
+
 #include <stdio.h>
 #include "../bi/bi.h"
 #include "io.h"
 
 /** Hex lookup for converting hexadecimal nibbles
  *  to string representation. */
-const char hex_lookup[] = {'0', '1', '2', '3',
-					 '4', '5', '6', '7',
-					 '8', '9', 'a', 'b',
-					 'c', 'd', 'e', 'f'};
+const char hex_lookup[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
 /**
  * Prints an unsigned integer to a string.
@@ -48,24 +45,24 @@ const char hex_lookup[] = {'0', '1', '2', '3',
  * @param u	the unsigned integer
  * @return a pointer to the end of the buffer
  */
-char *print_uint_to_buffer(char *buffer, const uint_t u) {
+char *print_uint_to_buffer( char *buffer, const uint_t u ) {
 
-#if (BYTES_PER_WORD > 2)
-    *buffer++ = hex_lookup[ (u >> 28) & 0xF ];
-    *buffer++ = hex_lookup[ (u >> 24) & 0xF];
-    *buffer++ = hex_lookup[ (u >> 20) & 0xF];
-    *buffer++ = hex_lookup[ (u >> 16) & 0xF];
+#if( BYTES_PER_WORD > 2 )
+    *buffer++ = hex_lookup[( u >> 28 ) & 0xF];
+    *buffer++ = hex_lookup[( u >> 24 ) & 0xF];
+    *buffer++ = hex_lookup[( u >> 20 ) & 0xF];
+    *buffer++ = hex_lookup[( u >> 16 ) & 0xF];
 #endif
 
-#if (BYTES_PER_WORD > 1)
-	*buffer++ = hex_lookup[(u >> 12) & 0xF ];
-	*buffer++ = hex_lookup[(u >> 8) & 0xF];
+#if( BYTES_PER_WORD > 1 )
+    *buffer++ = hex_lookup[( u >> 12 ) & 0xF];
+    *buffer++ = hex_lookup[( u >> 8 ) & 0xF];
 #endif
 
-	*buffer++ = hex_lookup[(u >> 4) & 0xF];
-	*buffer++ = hex_lookup[(u & 0xF)];
+    *buffer++ = hex_lookup[( u >> 4 ) & 0xF];
+    *buffer++ = hex_lookup[( u & 0xF )];
 
-	return buffer;
+    return buffer;
 }
 
 /**
@@ -73,11 +70,11 @@ char *print_uint_to_buffer(char *buffer, const uint_t u) {
  * @param buffer the character string to be printed
  * @param length the length of the character string
  */
-void io_gen_write(const char *buffer, const int length) {
-	int i;
-	for (i = 0; i < length; i++) {
-		io_write_byte(buffer[i]);
-	}
+void io_gen_write( const char *buffer, const int length ) {
+    int i;
+    for( i = 0; i < length; i++ ) {
+        io_write_byte( buffer[i] );
+    }
 }
 
 /**
@@ -87,26 +84,26 @@ void io_gen_write(const char *buffer, const int length) {
  * @param length the size of the buffer
  * @return the number of characters actually read
  */
-int io_gen_read(char *buffer, const int length) {
-	int i = 0;
-	uint8_t byte;
+int io_gen_read( char *buffer, const int length ) {
+    int i = 0;
+    uint8_t byte;
 
-	do {
-		byte = io_read_byte();
-		buffer[i++] = byte;
-	} while (byte != '\n' && i < length);
+    do {
+        byte = io_read_byte();
+        buffer[i++] = byte;
+    } while( byte != '\n' && i < length );
 
-	return i;
+    return i;
 }
 
 /**
  * Prints a NULL-terminated character string to the default output.
  * @param buffer the character string to be printed
  */
-void io_print(const char *buffer) {
-	while (*buffer) {
-		io_write_byte(*buffer++);
-	}
+void io_print( const char *buffer ) {
+    while( *buffer ) {
+        io_write_byte( *buffer++ );
+    }
 }
 
 /**
@@ -114,10 +111,10 @@ void io_print(const char *buffer) {
  * output and appends a newline.
  * @param buffer the character string to be printed
  */
-void io_println(const char *buffer) {
-	io_print(buffer);
-//	io_print("\r\n");
-	io_print("\n");
+void io_println( const char *buffer ) {
+    io_print( buffer );
+    //	io_print("\r\n");
+    io_print( "\n" );
 }
 
 /**
@@ -127,13 +124,13 @@ void io_println(const char *buffer) {
  * @param value the value to be printed
  * @param length the length of the array
  */
-void io_sprint_bytes_var(char *buffer, const uint8_t *value, const int length) {
-	int i;
-	for (i = length-1; i >= 0; i--) {
-		*buffer++ = hex_lookup[(value[i] >> 4) & 0xF];
-		*buffer++ = hex_lookup[(value[i] & 0xF)];
-	}
-	*buffer = '\0';
+void io_sprint_bytes_var( char *buffer, const uint8_t *value, const int length ) {
+    int i;
+    for( i = length - 1; i >= 0; i-- ) {
+        *buffer++ = hex_lookup[( value[i] >> 4 ) & 0xF];
+        *buffer++ = hex_lookup[( value[i] & 0xF )];
+    }
+    *buffer = '\0';
 }
 
 /**
@@ -141,10 +138,10 @@ void io_sprint_bytes_var(char *buffer, const uint8_t *value, const int length) {
  * @param value the big integer to be printed
  * @param length the length of the big integer to be printed
  */
-void io_print_bigint_var(const uint_t *value, const int length) {
-	char buffer[BYTES_PER_GFP*4+WORDS_PER_GFP*2+10];
-	bigint_print_var(buffer, value, length);
-	io_println(buffer);
+void io_print_bigint_var( const uint_t *value, const int length ) {
+    char buffer[BYTES_PER_GFP * 4 + WORDS_PER_GFP * 2 + 10];
+    bigint_print_var( buffer, value, length );
+    io_println( buffer );
 }
 
 /**
@@ -152,19 +149,19 @@ void io_print_bigint_var(const uint_t *value, const int length) {
  * @param value the byte array to be printed
  * @param length the length of the byte array to be printed
  */
-void io_print_bytes_var(const uint8_t *value, const int length) {
-	char buffer[BYTES_PER_GFP*2+WORDS_PER_GFP+1];	// TODO: correct size
-	io_sprint_bytes_var(buffer, value, length);
-	io_println(buffer);
+void io_print_bytes_var( const uint8_t *value, const int length ) {
+    char buffer[BYTES_PER_GFP * 2 + WORDS_PER_GFP + 1]; // TODO: correct size
+    io_sprint_bytes_var( buffer, value, length );
+    io_println( buffer );
 }
 
 /**
  * Prints an integer to the default output and appends a newline.
  * @param value the integer to be printed
  */
-void io_print_integer(const uint_t value) {
-	char buffer[BYTES_PER_WORD*2+1];
-	print_uint_to_buffer(buffer, value);
-	buffer[2*BYTES_PER_WORD] = 0;
-	io_println(buffer);
+void io_print_integer( const uint_t value ) {
+    char buffer[BYTES_PER_WORD * 2 + 1];
+    print_uint_to_buffer( buffer, value );
+    buffer[2 * BYTES_PER_WORD] = 0;
+    io_println( buffer );
 }

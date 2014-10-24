@@ -29,8 +29,8 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */ 
- 
+ */
+
 #include <stdio.h>
 #include "io_posix.h"
 
@@ -43,9 +43,9 @@ FILE *default_input_stream = NULL;
  * @param default_in the input stream to be set to default
  * @param default_out the output stream to be set to default
  */
-void io_posix_init(FILE *default_in, FILE *default_out) {
-	default_input_stream = default_in;
-	default_output_stream = default_out;
+void io_posix_init( FILE *default_in, FILE *default_out ) {
+    default_input_stream = default_in;
+    default_output_stream = default_out;
 }
 
 /**
@@ -53,13 +53,13 @@ void io_posix_init(FILE *default_in, FILE *default_out) {
  * @return the byte read
  */
 uint8_t io_posix_read_byte() {
-	return fgetc(default_input_stream);
+    return fgetc( default_input_stream );
 }
 
 /**
  * Writes a byte / character to the default output stream.
  * @param byte the byte / character that shall be written
  */
-void io_posix_write_byte(uint8_t byte) {
-	fputc(byte, default_output_stream);
+void io_posix_write_byte( uint8_t byte ) {
+    fputc( byte, default_output_stream );
 }

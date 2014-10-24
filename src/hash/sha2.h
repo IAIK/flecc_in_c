@@ -29,24 +29,22 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */ 
- 
+ */
+
 #ifndef SHA2_H_
 #define SHA2_H_
 
 #include "../types.h"
 
 /** The state of SHA224 and SHA256. */
-typedef struct _hash_sha224_256_t_ {
-    uint32_t hash[8];
-} hash_sha224_256_t;
+typedef struct _hash_sha224_256_t_ { uint32_t hash[8]; } hash_sha224_256_t;
 
-void hash_sha224_init(hash_sha224_256_t *state);
-void hash_sha256_init(hash_sha224_256_t *state);
-void hash_sha2_update(hash_sha224_256_t *state, const uint8_t *message);
-void hash_sha2_final(hash_sha224_256_t *state, const uint8_t *message, const int remaining_length, const int total_length);
+void hash_sha224_init( hash_sha224_256_t *state );
+void hash_sha256_init( hash_sha224_256_t *state );
+void hash_sha2_update( hash_sha224_256_t *state, const uint8_t *message );
+void hash_sha2_final( hash_sha224_256_t *state, const uint8_t *message, const int remaining_length, const int total_length );
 
-void hash_sha224_to_byte_array(uint8_t *hash, const hash_sha224_256_t *state);
-void hash_sha256_to_byte_array(uint8_t *hash, const hash_sha224_256_t *state);
+void hash_sha224_to_byte_array( uint8_t *hash, const hash_sha224_256_t *state );
+void hash_sha256_to_byte_array( uint8_t *hash, const hash_sha224_256_t *state );
 
 #endif /* SHA2_H_ */

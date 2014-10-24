@@ -29,24 +29,24 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */ 
- 
+ */
+
 #ifndef IO_GEN_H_
 #define IO_GEN_H_
 
 #include <stdio.h>
 #include "../types.h"
 
-void io_gen_write(const char *buffer, const int length);
-int  io_gen_read(char *buffer, const int length);
+void io_gen_write( const char *buffer, const int length );
+int io_gen_read( char *buffer, const int length );
 
-void io_print(const char *buffer);
-void io_println(const char *buffer);
+void io_print( const char *buffer );
+void io_println( const char *buffer );
 
-void io_print_integer(const uint_t value);
-void io_print_bigint_var(const uint_t *value, const int length);
+void io_print_integer( const uint_t value );
+void io_print_bigint_var( const uint_t *value, const int length );
 
-void io_sprint_bytes_var(char *buffer, const uint8_t *value, const int length);
-void io_print_bytes_var(const uint8_t *value, const int length);
+void io_sprint_bytes_var( char *buffer, const uint8_t *value, const int length );
+void io_print_bytes_var( const uint8_t *value, const int length );
 
 #endif /* IO_GEN_H_ */

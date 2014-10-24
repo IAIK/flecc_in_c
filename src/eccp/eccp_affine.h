@@ -29,19 +29,22 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */ 
- 
+ */
+
 #ifndef ECCP_AFFINE_H_
 #define ECCP_AFFINE_H_
 
 #include "../types.h"
 
-int  eccp_affine_point_is_valid(const eccp_point_affine_t *A, const eccp_parameters_t *param);
-int  eccp_affine_point_compare(const eccp_point_affine_t *A, const eccp_point_affine_t *B, const eccp_parameters_t *param);
-void eccp_affine_point_copy(eccp_point_affine_t *dest, const eccp_point_affine_t *src, const eccp_parameters_t *param);
+int eccp_affine_point_is_valid( const eccp_point_affine_t *A, const eccp_parameters_t *param );
+int eccp_affine_point_compare( const eccp_point_affine_t *A, const eccp_point_affine_t *B, const eccp_parameters_t *param );
+void eccp_affine_point_copy( eccp_point_affine_t *dest, const eccp_point_affine_t *src, const eccp_parameters_t *param );
 
-void eccp_affine_point_add(eccp_point_affine_t *res, const eccp_point_affine_t *A, const eccp_point_affine_t *B, const eccp_parameters_t *param);
-void eccp_affine_point_double(eccp_point_affine_t *res, const eccp_point_affine_t *A, const eccp_parameters_t *param);
-void eccp_affine_point_negate(eccp_point_affine_t *res, const eccp_point_affine_t *P, const eccp_parameters_t *param);
+void eccp_affine_point_add( eccp_point_affine_t *res,
+                            const eccp_point_affine_t *A,
+                            const eccp_point_affine_t *B,
+                            const eccp_parameters_t *param );
+void eccp_affine_point_double( eccp_point_affine_t *res, const eccp_point_affine_t *A, const eccp_parameters_t *param );
+void eccp_affine_point_negate( eccp_point_affine_t *res, const eccp_point_affine_t *P, const eccp_parameters_t *param );
 
 #endif /* ECCP_AFFINE_H_ */
