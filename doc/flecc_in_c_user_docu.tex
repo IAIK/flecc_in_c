@@ -1,0 +1,239 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%%               Title: flecc_in_c user documentation
+%%
+%%      Date, Location: 2014/04/04, Austria
+%%
+%%             Authors: Thomas Unterluggauer, Erich Wenger
+%%
+%%         Affiliation: IAIK TU Graz
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[runningheads]{llncs}
+
+\newif\ifanonymous\anonymoustrue
+% Uncomment the next line to get a non-anonymous version
+\anonymoustrue
+
+\usepackage{url}
+\usepackage[numbers,sectionbib]{natbib}
+\usepackage{graphicx}
+\usepackage{algorithm,algpseudocode}
+\usepackage{eqparbox} %
+\usepackage{listings}
+\usepackage{multicol} %
+\usepackage{multirow}
+\usepackage[usenames,dvipsnames]{xcolor} %
+\usepackage{amsmath,amssymb}
+\usepackage{array} %
+\usepackage{tikz} %
+\usepackage{pgfplots}
+\usepackage{relsize} %
+\usepackage{tabto}
+%\usepackage{footnote}
+%\makesavenoteenv{tabular}
+\usepackage{color, colortbl} %
+\usepackage{textcomp} 
+\usepackage{caption}
+\usepackage{footmisc}
+%\usepackage{geometry}
+%\usepackage{subcaption}
+%\usepackage{times}
+\usepackage{enumerate}
+
+
+%\usepackage{draftwatermark}
+%\SetWatermarkText{Draft \today -- do not distribute!}
+
+%\linespread{0.98}
+
+% \usepackage[a4paper,hmargin=1.6in,vmargin=1.35in]{geometry}
+
+% to avoid over-full lines
+\tolerance=2000
+
+\usetikzlibrary{patterns}
+ 
+\title{\texttt{flecc\_in\_c} User Documentation}
+%\subtitle{Version 0.1, \today}
+
+%\author{Thomas Unterluggauer \and Erich Wenger}
+\author{}
+\institute{ Stiftung Secure Information and Communication Technologies, \\ Inffeldgasse 16a, 8010 Graz, Austria \\
+\vspace{0.3cm}
+Version 1.1, \today}
+
+%--- Macros
+\newcommand{\todo}[1]%
+  {\marginpar{\baselineskip0ex\rule{2,5cm}{0.5pt}\\[0ex]{\tiny\textsf{#1}}}}
+\newcommand{\eg}{e.g.}
+\newcommand{\ie}{\textsl{i.e.}}
+\newcommand{\etal}{\textsl{et al.}}
+\newcommand{\jaavr}{OURAVR}
+\DeclareMathOperator{\yrecovery}{\texttt{y-recovery}}
+
+\definecolor{ColorArea}{rgb}{1,1,0.8}
+\newcolumntype{A}{>{\columncolor{ColorArea}}r}
+\definecolor{ColorRuntime}{rgb}{0.9,0.9,1}
+\newcolumntype{R}{>{\columncolor{ColorRuntime}}r}
+\definecolor{ColorPower}{rgb}{1,0.9,0.9}
+\newcolumntype{P}{>{\columncolor{ColorPower}}r}
+\definecolor{ColorEnergy}{rgb}{0.9,1,0.9}
+\newcolumntype{E}{>{\columncolor{ColorEnergy}}r}
+
+\algrenewcommand{\algorithmicrequire}{\textbf{Input:}}
+\algrenewcommand{\algorithmicensure}{\textbf{Output:}}
+\algrenewcommand{\algorithmiccomment}[1]{\hskip0.5em$\triangleright$ #1}
+\algnewcommand{\Lineif}[2]{%
+    %\STATE\algorithmicif\ {#1}\ \algorithmicthen\ {#2} \algorithmicend\ \algorithmicif%
+    \State\algorithmicif\ {#1}\ \algorithmicthen\ {#2}
+}
+
+\begin{document}
+
+\maketitle
+
+\section{Design Principles}
+
+To understand how to use \texttt{flecc\_in\_c} and understand the reasoning behind \texttt{flecc\_in\_c}, it is important to revisit the underlying design goals. 
+
+\begin{enumerate}[(a)]
+\item \texttt{flecc\_in\_c} supports multiple elliptic curves at runtime. (The preceding \texttt{ecc\_in\_c} library does only support a single elliptic curve at runtime.)
+\item \texttt{flecc\_in\_c} is designed to be executed on lightweight embedded processors. (Desktop processors are supported implicitly.) 
+\item Therefore, it is important to keep both the program-memory and data-memory footprints as low as possible. Some of the targeted microprocessors come with only mere, e.g., 4\,kBytes of RAM.
+\item As the overhead of a heap is especially costly on embedded processors, the stack is used as temporary memory storage. This mechanism is supported by all targeted embedded microprocessors.
+\item \texttt{flecc\_in\_c} is written in C, rather than C++, C\#, Java, or any other object-oriented programming language that might not be supported by the compiler that comes with an embedded microprocessor.
+\end{enumerate}
+
+In order to achieve those goals, compromises are necessary. For instance, some of the targeted microprocessors do not support (at runtime) variable-length stack allocation. Therefore, an element in GF(p) has to be sufficiently large such that it always supports the largest elliptic curve. 
+
+To avoid performance bottlenecks, one commonly performs assembly optimizations of finite-field operations. In a future version of \texttt{flecc\_in\_c}, curve-dependent function pointers can be used to call assembly-optimized finite-field operations.  
+
+\section{Data Representation}
+
+Before the functionality and project structure are investigated in detail, it is important to review the data-types. They are defined in \texttt{types.h}.
+
+\begin{description}
+\item[\texttt{uint\_t}] is a platform-dependent unsigned integer. It can range from as low as 8-bit to as high as 64-bit. The multi-precision integer library in \texttt{bi\_gen.c} is designed to deal with variable-length \texttt{uint\_t} arrays.
+\item[\texttt{gfp\_t}] represents an element in a finite prime-field. It is an \texttt{uint\_t} array that contains \texttt{WORDS\_PER\_GFP} elements and is sufficiently sized to contain \texttt{MIN\_BITS\_PER\_GFP} bits. However, by itself it only is a simple \texttt{uint\_t} array. Therefore, it always has to be used in combination with the \texttt{gfp\_prime\_data\_t} structure. 
+\item[\texttt{gfp\_prime\_data\_t}] contains all necessary information to do prime-field (Montgomery) arithmetic. It contains
+  \begin{itemize}
+  \item the prime,
+  \item the number of bits needed to represent the prime,
+  \item the number of words needed to represent the prime,
+  \item a boolean that specifies whether the elements in GF(p) are in the Montgomery domain,
+  \item and some constants needed to do operations within the Montgomery and the normal domain. 
+  \end{itemize}
+\item[\texttt{eccp\_point\_affine\_t}.] An affine elliptic curve point consisting of an x-coordinate, a y-coordinate, and an identity flag.
+\item[\texttt{eccp\_point\_projective\_t}.] A projective elliptic curve point consisting of (x,y,z) coordinates and an identity flag.
+\item[\texttt{eccp\_parameters\_t}] is a structure that contains all constants needed to do elliptic curve arithmetic:
+  \begin{itemize}
+  \item \texttt{gfp\_prime\_data\_t} information on the prime field,
+  \item \texttt{gfp\_prime\_data\_t} information on the prime group (sub-)order 
+  \item the co-factor
+  \item parameters $a$ and $b$ of the Weierstrass equation $y^2=x^3+ax+b$
+  \item the standardized base point
+  \item an identifier of the currently represented elliptic curve
+  \end{itemize}
+\item[\texttt{curve\_type\_t}] is an enum that specifies the type of elliptic curve stored within \texttt{eccp\_parameters\_t}. 
+\end{description}
+
+\section{Project structure}
+
+The project ist structured as follows:
+
+\begin{description}
+ \item[doc] \tabto{4em} All documentation on \texttt{flecc\_in\_c} is found here.
+ \item[flecc\_in\_c] \tabto{4em} The main project directory of \texttt{flecc\_in\_c}.
+ \begin{description}
+   \item[cmake] \tabto{4em} Contains \texttt{cmake} scripts for the build process.
+   \begin{description}
+     \item[toolchain] \tabto{4em} This folder contains \texttt{cmake} toolchain-files used to support \\
+     \tabto{4em} different architectures with different compiler toolchains.
+   \end{description}
+   \item[src] \tabto{4em} Source code and header files are placed here.
+   \begin{description}
+     \item[arch] \tabto{4em} Architecture-dependent source-code.
+     \item[bi] \tabto{4em} Multi-precision integer arithmetic. 
+     \item[hash] \tabto{4em} Hash functions.
+     \item[eccp] \tabto{4em} ECC over prime fields.
+     \item[gfp] \tabto{4em} Prime-field arithmetic.
+     \item[io] \tabto{4em} Input/Output functions.
+     \item[protocols] \tabto{4em} EC-based protocols: ECDH, ECDSA,...
+     \item[tests] \tabto{4em} Framwork for testing.
+     \item[utils] \tabto{4em} Various utilities: parsing, assert, rand,...
+   \end{description}
+ \end{description}
+ \item[tests] \tabto{4em} Files containing predefined testcases are found here.
+\end{description}
+
+\section{To-be-replaced Interfaces}
+
+If a random number is needed, \texttt{gfp\_rand(...)} in \texttt{utils/rand.c} is called. Currently, \texttt{gfp\_rand(...)} depends on \texttt{bigint\_rand\_insecure\_var}. However, this function does not securely generate random numbers. \texttt{bigint\_rand\_insecure\_var} has to be replaced with a secure random number generation function.
+
+\section{How-to Compile}
+
+A \texttt{cmake}-driven build process was chosen to be able to make adaptions for different target architectures conveniently. The current \texttt{cmake} configuration is designed to create both a \texttt{make} target for a static \texttt{flecc\_in\_c} library to be included within another project and an executable for testing purposes. The \texttt{cmake} configuration accepts several parameters that are intended to be used for customization of the build process. The following table gives an overview of the most important: \\
+
+\small{
+\begin{tabular}{ll}
+ \textbf{Parameter} 		& \textbf{Possible Options}  \\
+ \texttt{ARCHITECTURE} 		& ARCH\_X86, ARCH\_X86\_64, ARCH\_CORTEX\_A7,... \\ %& \texttt{cmake -DARCHITECTURE=ARCH\_X86\_64} \\
+ \texttt{CMAKE\_TOOLCHAIN\_FILE} & Path to architecture-dependent toolchain-file \\ % & \texttt{-DCMAKE\_TOOLCHAIN\_FILE=../cmake/toolchain/arm-linux-gnu-eabi-gcc.cmake} \\ 
+ \texttt{CMAKE\_BUILD\_TYPE} 	& Debug, Release, MinSizeRel \\ % & \texttt{cmake -DCMAKE\_BUILD\_TYPE=MinSizeRel} \\
+\end{tabular}
+}
+\\
+
+Note that it is required to appropriately set the parameter \texttt{ARCHITECTURE} as compilation of the library strongly depends on the targeted architecture. Moreover, when compiling the library for another platform than x86, a different toolchain is required. The toolchain to be used is passed to cmake via a dedicated \texttt{CMAKE\_TOOLCHAIN\_FILE}. Such a toolchain file for the ARM Cortex-A9 using the Linaro GCC compiler is available at \texttt{cmake/toolchain/arm-none-eabi-gcc.cmake}, which is easily modified to suite other ARM processors as well. Besides, choosing the appropriate \texttt{CMAKE\_BUILD\_TYPE} is important as it significantly affects the resulting performance and code size. For deployment, we recommend using \textit{MinSizeRel} as it yields the smallest code yet performant. 
+
+Summarizing, \texttt{flecc\_in\_c} is built for a common desktop computer with 64-bit architecture by performing the following procedure within the \texttt{flecc\_in\_c} project directory:
+
+\begin{verbatim}
+ mkdir _build
+ cd _build
+ cmake ../. -DARCHITECTURE=ARCH_X86_64
+ make 
+\end{verbatim}
+
+Contrary to that, configuration of \texttt{cmake} to create a build environment suitable for the ARM Cortex-A9 uses the following invocation:
+
+\begin{verbatim}
+ cmake ../. -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain/arm-none-eabi-gcc.cmake 
+            -DARCHITECTURE=ARCH_CORTEXM0 -DCMAKE_BUILD_TYPE=MinSizeRel
+\end{verbatim}
+
+
+\section{Testing}
+
+The framework is tested by using test cases that were generated using an external framework in Java. These test cases cover both border cases and completely random cases for all supported curves to verify the correctness of the implementation. The test cases, which are contained by the test files in the flecc\_in\_c/tests directory, can simply be passed as input to the executable created in the build process. For each test case, the program then outputs whether the test performed successfully or not. To execute all tests on a desktop computer, the following shell command finds all test files, executes their test cases, and outputs the test cases that did not work correctly:
+
+\begin{lstlisting}[language=bash,basicstyle=\footnotesize\ttfamily,breaklines=true]
+find . -name "*.tst" -exec sh -c "./flecc_in_c/build/bin/main < {}" \; | grep -v success
+\end{lstlisting}
+
+In order to test the correctness of the implementation for the ARM architectures, QEMU can be conveniently used on a Linux host with arbitrary underlying architecture. The same set of test cases can be used in this case using the following script.
+
+\begin{lstlisting}[language=bash,basicstyle=\footnotesize\ttfamily,breaklines=true]
+ARM_LIBC_PATH=path_to_arm_toolchain/arm-linux-gnueabihf/libc
+CPU=cortex-a9
+
+find . -name "*.tst" -exec sh -c "qemu-arm -cpu $CPU -L $ARM_LIBC_PATH ./flecc_in_c/build/bin/main < {}" \; | grep -v success
+\end{lstlisting}
+
+
+% \section*{Acknowledgments}
+
+%--- Bibliography
+%\bibliographystyle{abbrv}
+\bibliographystyle{abbrv}
+%\bibliographystyle{splncsnat}
+\bibliography{bibliography.bib}
+
+\appendix
+%\newpage
+%\input{10_appendix}
+
+
+\end{document}
