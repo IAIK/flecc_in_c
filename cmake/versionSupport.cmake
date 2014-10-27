@@ -1,7 +1,8 @@
 # This script determines the git revision of the project if possible.
 #
 # Processed variables:
-#   RELEASE....................omit the patch from all version strings when true
+#   RELEASE....................extend the PATCH version with the specified
+#                              string instead of the git revision
 #
 # Provided variables:
 #   GIT_INITIALIZED............true if the git revision of the project could
@@ -11,9 +12,8 @@
 #   GIT_COMBINED_SHORT_HASH....the short hash with an "M" prefix
 #                              when GIT_MODIFIED == true
 #
-#   VERSION_PATCH..............GIT_COMBINED_SHORT_HASH
-#   VERSION_SHORT..............VERSION_MAJOR.VERSION_MINOR
-#   VERSION_FULL...............VERSION_MAJOR.VERSION_MINOR(.VERSION_PATCH)?
+#   VERSION_PATCH_EXT..........VERSION_PATCH(-gitGIT_COMBINED_SHORT_HASH|RELEASE)
+#   VERSION_FULL...............VERSION_MAJOR.VERSION_MINOR.VERSION_PATCH_EXT
 #
 
 FIND_PROGRAM(GIT_COMMAND NAMES git)
@@ -49,13 +49,9 @@ IF(GIT_COMMAND)
   ENDIF()
 ENDIF()
 
-OPTION(RELEASE "Omit the patch version for the release." OFF)
-
-SET(VERSION_PATCH "")
-SET(VERSION_SHORT "${VERSION_MAJOR}.${VERSION_MINOR}")
-SET(VERSION_FULL  "${VERSION_SHORT}")
-
-IF(GIT_INITIALIZED AND NOT RELEASE )
-  SET(VERSION_PATCH "${GIT_COMBINED_SHORT_HASH}")
-  SET(VERSION_FULL "${VERSION_SHORT}.${VERSION_PATCH}")
+SET(VERSION_PATCH_EXT "${VERSION_PATCH}-git${GIT_COMBINED_SHORT_HASH}")
+IF(DEFINED RELEASE)
+  SET(VERSION_PATCH_EXT "${VERSION_PATCH}${RELEASE}")
 ENDIF()
+
+SET(VERSION_FULL      "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH_EXT}")

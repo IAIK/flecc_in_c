@@ -4,7 +4,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.10)
 PROJECT(flecc_in_c C)
 SET(VERSION_MAJOR "1")
 SET(VERSION_MINOR "0")
-
+SET(VERSION_PATCH "0")
 
 SET(DEFAULT_BUILD_TYPE MinSizeRel)
 
@@ -49,7 +49,7 @@ set(CPACK_SOURCE_GENERATOR "TGZ")
 set(CPACK_SOURCE_IGNORE_FILES "${PROJECT_BINARY_DIR}/" "/[.]git/")
 set(CPACK_PACKAGE_VERSION_MAJOR "${VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${VERSION_MINOR}")
-set(CPACK_PACKAGE_VERSION_PATCH "${VERSION_PATCH}")
+set(CPACK_PACKAGE_VERSION_PATCH "${VERSION_PATCH_EXT}")
 INCLUDE(CPack)
 
 # build the flecc_in_c library
@@ -67,7 +67,7 @@ OPTION(INSTALL_DOXYGEN "Install the doxygen documentation with the library." OFF
 IF(INSTALL_DOXYGEN)
   # hack to build the doxygen documentation before installing
   INSTALL(CODE "execute_process(COMMAND ${CMAKE_COMMAND} --build . --target doxygen WORKING_DIRECTORY \"${CMAKE_CURRENT_BINARY_DIR}\")")
-  INSTALL(DIRECTORY "${DOXYGEN_OUTPUT_DIR}/" DESTINATION "share/doc/flecc_in_c-${VERSION_SHORT}/doxygen")
+  INSTALL(DIRECTORY "${DOXYGEN_OUTPUT_DIR}/" DESTINATION "share/doc/flecc_in_c-${VERSION_FULL}/doxygen")
 ENDIF(INSTALL_DOXYGEN)
 
 # build the test runner
