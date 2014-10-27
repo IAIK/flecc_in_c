@@ -11,6 +11,7 @@ CMakeFiles
 /build*/
 /_build*/
 *.res
+.DS_Store
 
 # eclipse project files
 .settings
