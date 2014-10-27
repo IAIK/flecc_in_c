@@ -1,35 +1,39 @@
-/*
- * sha2.c
- *
- *  Created on: 25.03.2014
- *      Author: Erich Wenger
- */
-
-/*
- * Copyright (C) 2014 Stiftung Secure Information and
- *                    Communication Technologies SIC
- * http://www.sic.st
- *
- * All rights reserved.
- *
- * This source is provided for inspection purposes and recompilation only,
- * unless specified differently in a contract with IAIK. This source has to
- * be kept in strict confidence and must not be disclosed to any third party
- * under any circumstances. Redistribution in source and binary forms, with
- * or without modification, are <not> permitted in any case!
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- */
+/****************************************************************************
+**
+** Copyright (C) 2014 Stiftung Secure Information and 
+**                    Communication Technologies SIC and
+**                    Graz University of Technology
+** Contact: http://opensource.iaik.tugraz.at
+**
+** This file is part of <product_name>.
+**
+** $BEGIN_LICENSE:DEFAULT$
+** Commercial License Usage
+** Licensees holding valid commercial licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and SIC. For further information
+** contact us at http://opensource.iaik.tugraz.at.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 3.0 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.  Please review the following information to
+** ensure the GNU General Public License version 3.0 requirements will be
+** met: http://www.gnu.org/copyleft/gpl.html.
+** 
+** This software is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+** GNU General Public License for more details.
+**
+** You should have received a copy of the GNU General Public License
+** along with this software. If not, see http://www.gnu.org/licenses/.
+**
+** $END_LICENSE:DEFAULT$
+**
+****************************************************************************/
 
 #include "sha2.h"
 
@@ -86,8 +90,7 @@ void hash_sha256_init( hash_sha224_256_t *state ) {
 /**
  * Process a 512-bit block (w) to update the current hash state
  * @param state the hash state to update
- * @param w already prepared uint32_t[16] array used to update the state (is
- * overwritten during the calculation)
+ * @param w already prepared uint32_t[16] array used to update the state (is overwritten during the calculation)
  */
 void hash_sha2_process_block( hash_sha224_256_t *state, uint32_t *message ) {
     uint32_t a, b, c, d, e, f, g, h;
@@ -169,14 +172,12 @@ void hash_sha2_update( hash_sha224_256_t *state, const uint8_t *message ) {
 
 /**
  * Finalizes the sha2 hash calculation.
- * @param state the current state of the hash calculation --> will contain the
- *final hash value.
+ * @param state the current state of the hash calculation --> will contain the final hash value.
  * @param message the remaining message to be signed.
  * @param remaining_length the number of remaining bytes within "message"
  * @param total_length the total number of bytes signed
  *
- * (total_length - remaining_length) should already been processed using
- *sha1_process_message or sha1_process_block.
+ * (total_length - remaining_length) should already been processed using sha1_process_message or sha1_process_block.
  * (total_length - remaining_length) must be a multiple of 64!!
  */
 void hash_sha2_final( hash_sha224_256_t *state, const uint8_t *message, const int remaining_length, const int total_length ) {
