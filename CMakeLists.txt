@@ -87,8 +87,10 @@ FOREACH(loop ${FleccLibSources})
   add_stdin_test("${name}" "testrunner" "${loop}")
 ENDFOREACH()
 
-# register all source files for reformating
+# register source files for reformating
+SET(FormatBlacklist "${CMAKE_SOURCE_DIR}/src/utils/param_const.c")
 FILE(GLOB_RECURSE Sources "src/*.h" "src/*.c" "testrunner/*.h" "testrunner/*.c")
+LIST(REMOVE_ITEM Sources ${FormatBlacklist})
 add_file_to_format(${Sources})
 
 #------------------------------------------------------------------------------
