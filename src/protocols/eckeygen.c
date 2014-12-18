@@ -47,7 +47,8 @@
  */
 void eckeygen( gfp_t private_key, eccp_point_affine_t *public_key, eccp_parameters_t *param ) {
     gfp_rand( private_key, &param->order_n_data );
-    eccp_jacobian_point_multiply_L2R_DA( public_key, &param->base_point, private_key, param );
+    
+    param->eccp_mul_base_point( public_key, &param->base_point, private_key, param );
 
     // convert to normal basis such that other party has no problem
     if( param->prime_data.montgomery_domain == 1 ) {

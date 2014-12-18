@@ -541,7 +541,7 @@ unsigned test_ser() {
             read_bigint( buffer, READ_BUFFER_SIZE, bi_var_a, param->order_n_data.words );
             read_eccp_affine_point( buffer, READ_BUFFER_SIZE, &ecaff_var_expected, &( curve_params.prime_data ), 1 );
 
-            eccp_jacobian_point_multiply_L2R_DA( &ecaff_var_c, &ecaff_var_a, bi_var_a, param );
+            param->eccp_mul( &ecaff_var_c, &ecaff_var_a, bi_var_a, param );
 
             errors += assert_integer( test_id, ecaff_var_expected.identity, ecaff_var_c.identity );
             if( ecaff_var_expected.identity == 0 ) {

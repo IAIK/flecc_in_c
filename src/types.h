@@ -104,6 +104,12 @@ typedef struct _eccp_point_projective_t_ {
 } eccp_point_projective_t;
 /** specifies the used eccp_parameters_t */
 typedef enum _curve_type_t { UNKNOWN, SECP192R1, SECP224R1, SECP256R1, SECP384R1, SECP521R1 } curve_type_t;
+/** function point to a gfp operation (TODO: integrate into eccp_parameters_t) */
+typedef void (*gfp_operation_t)(gfp_t, const gfp_t, const gfp_t, const gfp_prime_data_t*);
+/** Parameters needed to do elliptic curve computations. */
+struct _eccp_parameters_t_;
+/** typedef of function pointer to an eccp scalar multiplication (used in eccp_parameters_t) */
+typedef void (*eccp_mul_t)(eccp_point_affine_t *,const eccp_point_affine_t*,const gfp_t,const struct _eccp_parameters_t_*);
 /** Parameters needed to do elliptic curve computations. */
 typedef struct _eccp_parameters_t_ {
     /** data needed to do computations modulo the prime */
@@ -121,6 +127,12 @@ typedef struct _eccp_parameters_t_ {
     eccp_point_affine_t base_point;
     /** specifies the used elliptic curve */
     curve_type_t curve_type;
+    /** generic scalar multiplication to be used for protocols */
+    eccp_mul_t eccp_mul;
+    /** pointer to a table with precomputed multiples of the base_point to be used by eccp_mul_base_point */
+    eccp_point_affine_t** base_point_tbl;
+    /** optimized scalar multiplication of the base point (uses base_point_tbl) */
+    eccp_mul_t eccp_mul_base_point;
 } eccp_parameters_t;
 /** ECDSA signature, with GF(p) elements modulo ecc_parameters_t.order_n_data */
 typedef struct _ecdsa_signature_t_ {
