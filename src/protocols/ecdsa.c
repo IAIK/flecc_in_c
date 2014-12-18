@@ -57,7 +57,7 @@ void ecdsa_sign( ecdsa_signature_t *signature,
     do {
         do {
             gfp_rand( ephemeral_key, &param->order_n_data );
-            param->eccp_mul_base_point( &ephemeral_point, &param->base_point, ephemeral_key, param );
+            eccp_generic_mul_wrapper( &ephemeral_point, &param->base_point, ephemeral_key, param );
 
             // in case order n and prime have a different length
             signature->r[param->order_n_data.words - 1] = 0;
@@ -135,8 +135,8 @@ int ecdsa_is_valid( const ecdsa_signature_t *signature,
 
     // TODO: replace by joint sparse form simultaneous point multiplication
     // TODO: safe memory
-    param->eccp_mul( &P2, &P1, w, param );
-    param->eccp_mul_base_point( &P1, &param->base_point, u1, param );
+    eccp_generic_mul_wrapper( &P2, &P1, w, param );
+    eccp_generic_mul_wrapper( &P1, &param->base_point, u1, param );
     eccp_affine_point_add( &P1, &P1, &P2, param );
 
     if( P1.identity == 1 )

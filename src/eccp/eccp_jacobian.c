@@ -39,6 +39,7 @@
 #include "../gfp/gfp.h"
 #include "../bi/bi.h"
 #include "../utils/rand.h"
+#include "eccp_affine.h"
 
 /**
  * Tests if the given affine point fulfills the elliptic curve equation.
@@ -174,8 +175,8 @@ void eccp_jacobian_to_affine( eccp_point_affine_t *res, const eccp_point_project
  * @param param elliptic curve parameters
  */
 void eccp_affine_to_jacobian( eccp_point_projective_t *res, const eccp_point_affine_t *a, const eccp_parameters_t *param ) {
-#if 0
-	gfp_copy(res->x, a->x);
+#if 1
+    gfp_copy(res->x, a->x);
     gfp_copy(res->y, a->y);
     gfp_copy(res->z, param->prime_data.gfp_one);
     res->identity = a->identity;
@@ -436,7 +437,7 @@ void
  * @param scalar the multiplicant
  * @param param elliptic curve parameters
  *
- * Hankerson p97 Alg-> 3->27
+ * Hankerson Page 97 Algorithm 3.27
  */
 void eccp_jacobian_point_multiply_L2R_DA( eccp_point_affine_t *result,
                                           const eccp_point_affine_t *P,
@@ -457,3 +458,131 @@ void eccp_jacobian_point_multiply_L2R_DA( eccp_point_affine_t *result,
 
     eccp_jacobian_to_affine( result, &result_projective, param );
 }
+
+/**
+ * Performs a point scalar multiplication
+ * @param result the resulting point
+ * @param P The base point to multiply
+ * @param scalar the multiplicant
+ * @param param elliptic curve parameters
+ *
+ * Hankerson Page 96 Algorithm 3.26
+ */
+void eccp_jacobian_point_multiply_R2L_DA( eccp_point_affine_t *result, const eccp_point_affine_t *P, const gfp_t scalar, const eccp_parameters_t *param ) {
+    eccp_point_projective_t result_projective;
+    eccp_point_projective_t P_projective;
+    int bit, msb;
+    
+    result_projective.identity = 1;
+    eccp_affine_to_jacobian(&P_projective, P, param);
+
+    msb = bigint_get_msb_var( scalar, param->order_n_data.words );
+    for(bit = 0; bit <= msb; bit++) {
+        if( bigint_test_bit_var( scalar, bit, param->order_n_data.words ) == 1 ) {
+            eccp_jacobian_point_add(&result_projective, &result_projective, &P_projective, param);
+        }
+        eccp_jacobian_point_double(&P_projective, &P_projective, param);
+    }
+
+    eccp_jacobian_to_affine(result, &result_projective, param);
+}
+
+/**
+ * Performs a point scalar multiplication
+ * @param result the resulting point
+ * @param P The base point to multiply
+ * @param scalar the multiplicant
+ * @param param elliptic curve parameters
+ *
+ * Hankerson Page 98 Algorithm 3.30
+ */
+void eccp_jacobian_point_multiply_L2R_NAF( eccp_point_affine_t *result, const eccp_point_affine_t *P, const gfp_t scalar, const eccp_parameters_t *param ) {
+    uint_t scalar_helper[WORDS_PER_BITS(MIN_BITS_PER_GFP+1)];
+    eccp_point_affine_t P_neg;
+    eccp_point_projective_t result_projective;
+    int bit, scalar_helper_size = WORDS_PER_BITS(param->order_n_data.bits + 1);
+    
+    // compute NAF
+    bigint_clear_var(scalar_helper, WORDS_PER_BITS(MIN_BITS_PER_GFP+1));
+    bigint_copy_var(scalar_helper, scalar, param->order_n_data.words);
+    bigint_shift_left_var(scalar_helper, scalar_helper, 1, WORDS_PER_BITS(MIN_BITS_PER_GFP+1));
+    scalar_helper[scalar_helper_size - 1] += bigint_add_var(scalar_helper, scalar_helper, scalar, param->order_n_data.words);
+
+    // prepare points
+    result_projective.identity = 1;
+    eccp_affine_point_negate(&P_neg, P, param);
+    
+    bit = bigint_get_msb_var( scalar_helper, scalar_helper_size );
+    while( bit > 0 ) {
+        eccp_jacobian_point_double( &result_projective, &result_projective, param );
+        if( (bigint_test_bit_var( scalar_helper, bit, scalar_helper_size ) == 1) && 
+            (bigint_test_bit_var( scalar, bit, param->order_n_data.words ) == 0) ) {
+            eccp_jacobian_point_add_affine( &result_projective, &result_projective, P, param );
+        } else if( (bigint_test_bit_var( scalar_helper, bit, scalar_helper_size ) == 0) && 
+                   (bigint_test_bit_var( scalar, bit, param->order_n_data.words ) == 1) ) {
+            eccp_jacobian_point_add_affine( &result_projective, &result_projective, &P_neg, param );
+        }
+        bit--;
+    }
+
+    eccp_jacobian_to_affine( result, &result_projective, param );
+}
+
+/**
+ * Performs a point scalar multiplication
+ * @param result the resulting point
+ * @param P_table the comb table
+ * @param width the parameter that influences the size of the comb table
+ * @param scalar the multiplicant
+ * @param param elliptic curve parameters
+ *
+ * Hankerson Page 106 Algorithm 3.44
+ * 
+ * TODO: WARNING UNTESTED!
+ */
+void eccp_jacobian_point_multiply_COMB( eccp_point_affine_t *result, const eccp_point_affine_t *P_table, const int width, const gfp_t scalar, const eccp_parameters_t *param ) {
+    eccp_point_projective_t result_projective;
+    int digit, j, j_cnt, comb_param_d = (param->order_n_data.bits - 1) / width + 1;
+    result_projective.identity = 1;
+
+    digit = comb_param_d - 1;
+    while(digit >= 0) {
+        eccp_jacobian_point_double(&result_projective, &result_projective, param);
+        j = 0;
+        for(j_cnt = 0; j_cnt < width; j_cnt++) {
+            j |= bigint_test_bit_var(scalar, comb_param_d*j_cnt + digit, param->order_n_data.words) << j_cnt;
+        }
+
+        if(j > 0) {
+            eccp_jacobian_point_add_affine(&result_projective, &result_projective, &P_table[j-1], param);
+        }
+        digit--;
+    }
+
+    eccp_jacobian_to_affine(result, &result_projective, param);
+}
+
+/**
+ * Performs a point scalar multiplication
+ * @param P_table the resulting comb table
+ * @param P The base point to be used for precomputation
+ * @param width the parameter that influences the size of the comb table
+ * @param param elliptic curve parameters
+ *
+ * Hankerson Page 106 Algorithm 3.44
+ * 
+ * TODO: WARNING UNTESTED!
+ */
+void eccp_jacobian_point_multiply_COMB_precompute( eccp_point_affine_t *P_table, const eccp_point_affine_t *P, const int width, const eccp_parameters_t *param ) {
+    int i;
+    eccp_affine_point_copy(&P_table[0], P, param);
+    for(i = 1; i < (1 << width)-1; i++) {
+        eccp_affine_point_add(&P_table[i], &P_table[i-1], P, param);
+    }
+}
+
+void eccp_jacobian_point_multiply_COMB_WOZ( eccp_point_affine_t *result, const eccp_point_affine_t *P_tbl, const gfp_t scalar, const eccp_parameters_t *param );
+void eccp_jacobian_point_multiply_COMB_WOZ_precompute( eccp_point_affine_t *P_tbl, const eccp_point_affine_t *P, const eccp_parameters_t *param );
+
+
+

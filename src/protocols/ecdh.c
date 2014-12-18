@@ -47,7 +47,7 @@
 void ecdh_phase_one( eccp_point_affine_t *res, const gfp_t scalar, const eccp_parameters_t *param ) {
 
     // base_point is already in Montgomery domain
-    param->eccp_mul_base_point( res, &param->base_point, scalar, param );
+    eccp_generic_mul_wrapper( res, &param->base_point, scalar, param );
 
     // convert to normal basis such that other party has no problem
     if( param->prime_data.montgomery_domain == 1 ) {
@@ -78,7 +78,7 @@ void ecdh_phase_two( eccp_point_affine_t *res,
         // TODO: error handling
     }
 
-    param->eccp_mul( res, other_party_point, scalar, param );
+    eccp_generic_mul_wrapper( res, other_party_point, scalar, param );
 
     // the commonly derived key shall not be in montgomery domain
     if( param->prime_data.montgomery_domain == 1 ) {
