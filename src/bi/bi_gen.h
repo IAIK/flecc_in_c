@@ -56,6 +56,7 @@ void bigint_shift_right_var( uint_t *res, const uint_t *a, const int right, cons
 void bigint_shift_right_one_var( uint_t *res, const uint_t *a, const int length );
 int bigint_compare_var( const uint_t *a, const uint_t *b, const int length );
 int bigint_is_zero_var( const uint_t *a, const int length );
+int bigint_is_one_var( const uint_t *a, const int length );
 void bigint_multiply_var( uint_t *result, const uint_t *a, const uint_t *b, const int length_a, const int length_b );
 void bigint_copy_var( uint_t *dest, const uint_t *source, const int length );
 void bigint_print_var( char *buffer, const uint_t *to_print, const int length );

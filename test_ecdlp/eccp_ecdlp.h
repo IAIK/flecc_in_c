@@ -29,6 +29,7 @@ typedef struct _eccp_ecdlp_triple_ {
 void pr_add_tree(eccp_ecdlp_triple *to_insert, gfp_t scalar);
 void pr_get_latest_point(eccp_ecdlp_triple *computed);
 void pr_send_to_master(const eccp_ecdlp_triple *comp);
+int pr_triple_is_distinguished(const eccp_ecdlp_triple *triple);
 void pr_triple_send_if_distinguished(const eccp_ecdlp_triple *triple);
 void pr_triple_generate(eccp_ecdlp_triple *to_comp);
 int pr_triple_negation_map(eccp_ecdlp_triple *triple);

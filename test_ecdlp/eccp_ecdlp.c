@@ -250,8 +250,8 @@ int pr_triple_loop_detection(eccp_ecdlp_triple *triple, eccp_ecdlp_triple_loop_d
             stats_loops[i]++;
             if(i > stats_loops_max)
                 stats_loops_max = i;
-            if(i > 7) {
-                printf("WARNING: loop detected %u %ld %ld", stats_loops_max, stats_num_branch_additions, stats_num_distinguished_triples);
+            if(i > 7 && i == stats_loops_max) {
+                printf("WARNING: loop detected %u %ld %ld --", stats_loops_max, stats_num_branch_additions, stats_num_distinguished_triples);
                 for(j=0; j <= stats_loops_max; j++) {
                     printf(" %u", stats_loops[j]);
                 }
@@ -279,14 +279,20 @@ int pr_triple_loop_detection(eccp_ecdlp_triple *triple, eccp_ecdlp_triple_loop_d
     if(loop_detected != 0) {
 #if 1
         int j = triple->R.x[0] & (NUM_BRANCHES - 1);
-        pr_triple_add_branch_index(triple, (j + i + 1) % NUM_BRANCHES);
+        if((i + 1) % NUM_BRANCHES == 0) {
+            printf("WARNING(loop): cheating\n");
+            pr_triple_generate(triple);
+        } else {
+            pr_triple_add_branch_index(triple, (j + i + 1) % NUM_BRANCHES);
+        }
 //        j = rand() % NUM_BRANCHES;
 //        pr_triple_add_branch_index(triple, j);
 #if (USE_NEGATION_MAP == 1)
         pr_triple_negation_map(triple);
 #endif
 #else
-        pr_triple_generate(triple);
+//        pr_triple_generate(triple);
+        pr_triple_double(triple);
 #endif
         pr_triple_send_if_distinguished(triple);
         iterations += pr_triple_loop_detection(triple, loop_detection) + 1;
@@ -296,11 +302,23 @@ int pr_triple_loop_detection(eccp_ecdlp_triple *triple, eccp_ecdlp_triple_loop_d
 }
 
 /**
+ * Returns 1 if point is distinguished
+ * @param triple
+ * @return 1 if distinguished
+ */
+int pr_triple_is_distinguished(const eccp_ecdlp_triple *triple) {
+    if (bigint_get_msb_var(triple->R.x, param->prime_data.words) < (param->prime_data.bits - DISTINGUISHING_BITS)) {
+        return 1;
+    }
+    return 0;
+}
+
+/**
  * Send the triple to the master thread if point is distinguished
  * @param triple
  */
 void pr_triple_send_if_distinguished(const eccp_ecdlp_triple *triple) {
-    if (bigint_get_msb_var(triple->R.x, param->prime_data.words) < (param->prime_data.bits - DISTINGUISHING_BITS)) {
+    if (pr_triple_is_distinguished(triple) == 1) {
         pr_send_to_master(triple);
     }
 }

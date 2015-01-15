@@ -540,9 +540,10 @@ void eccp_jacobian_point_multiply_L2R_NAF( eccp_point_affine_t *result, const ec
  * 
  * TODO: WARNING UNTESTED!
  */
-void eccp_jacobian_point_multiply_COMB( eccp_point_affine_t *result, const eccp_point_affine_t *P_table, const int width, const gfp_t scalar, const eccp_parameters_t *param ) {
+    void eccp_jacobian_point_multiply_COMB( eccp_point_affine_t *result, const eccp_point_affine_t *P_table, const unsigned int width, const gfp_t scalar, const eccp_parameters_t *param ) {
     eccp_point_projective_t result_projective;
-    int digit, j, j_cnt, comb_param_d = (param->order_n_data.bits - 1) / width + 1;
+    int digit, j, j_cnt;
+    int comb_param_d = (param->order_n_data.bits - 1) / width + 1;  // same as ceil (bits / width)
     result_projective.identity = 1;
 
     digit = comb_param_d - 1;
@@ -574,10 +575,22 @@ void eccp_jacobian_point_multiply_COMB( eccp_point_affine_t *result, const eccp_
  * TODO: WARNING UNTESTED!
  */
 void eccp_jacobian_point_multiply_COMB_precompute( eccp_point_affine_t *P_table, const eccp_point_affine_t *P, const int width, const eccp_parameters_t *param ) {
-    int i;
+    int i,j;
+    int comb_param_d = (param->order_n_data.bits - 1) / width + 1;  // same as ceil (bits / width)
+    eccp_point_projective_t temp;
+    
+    eccp_affine_to_jacobian(&temp, P, param);
     eccp_affine_point_copy(&P_table[0], P, param);
-    for(i = 1; i < (1 << width)-1; i++) {
-        eccp_affine_point_add(&P_table[i], &P_table[i-1], P, param);
+    
+    // compute necessary doubles
+    for(i = 2; i < width; i++) {
+        for(j = 0; j < comb_param_d; j++) {
+            eccp_jacobian_point_double(&temp, &temp, param);
+        }
+        eccp_jacobian_to_affine(&P_table[(1 << i) - 1], &temp, param);
+        for(j = 1 << (i - 1); j < (1 << i); j++) {
+            eccp_affine_point_add(&P_table[j - 1], &P_table[(1 << i) - 1], &P_table[j - (1 << (i - 1)) - 1], param);
+        }
     }
 }
 

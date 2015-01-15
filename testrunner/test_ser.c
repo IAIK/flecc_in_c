@@ -209,7 +209,7 @@ unsigned test_ser() {
     eccp_jacobian_point_multiply_COMB_precompute(comb_table, &param->base_point, TBL_WIDTH, param);
     param->base_point_precomputed_table = comb_table;
     param->base_point_precomputed_table_width = TBL_WIDTH;
-//    param->eccp_mul_base_point = &eccp_jacobian_point_multiply_COMB;
+    param->eccp_mul_base_point = &eccp_jacobian_point_multiply_COMB;
 
     while( 1 ) {
         io_read( buffer, READ_BUFFER_SIZE );

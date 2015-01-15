@@ -47,5 +47,6 @@ void gfp_gen_halving( gfp_t res, const gfp_t a, const gfp_prime_data_t *prime_da
 void gfp_gen_negate( gfp_t res, const gfp_t a, const gfp_prime_data_t *prime_data );
 void gfp_gen_multiply_div( gfp_t res, const gfp_t a, const gfp_t b, const gfp_prime_data_t *prime_data );
 void gfp_reduce( gfp_t a, const gfp_prime_data_t *prime_data );
+void gfp_binary_euclidean_inverse( gfp_t result, const gfp_t to_invert, const gfp_prime_data_t *prime_data);
 
 #endif /* GFP_GEN_H_ */

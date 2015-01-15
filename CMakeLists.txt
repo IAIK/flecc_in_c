@@ -79,6 +79,14 @@ SET_TARGET_PROPERTIES("testrunner" PROPERTIES
 TARGET_LINK_LIBRARIES("testrunner" "flecc_in_c")
 add_to_suite("testrunner")
 
+# build the test ecdlp
+#-----------------------------------------
+FILE(GLOB TestrunnerSources "test_ecdlp/*.c")
+ADD_EXECUTABLE("test_ecdlp" EXCLUDE_FROM_ALL ${TestrunnerSources})
+SET_TARGET_PROPERTIES("test_ecdlp" PROPERTIES
+  COMPILE_FLAGS "-DARCHITECTURE=${ARCHITECTURE}")
+TARGET_LINK_LIBRARIES("test_ecdlp" "flecc_in_c")
+
 # generate a test target
 #-----------------------------------------
 FILE(GLOB FleccLibSources "tests/*.tst")

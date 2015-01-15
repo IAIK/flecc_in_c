@@ -53,4 +53,6 @@ void io_print_bigint_var( const uint_t *value, const int length );
 void io_sprint_bytes_var( char *buffer, const uint8_t *value, const int length );
 void io_print_bytes_var( const uint8_t *value, const int length );
 
+void io_print_affine_point( const eccp_point_affine_t *point, const eccp_parameters_t *param );
+
 #endif /* IO_GEN_H_ */

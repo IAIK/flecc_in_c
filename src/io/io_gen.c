@@ -38,6 +38,7 @@
 #include <stdio.h>
 #include "../bi/bi.h"
 #include "io.h"
+#include "../types.h"
 
 /** Hex lookup for converting hexadecimal nibbles
  *  to string representation. */
@@ -168,4 +169,15 @@ void io_print_integer( const uint_t value ) {
     print_uint_to_buffer( buffer, value );
     buffer[2 * BYTES_PER_WORD] = 0;
     io_println( buffer );
+}
+
+/**
+ * Prints a point to the default output and appends a newline.
+ * @param point the point to be printed
+ * @param param elliptic curve parameters 
+ */
+void io_print_affine_point( const eccp_point_affine_t *point, const eccp_parameters_t *param ) {
+    io_print_bigint_var(point->x, param->prime_data.words);
+    io_print_bigint_var(point->y, param->prime_data.words);
+    io_print_integer(point->identity);
 }

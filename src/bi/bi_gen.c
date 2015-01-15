@@ -297,6 +297,23 @@ int bigint_is_zero_var( const uint_t *a, const int length ) {
 }
 
 /**
+ * Checks if a number is one.
+ * @param a
+ * @param length the size of a in words
+ * @return 1 if one otherwise 0.
+ */
+int bigint_is_one_var( const uint_t *a, const int length ) {
+    int i;
+    if( a[0] != 1)
+        return 0;
+    for( i = 1; i < length; i++ ) {
+        if( a[i] != 0 )
+            return 0;
+    }
+    return 1;
+}
+
+/**
  * Multiply two big integers with variable length
  * @param a first multiplicant
  * @param b second multiplicant

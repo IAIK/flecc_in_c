@@ -99,6 +99,9 @@ int main(int argc, char** argv) {
     gfp_t scalar;
     init_param_itsec2012_30(&param);
 
+    // disable buffering of stdout
+    setvbuf(stdout, NULL, _IONBF, 0);
+
     printf("ecdlp_test started\n");
     io_init( stdin, stdout );
     if(param_is_valid(&param) == 0)
