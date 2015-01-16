@@ -50,10 +50,10 @@
  */
 void eccp_generic_mul_wrapper( eccp_point_affine_t *result, const eccp_point_affine_t *P,
                                const gfp_t scalar, const eccp_parameters_t *param ) {
-    if((eccp_affine_point_compare(&param->base_point, P, param) == 0) && 
-            (param->eccp_mul_base_point != NULL) &&
-            (param->base_point_precomputed_table != NULL) && 
-            (param->base_point_precomputed_table_width != 0)) {
+    if((param->eccp_mul_base_point != NULL) &&
+       (param->base_point_precomputed_table != NULL) && 
+       (param->base_point_precomputed_table_width != 0) && 
+       (eccp_affine_point_compare(&param->base_point, P, param) == 0) ) {
         param->eccp_mul_base_point(result, param->base_point_precomputed_table, param->base_point_precomputed_table_width, scalar, param);
     } else {
         param->eccp_mul(result, P, scalar, param);
