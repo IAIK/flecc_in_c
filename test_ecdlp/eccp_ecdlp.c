@@ -47,7 +47,7 @@
 #include "utils/rand.h"
 #include "io/io_gen.h"
 
-#define NUM_BRANCHES 128
+#define NUM_BRANCHES 16
 #define NUM_THREADS 4
 #define DISTINGUISHING_BITS 6
 #define SIZE_FIFO 32
@@ -77,9 +77,13 @@ eccp_parameters_t *param = 0;
 
 long stats_num_pollard_rho_tests = 0;
 long stats_pollard_rho_tests_sum_iterations = 0;
+
+pthread_mutex_t stats_branch_additions_lock;
 long stats_num_branch_additions = 0;
 
+pthread_mutex_t stats_loops_lock;
 volatile int stats_loops[LOOP_DETECTION_SIZE];
+volatile long stats_loops_sum = 0;
 volatile int stats_loops_max = 0;
 
 /**
@@ -162,7 +166,9 @@ void pr_triple_add(eccp_ecdlp_triple *res, const eccp_ecdlp_triple *opa, const e
  */
 void pr_triple_add_branch_index(eccp_ecdlp_triple *triple, int index) {
     pr_triple_add(triple, triple, &branches[index]);
+    pthread_mutex_lock(&stats_branch_additions_lock);
     stats_num_branch_additions++;
+    pthread_mutex_unlock(&stats_branch_additions_lock);
 }
 
 /**
@@ -215,13 +221,33 @@ void pr_triple_generate(eccp_ecdlp_triple *to_comp) {
 }
 
 /**
+ * Prints the current loop statistics (does not lock mutex)
+ */
+void print_loop_stats() {
+    int j;
+    printf("loop detected %u %ld %ld --", stats_loops_max, stats_num_branch_additions, stats_num_distinguished_triples);
+    for(j=0; j <= stats_loops_max; j++) {
+        printf(" %u", stats_loops[j]);
+    }
+    printf("-- ");
+    double r = (double)stats_num_branch_additions/(double)stats_loops[1];
+    printf("%.1f ", r);
+
+    for(j=2; j <= stats_loops_max; j++) {
+        double r = (double)stats_loops[j-2]/(double)stats_loops[j];
+        printf("%.1f ", r);
+    }
+    printf("\n");
+}
+
+/**
  * Displays a warning when a loop is detected.
  * @param triple
  * @param loop_detection 
  * @return 1 if loop was detected
  */
 int pr_triple_loop_detection(eccp_ecdlp_triple *triple, eccp_ecdlp_triple_loop_detection *loop_detection) {
-    int i,j,index;
+    int i,index;
     int loop_detected = 0;
     int iterations = 0;
     
@@ -247,24 +273,16 @@ int pr_triple_loop_detection(eccp_ecdlp_triple *triple, eccp_ecdlp_triple_loop_d
                 }
             }
                 
+            pthread_mutex_lock(&stats_loops_lock);
             stats_loops[i]++;
+            stats_loops_sum++;
             if(i > stats_loops_max)
                 stats_loops_max = i;
             if(i > 7 && i == stats_loops_max) {
-                printf("WARNING: loop detected %u %ld %ld --", stats_loops_max, stats_num_branch_additions, stats_num_distinguished_triples);
-                for(j=0; j <= stats_loops_max; j++) {
-                    printf(" %u", stats_loops[j]);
-                }
-                printf("-- ");
-                double r = (double)stats_num_branch_additions/(double)stats_loops[1];
-                printf("%.1f ", r);
-                    
-                for(j=2; j <= stats_loops_max; j++) {
-                    double r = (double)stats_loops[j-2]/(double)stats_loops[j];
-                    printf("%.1f ", r);
-                }
-                printf("\n");
+                printf("WARNING: ");
+                print_loop_stats();
             }
+            pthread_mutex_unlock(&stats_loops_lock);
             loop_detected = i;
             break;
         }
@@ -477,6 +495,14 @@ void pr_ecdlp_pollard_rho(gfp_t scalar, const eccp_point_affine_t *P, const eccp
         printf("pthread_mutex_init failed\n");
         return;
     }
+    if (pthread_mutex_init(&stats_loops_lock, NULL) != 0) {
+        printf("pthread_mutex_init failed\n");
+        return;
+    }
+    if (pthread_mutex_init(&stats_branch_additions_lock, NULL) != 0) {
+        printf("pthread_mutex_init failed\n");
+        return;
+    }
     // this mutex is only unlocked when we want the client threads to finish
     pthread_mutex_lock(&finished_computing_lock);
     
@@ -498,6 +524,7 @@ void pr_ecdlp_pollard_rho(gfp_t scalar, const eccp_point_affine_t *P, const eccp
     fifo_write_index = 0;
     stats_num_branch_additions = 0;
     stats_loops_max = 0;
+    stats_loops_sum = 0;
     for(j = 0; j < LOOP_DETECTION_SIZE; j++) {
         stats_loops[j] = 0;
     }
@@ -536,7 +563,7 @@ void pr_ecdlp_pollard_rho(gfp_t scalar, const eccp_point_affine_t *P, const eccp
         printf("ERROR(pr_ecdlp_pollard_rho): resulting scalar verification failed\n");
     }
 
-    printf("%ld iterations, %ld points, %ld discarded\n", stats_num_iterations, stats_num_distinguished_triples, stats_num_discarded_triples);
+    printf("%ld iterations, %ld points, %ld discarded, %ld loops, %ld additions\n", stats_num_iterations, stats_num_distinguished_triples, stats_num_discarded_triples, stats_loops_sum, stats_num_branch_additions);
     stats_pollard_rho_tests_sum_iterations += stats_num_iterations;
     stats_num_pollard_rho_tests++;
     if(stats_num_pollard_rho_tests > 0) {
