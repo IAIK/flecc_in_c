@@ -61,7 +61,7 @@ Using the library is straight forward given the header files and the static libr
 
 ## Further Reading
 
-* [Project Page](http://opensource.iaik.tugraz.at/software-projects/flecc_in_c/)
+* [Project Page](http://www.iaik.tugraz.at/content/research/opensource/flecc_in_c/)
 * [Institute for Applied Information Processing and Communications (IAIK)](http://www.iaik.tugraz.at)
 
 ## Authors
