@@ -17,12 +17,14 @@ Optional:
 ## Building
 
 The library can be built like any other cmake project with the following commands:
-```
+
+~~~
 $ mkdir <build-directory>
 $ cd <build-directory>
 $ cmake [cmake-options] <source-directory>
 $ cmake --build . [--target <target-name>]
-```
+~~~
+
 The `cmake-options` are of the form `-D<option>=<value>` and are optional.
 
 Selection of cmake-options:
@@ -51,9 +53,10 @@ Selection of target-names:
 The library comes with a huge selection of test vectors which check the supported elliptic curves and the involved arithmetic. The test vectors are located under `tests` in the form of text files. These files can be processed by the testrunner which expects the files on stdin.
 
 The test suite related targets (`test`, `check`, `coverage`) can be used to run the test suite when the library is built for the host. Manual test case execution on the build host is possible as well using the following command:
-```
+
+~~~
 $ <build-directory>/bin/testrunner < <source-directory>/tests/<test-vector>.tst
-```
+~~~
 
 ## Usage
 

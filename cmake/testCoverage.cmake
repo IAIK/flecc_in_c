@@ -16,12 +16,17 @@
 # is set.
 #
 
+# include the coverage testing logic only once
+IF( DEFINED COVERAGE_TEST_POSSIBLE )
+  RETURN()
+ENDIF()
+
 FIND_PROGRAM(LCOV_COMMAND NAMES lcov)
 FIND_PROGRAM(GENHTML_COMMAND NAMES genhtml)
 MARK_AS_ADVANCED(LCOV_COMMAND GENHTML_COMMAND)
 
 IF( NOT LCOV_COMMAND OR NOT GENHTML_COMMAND )
-  MESSAGE( STATUS "lcov and/or genhtml couldn't be found. Coverage testing will not be available." )
+  INFO_MSG("lcov and/or genhtml couldn't be found. Coverage testing will not be available." )
 ENDIF ( )
 
 SET( COVERAGE_TEST_POSSIBLE 0)

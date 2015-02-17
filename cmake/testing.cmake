@@ -11,6 +11,10 @@
 #                                           is piped in via stdin
 #
 
+IF(SUB_PROJECT)
+  RETURN()
+ENDIF()
+
 # enable the ctest support
 enable_testing()
 
