@@ -27,7 +27,7 @@
  */
 void init_param_itsec2012_30(eccp_parameters_t *param) {
     param->curve_type = CUSTOM;
-    param->eccp_mul = &eccp_jacobian_point_multiply_L2R_NAF;
+    param->eccp_mul = &eccp_protected_point_multiply;
     param->eccp_mul_base_point = NULL;
     param->base_point_precomputed_table = NULL;
     param->base_point_precomputed_table_width = 0;

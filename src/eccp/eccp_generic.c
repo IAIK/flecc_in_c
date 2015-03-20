@@ -37,7 +37,6 @@
 
 #include "eccp_generic.h"
 #include "eccp_affine.h"
-#include "../gfp/gfp.h"
 #include <stdlib.h> // for the definition of the NULL pointer
 
 /**

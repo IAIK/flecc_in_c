@@ -122,7 +122,7 @@ curve_type_t param_get_curve_type_from_name( const char *buffer ) {
  */
 void param_load( eccp_parameters_t *param, const curve_type_t type ) {
     param->curve_type = type;
-    param->eccp_mul = &eccp_jacobian_point_multiply_L2R_NAF;
+    param->eccp_mul = &eccp_protected_point_multiply;
     param->eccp_mul_base_point = NULL;
     param->base_point_precomputed_table = NULL;
     param->base_point_precomputed_table_width = 0;

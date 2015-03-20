@@ -35,13 +35,30 @@
 **
 ****************************************************************************/
 
-#ifndef ECCP_H_
-#define ECCP_H_
+/* 
+ * File:   eccp_protected.h
+ * Author: erichwenger
+ *
+ * Created on March 20, 2015, 1:35 PM
+ */
 
-#include "eccp_affine.h"
-#include "eccp_generic.h"
-#include "eccp_jacobian.h"
-#include "eccp_std_projective.h"
-#include "eccp_protected.h"
+#ifndef ECCP_PROTECTED_H
+#define	ECCP_PROTECTED_H
 
-#endif /* ECCP_H_ */
+#ifdef	__cplusplus
+extern "C" {
+#endif
+
+#include "../types.h"
+
+void eccp_protected_point_multiply( eccp_point_affine_t *result,
+                                    const eccp_point_affine_t *P,
+                                    const gfp_t scalar,
+                                    const eccp_parameters_t *param );
+
+#ifdef	__cplusplus
+}
+#endif
+
+#endif	/* ECCP_PROTECTED_H */
+
