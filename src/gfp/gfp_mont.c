@@ -227,7 +227,7 @@ void gfp_mont_compute_R_squared( gfp_t res, gfp_prime_data_t *prime_data ) {
     bigint_clear_var( res, prime_data->words );
     bigint_set_bit_var( res, prime_data->bits - 1, 1, prime_data->words );
 
-    for( i = prime_data->bits - 1; i < 2 * prime_data->words * BITS_PER_WORD; i++ ) {
+    for( i = prime_data->bits - 1; i < (2 * prime_data->words * BITS_PER_WORD); i++ ) {
         gfp_gen_add( res, res, res, prime_data );
     }
 }
@@ -251,12 +251,15 @@ uint_t gfp_mont_compute_n0( gfp_prime_data_t *prime_data ) {
 
 /**
  * Use two montgomery multiplications to compute a * b mod prime
- * @param res the result = a * b  mod prime
- * @param a first operand
- * @param b second operand
+ *   T1 = a * b * R^-1
+ *   res = T1 * R^2 * R^-1 = a * b
+ * @param res the result = a * b  mod prime (not in Montgomery domain)
+ * @param a first operand (not in Montgomery domain)
+ * @param b second operand (not in Montgomery domain)
  * @param prime_data the used prime data needed to do the multiplication
  */
 void gfp_mult_two_mont( gfp_t res, const gfp_t a, const gfp_t b, const gfp_prime_data_t *prime_data ) {
     gfp_mont_multiply( res, a, b, prime_data );
     gfp_mont_multiply( res, res, prime_data->r_squared, prime_data );
 }
+

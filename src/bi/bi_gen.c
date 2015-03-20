@@ -162,10 +162,10 @@ void bigint_xor_var( uint_t *res, const uint_t *a, const uint_t *b, const int le
 }
 
 /**
- * Shifts a biginteger to the lift
+ * Shifts a biginteger to the left
+ * @param res destination big integer
  * @param a the data to shift
  * @param left the number of bits to shift
- * @param destination big integer
  * @param length number of words which should be shifted (size of a & res)
  */
 void bigint_shift_left_var( uint_t *res, const uint_t *a, const int left, const int length ) {
@@ -616,10 +616,10 @@ int bigint_hamming_weight_var( const uint_t *var, const int length ) {
 
 /**
  * Simple bit-wise long division algorithm. Not fast nor optimal but simple.
- * @param N Dividend
- * @param D Divisor
  * @param Q Quotient
  * @param R Remainder
+ * @param N Dividend
+ * @param D Divisor
  * @param len
  */
 void bigint_divide_simple_var( uint_t *Q, uint_t *R, const uint_t *N, const uint_t *D, const int words ) {

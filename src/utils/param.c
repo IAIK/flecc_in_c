@@ -178,7 +178,7 @@ void param_load( eccp_parameters_t *param, const curve_type_t type ) {
         // set prime data (group order)
         param->order_n_data.bits = SECP224R1_ORDER_N_BITS;
         param->order_n_data.words = WORDS_PER_BITS( SECP224R1_ORDER_N_BITS );
-        param->order_n_data.montgomery_domain = 1;
+        param->order_n_data.montgomery_domain = 0;
         bigint_copy_var( param->order_n_data.prime, SECP224R1_ORDER_N, param->order_n_data.words );
 
         // compute Montgomery constants (group order)
@@ -212,7 +212,7 @@ void param_load( eccp_parameters_t *param, const curve_type_t type ) {
         // set prime data (group order)
         param->order_n_data.bits = SECP256R1_ORDER_N_BITS;
         param->order_n_data.words = WORDS_PER_BITS( SECP256R1_ORDER_N_BITS );
-        param->order_n_data.montgomery_domain = 1;
+        param->order_n_data.montgomery_domain = 0;
         bigint_copy_var( param->order_n_data.prime, SECP256R1_ORDER_N, param->order_n_data.words );
 
         // compute Montgomery constants (group order)
@@ -246,7 +246,7 @@ void param_load( eccp_parameters_t *param, const curve_type_t type ) {
         // set prime data (group order)
         param->order_n_data.bits = SECP384R1_ORDER_N_BITS;
         param->order_n_data.words = WORDS_PER_BITS( SECP384R1_ORDER_N_BITS );
-        param->order_n_data.montgomery_domain = 1;
+        param->order_n_data.montgomery_domain = 0;
         bigint_copy_var( param->order_n_data.prime, SECP384R1_ORDER_N, param->order_n_data.words );
 
         // compute Montgomery constants (group order)
@@ -280,7 +280,7 @@ void param_load( eccp_parameters_t *param, const curve_type_t type ) {
         // set prime data (group order)
         param->order_n_data.bits = SECP521R1_ORDER_N_BITS;
         param->order_n_data.words = WORDS_PER_BITS( SECP521R1_ORDER_N_BITS );
-        param->order_n_data.montgomery_domain = 1;
+        param->order_n_data.montgomery_domain = 0;
         bigint_copy_var( param->order_n_data.prime, SECP521R1_ORDER_N, param->order_n_data.words );
 
         // compute Montgomery constants (group order)
