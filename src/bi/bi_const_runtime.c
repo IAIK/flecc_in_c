@@ -47,7 +47,7 @@
  * @param words_per_entry the number of words per table entry
  * @param words_result the number of words copied to result
  */
-void bi_cr_tbl_access(uint_t *result, const uint_t *table, const int index, 
+void bigint_cr_tbl_access(uint_t *result, const uint_t *table, const int index, 
         const int tbl_entries, const int words_per_entry, const int words_result) {
     int i, j, k, right_entry, index2;
     uint_t mask;
@@ -60,8 +60,7 @@ void bi_cr_tbl_access(uint_t *result, const uint_t *table, const int index,
         right_entry = index2;
         j = 1;
         while(j != (sizeof(int) * 8)) {
-            index2 >>= j;
-            right_entry |= index2;
+            right_entry |= (right_entry >> j);
             j <<= 1;
         }
         right_entry &= 1;
@@ -75,3 +74,29 @@ void bi_cr_tbl_access(uint_t *result, const uint_t *table, const int index,
         index2++;
     }
 }
+
+/**
+ * Switch two variables in constant time and with constant access pattern.
+ * @param var1
+ * @param var2
+ * @param switch_vars if 1, variables are switched; if 0, no switch is performed
+ * @param words number of words to represent the two variables
+ */
+void bigint_cr_switch(uint_t *var1, uint_t *var2, const int switch_vars, const int words) {
+    uint_t M1, M2;
+    uint_t V1, V2, V3, V4;
+    int i;
+    
+    M2 = -switch_vars;
+    M1 = ~M2;
+    
+    for(i = 0; i < words; i++) {
+        V1 = var1[i];
+        V2 = var2[i];
+        V3 = (V1 & M1) | (V2 & M2);
+        V4 = (V1 & M2) | (V2 & M1);
+        var1[i] = V3;
+        var2[i] = V4;
+    }
+}
+

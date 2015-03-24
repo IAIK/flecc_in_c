@@ -77,9 +77,14 @@ int eccp_protected_std_projective_point_is_valid(const gfp_t px, const gfp_t py,
         return 0;
 }
 
+/** can be set to zero on cache-less microprocessor architectures 
+ *  (faster on cache-less microprocessor architectures)
+ */
+#define AVOID_CACHE_TIMING_ATTACKS 1
+
 /**
  * Performs a point scalar multiplication based on "8/16/32 shades of ECC on embedded microprocessors"
- * @param result the resulting point (set to identity when error happens)
+ * @param result the resulting point (set to identity when error happens) 
  * @param P The base point to multiply
  * @param scalar the multiplicant
  * @param param elliptic curve parameters
@@ -88,10 +93,18 @@ void eccp_protected_point_multiply( eccp_point_affine_t *result,
                                     const eccp_point_affine_t *P,
                                     const gfp_t scalar,
                                     const eccp_parameters_t *param ) {
-    gfp_t X1_, X2_, Z_, R1, R2, R3, R4, ECC_curve_b_4;
+    gfp_t Z_, R1, R2, R3, R4, ECC_curve_b_4;
     int bit, bit_is_set;
-    uint_t* dest[2];
+#if (AVOID_CACHE_TIMING_ATTACKS == 1)
+    gfp_t X1, X2;
+    int last_bit = 1;
+#else
+    gfp_t X1_, X2_;
     uint_t *X1 = X1_, *X2 = X2_;
+    uint_t* dest[2];
+    dest[0] = X1;
+    dest[1] = X2;
+#endif
 
     if(P->identity == 1) {
         result->identity = 1;
@@ -103,6 +116,30 @@ void eccp_protected_point_multiply( eccp_point_affine_t *result,
         result->identity = 1;
         return;
     }
+    
+    /* deal with the case that the scalar is larger than the group order */
+    if(bigint_compare_var(scalar, param->order_n_data.prime, param->order_n_data.words) >= 0) {
+        /* TODO: fancier error handling? */
+        result->identity = 1;
+        return;
+    }
+    
+    /* deal with the case that the scalar is zero */
+    if(bigint_is_zero_var(scalar, param->order_n_data.words)) {
+        result->identity = 1;
+        return;
+    }
+    
+    bigint_copy_var(R3, param->order_n_data.prime, param->order_n_data.words );
+    bigint_clear_var(R4, param->order_n_data.words );
+    R4[0] = 1;
+    bigint_subtract_var(R3, R3, R4, param->order_n_data.words);
+    
+    /* deal with the case that the scalar is (order-1) */
+    if(bigint_compare_var(scalar, R3, param->order_n_data.words) == 0) {
+        eccp_affine_point_negate(result, P, param);
+        return;
+    }
 
     /* randomize projective coordinates */
     gfp_rand(R4, &param->prime_data);
@@ -110,7 +147,7 @@ void eccp_protected_point_multiply( eccp_point_affine_t *result,
     gfp_multiply(R2, P->y, R4);
     gfp_copy(R3, R4);
 
-    if(!eccp_protected_std_projective_point_is_valid(R1, R2, R3, R4, X1_, X2_, param)) {
+    if(!eccp_protected_std_projective_point_is_valid(R1, R2, R3, R4, X1, X2, param)) {
         /* TODO: fancier error handling? */
         result->identity = 1;
         return;
@@ -148,14 +185,17 @@ void eccp_protected_point_multiply( eccp_point_affine_t *result,
 
     /* the multiplication starts with the most significant bit*/
     bit = bigint_get_msb_var(scalar, param->order_n_data.words)-1;
-    dest[0] = X1;
-    dest[1] = X2;
 
     while(bit >= 0) {
 
         bit_is_set = bigint_test_bit_var(scalar, bit, param->order_n_data.words);
+#if (AVOID_CACHE_TIMING_ATTACKS == 1)
+        bigint_cr_switch(X1, X2, bit_is_set ^ last_bit, param->prime_data.words);
+        last_bit = bit_is_set;
+#else
         X1 = dest[1^bit_is_set];
         X2 = dest[bit_is_set];
+#endif
         bit--;
 
         /*
@@ -204,8 +244,12 @@ void eccp_protected_point_multiply( eccp_point_affine_t *result,
         gfp_multiply(Z_, X1, R4);
         gfp_multiply(X1, R3, R4);
     }
+#if (AVOID_CACHE_TIMING_ATTACKS == 1)
+    bigint_cr_switch(X1, X2, 1 ^ last_bit, param->prime_data.words);
+#else
     X1 = dest[0];
     X2 = dest[1];
+#endif
 
     /* y-recovery (taken from Hutter) */
     gfp_multiply(R1, P->x, Z_);
@@ -257,6 +301,7 @@ void eccp_protected_point_multiply( eccp_point_affine_t *result,
     gfp_inverse(R1, Z_);
     gfp_multiply(result->x, X1, R1);
     gfp_multiply(result->y, X2, R1);
+    result->identity = 0;
 
     if(!eccp_affine_point_is_valid(result, param)) {
         /* TODO: fancier error handling? */

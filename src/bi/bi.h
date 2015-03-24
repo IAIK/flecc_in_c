@@ -39,5 +39,6 @@
 #define BI_H_
 
 #include "bi_gen.h"
+#include "bi_const_runtime.h"
 
 #endif /* BI_H_ */
