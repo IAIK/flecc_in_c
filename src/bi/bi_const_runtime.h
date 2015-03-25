@@ -47,6 +47,7 @@ extern "C" {
 void bigint_cr_tbl_access(uint_t *result, const uint_t *table, const int index, 
         const int tbl_entries, const int words_per_entry, const int words_result);
 void bigint_cr_switch(uint_t *var1, uint_t *var2, const int switch_vars, const int words);
+void bigint_cr_select_2(uint_t *result, const uint_t *var0, const uint_t *var1, const int var_sel, const int words);
 
 
 #ifdef	__cplusplus

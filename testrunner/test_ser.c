@@ -210,17 +210,16 @@ unsigned test_ser() {
     eccp_point_projective_t ecproj_var_b;
     eccp_point_projective_t ecproj_var_c;
 
-    eccp_point_affine_t comb_table[(1 << TBL_WIDTH) - 1];
+    eccp_point_affine_t comb_table[JCB_COMB_TBL_SIZE(TBL_WIDTH)];
     
     curve = read_curve_type( buffer, READ_BUFFER_SIZE );
     param_load( &curve_params, curve );
     param = &curve_params;
     length = curve_params.prime_data.words;
 
-    eccp_jacobian_point_multiply_COMB_precompute(comb_table, &param->base_point, TBL_WIDTH, param);
     param->base_point_precomputed_table = comb_table;
     param->base_point_precomputed_table_width = TBL_WIDTH;
-    param->eccp_mul_base_point = &eccp_jacobian_point_multiply_COMB;
+    eccp_jacobian_point_multiply_COMB_precompute(param);
 
     while( 1 ) {
         io_read( buffer, READ_BUFFER_SIZE );

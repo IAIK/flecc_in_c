@@ -160,6 +160,22 @@ void eccp_affine_point_add( eccp_point_affine_t *res,
 }
 
 /**
+ * Subtracts two affine points. Handles the case of R=A and R=B.
+ * @param res res = minuend - subtrahend
+ * @param minuend positive point
+ * @param subtrahend point that is subtracted
+ * @param param elliptic curve parameters
+ */
+void eccp_affine_point_subtract( eccp_point_affine_t *res,
+                            const eccp_point_affine_t *minuend,
+                            const eccp_point_affine_t *subtrahend,
+                            const eccp_parameters_t *param ) {
+    eccp_point_affine_t temp;
+    eccp_affine_point_negate(&temp, subtrahend, param);
+    eccp_affine_point_add(res, minuend, &temp, param);
+}
+
+/**
  * Doubles an affine point. Handles the case of R=A.
  * @param res
  * @param A

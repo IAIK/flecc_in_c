@@ -100,3 +100,23 @@ void bigint_cr_switch(uint_t *var1, uint_t *var2, const int switch_vars, const i
     }
 }
 
+/**
+ * Copy one of two variables to the destination memory in constant time.
+ * @param result destination memory
+ * @param var0
+ * @param var1
+ * @param var_sel if 0, selects var0, if 1, selects var1
+ * @param words the number of words to copy
+ */
+void bigint_cr_select_2(uint_t *result, const uint_t *var0, const uint_t *var1, const int var_sel, const int words) {
+    uint_t M0, M1;
+    int i;
+    
+    M1 = -var_sel;
+    M0 = ~M1;
+    
+    for(i = 0; i < words; i++) {
+        result[i] = (var0[i] & M0) | (var1[i] & M1);
+    }
+}
+

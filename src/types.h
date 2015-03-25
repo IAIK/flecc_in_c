@@ -111,7 +111,7 @@ struct _eccp_parameters_t_;
 /** typedef of function pointer to an optimized eccp scalar multiplication (used in eccp_parameters_t) */
 typedef void (*eccp_mul_t)(eccp_point_affine_t *,const eccp_point_affine_t*,const gfp_t,const struct _eccp_parameters_t_*);
 /** typedef of function pointer to an optimized scalar multiplication with constant point (used in eccp_parameters_t). */
-typedef void (*eccp_mul_const_t)(eccp_point_affine_t *,const eccp_point_affine_t *,const unsigned int,const gfp_t,const struct _eccp_parameters_t_*);
+typedef void (*eccp_mul_const_t)(eccp_point_affine_t *,const gfp_t,const struct _eccp_parameters_t_*);
 /** Parameters needed to do elliptic curve computations. */
 typedef struct _eccp_parameters_t_ {
     /** data needed to do computations modulo the prime */
