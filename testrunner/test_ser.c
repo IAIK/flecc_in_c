@@ -554,13 +554,25 @@ unsigned test_ser() {
             eccp_affine_to_jacobian( &ecproj_var_a, &ecaff_var_a, param );
             int is_valid = eccp_jacobian_point_is_valid( &ecproj_var_a, param );
             errors += assert_integer( test_id, expected, is_valid );
-        } else if( line_starts_with( buffer, "eccp_jacobian_point_multiply" ) ) {
+        } else if( line_starts_with( buffer, "eccp_point_multiply" ) ) {
 
             read_eccp_affine_point( buffer, READ_BUFFER_SIZE, &ecaff_var_a, &( curve_params.prime_data ), 1 );
             read_bigint( buffer, READ_BUFFER_SIZE, bi_var_a, param->order_n_data.words );
             read_eccp_affine_point( buffer, READ_BUFFER_SIZE, &ecaff_var_expected, &( curve_params.prime_data ), 1 );
 
             param->eccp_mul( &ecaff_var_c, &ecaff_var_a, bi_var_a, param );
+
+            errors += assert_integer( test_id, ecaff_var_expected.identity, ecaff_var_c.identity );
+            if( ecaff_var_expected.identity == 0 ) {
+                errors += assert_bigint( test_id, ecaff_var_expected.x, ecaff_var_c.x, length );
+                errors += assert_bigint( test_id, ecaff_var_expected.y, ecaff_var_c.y, length );
+            }
+        } else if( line_starts_with( buffer, "eccp_comb_point_multiply" ) ) {
+
+            read_bigint( buffer, READ_BUFFER_SIZE, bi_var_a, param->order_n_data.words );
+            read_eccp_affine_point( buffer, READ_BUFFER_SIZE, &ecaff_var_expected, &( curve_params.prime_data ), 1 );
+
+            param->eccp_mul_base_point( &ecaff_var_c, bi_var_a, param );
 
             errors += assert_integer( test_id, ecaff_var_expected.identity, ecaff_var_c.identity );
             if( ecaff_var_expected.identity == 0 ) {
