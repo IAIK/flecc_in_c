@@ -641,7 +641,6 @@ void eccp_jacobian_point_multiply_COMB_WOZ( eccp_point_affine_t *result, const g
     }
 
     if(bigint_test_bit_var(scalar, 0, param->order_n_data.words) == 0) {
-        // TODO: does the base point fit the table?
         eccp_affine_point_negate(&temp, &param->base_point, param);
         eccp_jacobian_point_add_affine(&result_projective, &result_projective, &temp, param);
     }
