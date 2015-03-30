@@ -46,7 +46,7 @@
 #define io_init( default_in, default_out ) io_posix_init( default_in, default_out )
 #define io_read_byte() io_posix_read_byte()
 #define io_write_byte( byte ) io_posix_write_byte( byte )
-#define io_read( buffer, len ) io_gen_read( buffer, len )
+#define io_read( buffer, len ) io_gen_readline( buffer, len )
 #define io_write( buffer, len ) io_gen_write( buffer, len )
 
 #if( ARCHITECTURE == ARCH_ATMEGA_FOR_GCC )

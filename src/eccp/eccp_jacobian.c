@@ -605,27 +605,36 @@ void eccp_jacobian_point_multiply_COMB_precompute( eccp_parameters_t *param ) {
 void eccp_jacobian_point_multiply_COMB_WOZ( eccp_point_affine_t *result, const gfp_t scalar, const eccp_parameters_t *param ) {
     int width = param->base_point_precomputed_table_width;
     int comb_param_d = (param->order_n_data.bits - 1) / width + 1;  // same as ceil (bits / width)
+    int tbl_size = JCB_COMB_WOZ_TBL_SIZE(width);
     eccp_point_affine_t *table = param->base_point_precomputed_table;
     eccp_point_projective_t result_projective;
     eccp_point_affine_t temp;
     int digit, index, j;
     int to_invert;
     result_projective.identity = 1;
-    
+
     digit = comb_param_d;
-    while(digit >= 1) {
+    index = 0;
+    for(j = 0; j < width - 1; j++) {
+        index |= bigint_test_bit_var(scalar, comb_param_d*j + digit, param->order_n_data.words) << j;
+    }
+    eccp_affine_to_jacobian(&result_projective, &table[index], param);
+
+    digit--;
+    while(digit > 0) {
         index = 0;
-        for(j = 0; j < width - 1; j++) {
+        for(j = 0; j < (width - 1); j++) {
             index |= bigint_test_bit_var(scalar, comb_param_d*j + digit, param->order_n_data.words) << j;
         }
-        to_invert = 1 ^ bigint_test_bit_var(scalar, comb_param_d*(width - 1) + digit, param->order_n_data.words) << j;
+        to_invert = bigint_test_bit_var(scalar, comb_param_d*(width - 1) + digit, param->order_n_data.words);
         
-        eccp_affine_point_copy(&temp, &table[index], param);
-        
-        if(to_invert) {
-            eccp_affine_point_negate(&temp, &temp, param);
+        if(!to_invert) {
+            index = tbl_size - index - 1;
+            eccp_affine_point_negate(&temp, &table[index], param);
+        } else {
+            eccp_affine_point_copy(&temp, &table[index], param);
         }
-
+        
         eccp_jacobian_point_double(&result_projective, &result_projective, param);
         eccp_jacobian_point_add_affine(&result_projective, &result_projective, &temp, param);
         digit--;
@@ -655,11 +664,12 @@ void eccp_jacobian_point_multiply_COMB_WOZ_precompute( eccp_parameters_t *param 
     int width = param->base_point_precomputed_table_width;
     eccp_point_affine_t *table = param->base_point_precomputed_table;
     int comb_param_d = (param->order_n_data.bits - 1) / width + 1;  // same as ceil (bits / width)
+    int tbl_size = JCB_COMB_WOZ_TBL_SIZE(width);
     eccp_point_affine_t temp_a;
     eccp_point_projective_t temp_p;
     int i, j, k;
 
-    for(j = 0; j < JCB_COMB_WOZ_TBL_SIZE(width); j++) {
+    for(j = 0; j < tbl_size; j++) {
         table[j].identity = 1;
     }
 
@@ -667,7 +677,7 @@ void eccp_jacobian_point_multiply_COMB_WOZ_precompute( eccp_parameters_t *param 
     eccp_affine_point_copy(&temp_a, &param->base_point, param);
     
     for(i = 0; i < width-1; i++) {
-        for(j = 0; j < JCB_COMB_WOZ_TBL_SIZE(width); j++) {
+        for(j = 0; j < tbl_size; j++) {
             if((j & (1 << i)) > 0) {
                 eccp_affine_point_add(&table[j], &table[j], &temp_a, param);
             } else {
@@ -680,7 +690,7 @@ void eccp_jacobian_point_multiply_COMB_WOZ_precompute( eccp_parameters_t *param 
         eccp_jacobian_to_affine(&temp_a, &temp_p, param);
     }
     
-    for(j = 0; j < JCB_COMB_WOZ_TBL_SIZE(width); j++) {
+    for(j = 0; j < tbl_size; j++) {
         eccp_affine_point_add(&table[j], &table[j], &temp_a, param);
     }
     

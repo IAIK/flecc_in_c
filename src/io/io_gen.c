@@ -84,17 +84,20 @@ void io_gen_write( const char *buffer, const int length ) {
 
 /**
  * Reads a character string with a maximum size of
- * length from the default input.
+ * length from the default input until the line ends.
  * @param buffer the buffer to be filled with the character string being read
  * @param length the size of the buffer
  * @return the number of characters actually read
  */
-int io_gen_read( char *buffer, const int length ) {
+int io_gen_readline( char *buffer, const int length ) {
     int i = 0;
     uint8_t byte;
 
     do {
         byte = io_read_byte();
+        // happens only in netbeans copy-paste
+        if(byte == 255)
+            continue;
         buffer[i++] = byte;
     } while( byte != '\n' && i < length );
 

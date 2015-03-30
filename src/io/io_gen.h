@@ -42,7 +42,7 @@
 #include "../types.h"
 
 void io_gen_write( const char *buffer, const int length );
-int io_gen_read( char *buffer, const int length );
+int io_gen_readline( char *buffer, const int length );
 
 void io_print( const char *buffer );
 void io_println( const char *buffer );

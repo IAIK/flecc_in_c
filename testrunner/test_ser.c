@@ -108,8 +108,8 @@ int line_starts_with( const char *line, const char *to_compare ) {
  * @return the type of curve
  */
 curve_type_t read_curve_type( char *buffer, const int buf_length ) {
-    int i = io_read( buffer, buf_length );
-    return param_get_curve_type_from_name( buffer );
+    int length = io_read( buffer, buf_length );
+    return param_get_curve_type_from_name( buffer, length);
 }
 
 /**
@@ -210,16 +210,15 @@ unsigned test_ser() {
     eccp_point_projective_t ecproj_var_b;
     eccp_point_projective_t ecproj_var_c;
 
-    eccp_point_affine_t comb_table[JCB_COMB_TBL_SIZE(TBL_WIDTH)];
-    
     curve = read_curve_type( buffer, READ_BUFFER_SIZE );
     param_load( &curve_params, curve );
     param = &curve_params;
     length = curve_params.prime_data.words;
 
+    eccp_point_affine_t comb_table[JCB_COMB_WOZ_TBL_SIZE(TBL_WIDTH)];
     param->base_point_precomputed_table = comb_table;
     param->base_point_precomputed_table_width = TBL_WIDTH;
-    eccp_jacobian_point_multiply_COMB_precompute(param);
+    eccp_jacobian_point_multiply_COMB_WOZ_precompute(param);
 
     while( 1 ) {
         io_read( buffer, READ_BUFFER_SIZE );

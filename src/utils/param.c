@@ -92,22 +92,54 @@ extern const uint_t SECP521R1_BASE_X[16];
 extern const uint_t SECP521R1_BASE_Y[16];
 
 /**
+ * Compare two buffers which both have length limitations.
+ * @param buffer1
+ * @param length1 length of first buffer
+ * @param buffer2 
+ * @param length2 length of second buffer
+ * @return 
+ */
+int string_max_buffer_match(const char *buffer1, const size_t length1, const char *buffer2, const size_t length2) {
+    size_t i, min_length;
+    char *buffer1_ = (char*) buffer1;
+    char *buffer2_ = (char*) buffer2;
+    
+    min_length = length1;
+    if (length2 < length1) {
+        min_length = length2;
+    }
+    
+    for(i = 0; i < min_length-1; i++) {
+        if(*buffer1_ != *buffer2_)
+            break;
+        buffer1_++;
+        buffer2_++;
+    }
+    
+    return *buffer1_ - *buffer2_;
+}
+
+/**
  * Determines the type of curve from the string in the buffer.
  * @param buffer the string defining the type of curve
  * @return type of curve
  */
-curve_type_t param_get_curve_type_from_name( const char *buffer ) {
+curve_type_t param_get_curve_type_from_name( const char *buffer , const int buffer_length ) {
     curve_type_t curve = UNKNOWN;
 
-    if( strncmp( buffer, "secp192r1", 9 ) == 0 ) {
+    if(buffer_length == 0) {
+        return curve;
+    }
+    
+    if( string_max_buffer_match( buffer, buffer_length, "secp192r1", 9 ) == 0 ) {
         curve = SECP192R1;
-    } else if( strncmp( buffer, "secp224r1", 9 ) == 0 ) {
+    } else if( string_max_buffer_match( buffer, buffer_length, "secp224r1", 9 ) == 0 ) {
         curve = SECP224R1;
-    } else if( strncmp( buffer, "secp256r1", 9 ) == 0 ) {
+    } else if( string_max_buffer_match( buffer, buffer_length, "secp256r1", 9 ) == 0 ) {
         curve = SECP256R1;
-    } else if( strncmp( buffer, "secp384r1", 9 ) == 0 ) {
+    } else if( string_max_buffer_match( buffer, buffer_length, "secp384r1", 9 ) == 0 ) {
         curve = SECP384R1;
-    } else if( strncmp( buffer, "secp521r1", 9 ) == 0 ) {
+    } else if( string_max_buffer_match( buffer, buffer_length, "secp521r1", 9 ) == 0 ) {
         curve = SECP521R1;
     }
 
