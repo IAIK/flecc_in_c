@@ -81,10 +81,7 @@ int eccp_std_projective_point_is_valid( const eccp_point_projective_t *a, const 
     gfp_multiply( left, temp, a->z);          /* ZY^2                       */
 
     /* check if Y^2*Z == X^3 + a*X*Z^2 + b*Z^3 */
-    if( gfp_compare( left, right ) == 0 )
-        return 1;
-    else
-        return 0;
+    return gfp_is_equal( left, right );
 }
 
 /**
@@ -111,16 +108,13 @@ int eccp_std_projective_point_equals( const eccp_point_projective_t *a,
     gfp_multiply( temp_a, a->z, b->x );
     gfp_multiply( temp_b, b->z, a->x );
 
-    if( gfp_compare( temp_a, temp_b ) != 0 )
+    if( !gfp_is_equal( temp_a, temp_b ) )
         return 0;
 
     gfp_multiply( temp_a, a->z, b->y );
     gfp_multiply( temp_b, b->z, a->y );
 
-    if( gfp_compare( temp_a, temp_b ) != 0 )
-        return 0;
-    else
-        return 1;
+    return gfp_is_equal( temp_a, temp_b );
 }
 
 /**

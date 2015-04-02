@@ -116,4 +116,10 @@
 #endif
 #endif
 
+/**
+ * Platform dependent function that returns a cycle counter
+ * @return a cycle counter.
+ */
+unsigned long perf_get_cycle_counter();
+
 #endif /* ARCH_H_ */

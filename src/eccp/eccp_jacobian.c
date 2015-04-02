@@ -80,10 +80,7 @@ int eccp_jacobian_point_is_valid( const eccp_point_projective_t *a, const eccp_p
     gfp_square( left, a->y );
 
     /* check if Y^2 == X^3 + a*X*Z^4 + b*Z^6 */
-    if( gfp_compare( left, right ) == 0 )
-        return 1;
-    else
-        return 0;
+    return gfp_is_equal( left, right );
 }
 
 /**
@@ -113,7 +110,7 @@ int eccp_jacobian_point_equals( const eccp_point_projective_t *a,
     gfp_multiply( temp_a, temp_a_z2, b->x );
     gfp_multiply( temp_b, temp_b_z2, a->x );
 
-    if( gfp_compare( temp_a, temp_b ) != 0 )
+    if( !gfp_is_equal( temp_a, temp_b ) )
         return 0;
 
     gfp_multiply( temp_a, temp_a_z2, a->z );
@@ -121,10 +118,7 @@ int eccp_jacobian_point_equals( const eccp_point_projective_t *a,
     gfp_multiply( temp_a_z2, temp_a, b->y );
     gfp_multiply( temp_b_z2, temp_b, a->y );
 
-    if( gfp_compare( temp_a_z2, temp_b_z2 ) != 0 )
-        return 0;
-    else
-        return 1;
+    return gfp_is_equal( temp_a_z2, temp_b_z2 );
 }
 
 /**
@@ -213,7 +207,7 @@ void
     }
 
     gfp_negate( T1, a->y );
-    if( gfp_compare( T1, a->y ) == 0 ) {
+    if( gfp_is_equal( T1, a->y ) ) {
         // this handles the special case of doubling a point of order 2
         res->identity = 1;
         return;
@@ -312,8 +306,8 @@ void eccp_jacobian_point_add( eccp_point_projective_t *res,
     gfp_multiply( T2, a->y, T6 ); // S1 = Y1*Z2*Z2Z2
     gfp_multiply( T6, b->y, T5 ); // S2 = Y2*Z1*Z1Z1
 
-    if( gfp_compare( T3, T4 ) == 0 ) {
-        if( gfp_compare( T2, T6 ) == 0 ) {
+    if( gfp_is_equal( T3, T4 ) ) {
+        if( gfp_is_equal( T2, T6 ) ) {
             // CASE: A is equal to B
             eccp_jacobian_point_double( res, a, param );
             return;

@@ -48,6 +48,7 @@
 #include "gfp/gfp.h"
 #include "utils/param.h"
 #include "utils/assert.h"
+#include "utils/performance.h"
 #include "eccp/eccp.h"
 #include "utils/parse.h"
 #include "protocols/protocols.h"
@@ -368,7 +369,7 @@ unsigned test_ser() {
             read_bigint( buffer, READ_BUFFER_SIZE, bi_var_a, length );
             read_bigint( buffer, READ_BUFFER_SIZE, bi_var_b, length );
             read_bigint( buffer, READ_BUFFER_SIZE, bi_var_expected, length );
-            gfp_gen_subtract( bi_var_c, bi_var_a, bi_var_b, &( curve_params.prime_data ) );
+            gfp_subtract( bi_var_c, bi_var_a, bi_var_b );
             errors += assert_bigint( test_id, bi_var_expected, bi_var_c, length );
         } else if( line_starts_with( buffer, "gfp_halve" ) ) {
 
@@ -823,6 +824,10 @@ unsigned test_ser() {
             hash_sha256_to_byte_array( hash, &sha2_state );
 
             errors += assert_byte_array( test_id, expected_hash, hash, 32 );
+        } else if(line_starts_with( buffer, "performance_test_eccp_mul" ) ) {
+            performance_test_eccp_mul(param);
+        } else if(line_starts_with( buffer, "performance_test_gfp_mul" ) ) {
+            performance_test_gfp_mul(param);
         }
     }
     return errors;

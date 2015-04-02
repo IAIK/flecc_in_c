@@ -35,8 +35,8 @@
 **
 ****************************************************************************/
 
-#ifndef BI_CONST_RUNTIME_H
-#define	BI_CONST_RUNTIME_H
+#ifndef PERFORMANCE_H
+#define	PERFORMANCE_H
 
 #ifdef	__cplusplus
 extern "C" {
@@ -44,16 +44,13 @@ extern "C" {
 
 #include "../types.h"
 
-void bigint_cr_tbl_access(uint_t *result, const uint_t *table, const int index, 
-        const int tbl_entries, const int words_per_entry, const int words_result);
-void bigint_cr_switch(uint_t *var1, uint_t *var2, const int switch_vars, const int words);
-void bigint_cr_select_2(uint_t *result, const uint_t *var0, const uint_t *var1, const int var_sel, const int words);
-int bigint_cr_is_equal_var( const uint_t *a, const uint_t *b, const int length );
+void performance_test_eccp_mul(eccp_parameters_t *param);
+void performance_test_gfp_mul(eccp_parameters_t *param);
 
 
 #ifdef	__cplusplus
 }
 #endif
 
-#endif	/* BI_CONST_RUNTIME_H */
+#endif	/* PERFORMANCE_H */
 

@@ -71,10 +71,7 @@ int eccp_protected_std_projective_point_is_valid(const gfp_t px, const gfp_t py,
     gfp_multiply(left, temp, pz);
 
     /* check if ZY^2 == X^3 + a*X*Z^2 + b*Z^3 */
-    if(gfp_compare(left, right) == 0)
-        return 1;
-    else
-        return 0;
+    return gfp_is_equal(left, right);
 }
 
 /** can be set to zero on cache-less microprocessor architectures 

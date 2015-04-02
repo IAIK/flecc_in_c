@@ -120,3 +120,30 @@ void bigint_cr_select_2(uint_t *result, const uint_t *var0, const uint_t *var1, 
     }
 }
 
+/**
+ * Returns 1 if the two biginteger are equal IN CONSTANT TIME.
+ * @param a
+ * @param b
+ * @param length the size of a and b in words
+ * @return 1 if equal; 0 if not equal
+ */
+int bigint_cr_is_equal_var( const uint_t *a, const uint_t *b, const int length ) {
+    uint_t temp = 0;
+    int i = length - 1;
+    int j;
+    for( ; i >= 0; i-- ) {
+        temp |= a[i] ^ b[i];
+    }
+
+    // at this point, temp is zero if equal
+    temp = ~temp;
+    
+    // if all bits are ored together, the LSB will be 1 if all bits are equal
+    j = 1;
+    while(j != (sizeof(uint_t) * 8)) {
+        temp &= (temp >> j);
+        j <<= 1;
+    }
+
+    return temp & 1;
+}

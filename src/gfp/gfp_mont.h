@@ -39,6 +39,7 @@
 #define GFP_MONT_H_
 
 #include "../types.h"
+#include "gfp_const_runtime.h"
 
 void gfp_normal_to_montgomery( gfp_t res, const gfp_t src, const gfp_prime_data_t *prime_data );
 void gfp_montgomery_to_normal( gfp_t res, const gfp_t src, const gfp_prime_data_t *prime_data );
@@ -50,9 +51,10 @@ void gfp_mont_multiply_sos( gfp_t res, const gfp_t a, const gfp_t b, const gfp_p
 void gfp_mont_inverse( gfp_t result, const gfp_t a, const gfp_prime_data_t *prime_data );
 void gfp_mont_exponent(
     gfp_t res, const gfp_t a, const uint_t *exponent, const int exponent_length, const gfp_prime_data_t *prime_data );
+void gfp_mont_inverse_fermat( gfp_t result, const gfp_t to_invert, const gfp_prime_data_t *prime_data);
 
 void gfp_mult_two_mont( gfp_t res, const gfp_t a, const gfp_t b, const gfp_prime_data_t *prime_data );
 
-#define gfp_mont_multiply( res, a, b, prime_data ) gfp_mont_multiply_sos( res, a, b, prime_data )
+#define gfp_mont_multiply( res, a, b, prime_data ) gfp_cr_mont_multiply_sos( res, a, b, prime_data )
 
 #endif /* GFP_MONT_H_ */

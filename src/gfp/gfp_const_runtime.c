@@ -49,14 +49,15 @@
 void gfp_cr_add( gfp_t res, const gfp_t a, const gfp_t b, const gfp_prime_data_t *prime_data ) {
     gfp_t temp;
     int carry = bigint_add_var( res, a, b, prime_data->words );
-    int carry2 = -bigint_subtract_var(temp, res, prime_data->prime, prime_data->words);
+    int carry2 = 1 + bigint_subtract_var(temp, res, prime_data->prime, prime_data->words);
     
-    bigint_cr_select_2(res, res, temp, carry | (1-carry2), prime_data->words);
+    bigint_cr_select_2(res, res, temp, carry | carry2, prime_data->words);
 }
 
 
 /**
- * Subtract b from a, store it in res, use the modulo. res = (a - b) mod modulo.
+ * Subtract b from a, store it in res, use the modulo IN CONSTANT TIME. 
+ * res = (a - b) mod modulo.
  * @param a the minuend
  * @param b the subtrahend
  * @param res the difference
@@ -64,8 +65,61 @@ void gfp_cr_add( gfp_t res, const gfp_t a, const gfp_t b, const gfp_prime_data_t
  */
 void gfp_cr_subtract( gfp_t res, const gfp_t a, const gfp_t b, const gfp_prime_data_t *prime_data ) {
     gfp_t temp;
-    int carry = bigint_subtract_var( res, a, b, prime_data->words );
+    int carry = -bigint_subtract_var( res, a, b, prime_data->words );
     bigint_add_var( temp, res, prime_data->prime, prime_data->words );
     
     bigint_cr_select_2(res, res, temp, carry, prime_data->words);
+}
+
+/**
+ * Montgomery multiplication based on Separated Operand Scanning (SOS) method
+ * Koc, ACar, Kaliski "Analyzing and Comparing Montgomery Multiplication
+ * Algorithms" IN CONSTANT TIME
+ * @param res the result = a * b * R^-1 mod prime
+ * @param a first operand
+ * @param b second operand
+ * @param prime_data the used prime data needed to do the multiplication
+ */
+void gfp_cr_mont_multiply_sos( gfp_t res, const gfp_t a, const gfp_t b, const gfp_prime_data_t *prime_data ) {
+    int i, j;
+    ulong_t product;
+    uint_t global_carry = 0;
+    uint_t carry;
+    uint_t temp;
+    uint_t temp_buffer[2 * WORDS_PER_GFP];
+    int length = prime_data->words;
+    bigint_clear_var( temp_buffer, length );
+    for( i = 0; i < length; i++ ) {
+        carry = 0;
+        temp = a[i];
+        for( j = 0; j < length; j++ ) {
+            product = temp_buffer[i + j];
+            product += (ulong_t)temp * (ulong_t)b[j];
+            product += carry;
+            temp_buffer[i + j] = ( product & UINT_T_MAX );
+            carry = product >> BITS_PER_WORD;
+        }
+        temp_buffer[i + length] = carry;
+    }
+    for( i = 0; i < length; i++ ) {
+        carry = 0;
+        temp = temp_buffer[i] * prime_data->n0;
+        for( j = 0; j < length; j++ ) {
+            product = temp_buffer[i + j];
+            product += (ulong_t)temp * (ulong_t)prime_data->prime[j];
+            product += carry;
+            temp_buffer[i + j] = ( product & UINT_T_MAX );
+            carry = product >> BITS_PER_WORD;
+        }
+        // TODO: carry propagation can be optimized
+        for( j = i + length; j < 2 * length; j++ ) {
+            product = temp_buffer[j];
+            product += carry;
+            temp_buffer[j] = ( product & UINT_T_MAX );
+            carry = product >> BITS_PER_WORD;
+        }
+        global_carry += carry;
+    }
+    carry = 1 + bigint_subtract_var(temp_buffer, temp_buffer + length, prime_data->prime, length);
+    bigint_cr_select_2(res, temp_buffer + length, temp_buffer, global_carry | carry, prime_data->words);
 }

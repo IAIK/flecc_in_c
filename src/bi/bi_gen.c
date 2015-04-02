@@ -90,7 +90,7 @@ int bigint_add_carry_var( uint_t *res, const uint_t *a, const uint_t *b, const i
  * @param b the subtrahend
  * @param res the difference
  * @param length the number of uint_t elements to subtract
- * @return the carry flag
+ * @return the carry flag (0 or -1)
  */
 int bigint_subtract_var( uint_t *res, const uint_t *a, const uint_t *b, const int length ) {
     slong_t temp = 0;
@@ -282,6 +282,22 @@ int bigint_compare_var( const uint_t *a, const uint_t *b, const int length ) {
 }
 
 /**
+ * Returns 1 if the two biginteger are equal.
+ * @param a
+ * @param b
+ * @param length the size of a and b in words
+ * @return 1 if equal; 0 if not equal
+ */
+int bigint_is_equal_var( const uint_t *a, const uint_t *b, const int length ) {
+    int i = length - 1;
+    for( ; i >= 0; i-- ) {
+        if( a[i] != b[i] )
+            return 0;
+    }
+    return 1;
+}
+
+/**
  * Checks if a number is zero.
  * @param a
  * @param length the size of a in words
@@ -331,7 +347,8 @@ void bigint_multiply_var( uint_t *result, const uint_t *a, const uint_t *b, cons
     if( length_b < 0 )
         return;
 
-    bigint_clear_var( result, length_a + length_b );
+    // all results with index larger than length_b are written before read
+    bigint_clear_var( result, length_b );
     for( i = 0; i < length_a; i++ ) {
         carry = 0;
         for( j = 0; j < length_b; j++ ) {

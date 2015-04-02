@@ -35,7 +35,7 @@ void init_param_itsec2012_30(eccp_parameters_t *param) {
     // set prime data
     param->prime_data.bits = 30;
     param->prime_data.words = 1;
-    param->prime_data.montgomery_domain = 0;
+    param->prime_data.montgomery_domain = 1;
     param->prime_data.prime[0] = 0x3fffffd7;
 
     // compute Montgomery constants
@@ -46,7 +46,7 @@ void init_param_itsec2012_30(eccp_parameters_t *param) {
     // set prime data (group order)
     param->order_n_data.bits = 30;
     param->order_n_data.words = 1;
-    param->order_n_data.montgomery_domain = 1;
+    param->order_n_data.montgomery_domain = 0;
     param->order_n_data.prime[0] = 0x3fff7589;
 
     // compute Montgomery constants (group order)
