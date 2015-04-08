@@ -147,3 +147,31 @@ int bigint_cr_is_equal_var( const uint_t *a, const uint_t *b, const int length )
 
     return temp & 1;
 }
+
+/**
+ * Returns 1 if the given biginteger is zero; IN CONSTANT TIME.
+ * @param a
+ * @param length the size of a and b in words
+ * @return 1 if zero; 0 if not zero
+ */
+int bigint_cr_is_zero_var( const uint_t *a, const int length ) {
+    uint_t temp = 0;
+    int i = length - 1;
+    int j;
+    for( ; i >= 0; i-- ) {
+        temp |= a[i];
+    }
+
+    // at this point, temp is zero if all bits are zero
+    temp = ~temp;
+    // at this point, temp is all ones if all bits of a[] are zero
+    
+    // if all bits are ored together, the LSB will be 1 if all bits are equal
+    j = 1;
+    while(j != (sizeof(uint_t) * 8)) {
+        temp &= (temp >> j);
+        j <<= 1;
+    }
+
+    return temp & 1;
+}

@@ -142,3 +142,16 @@ void gfp_cr_halving( gfp_t res, const gfp_t a, const gfp_prime_data_t *prime_dat
     carry &= do_addition;
     res[prime_data->words - 1] |= carry << ( BITS_PER_WORD - 1 );
 }
+
+/**
+ * Negate a element modulo p IN CONSTANT TIME
+ * @param a the gfp element to negate
+ * @param res the negated element
+ * @param prime_data the prime number data to reduce the result
+ */
+void gfp_cr_negate( gfp_t res, const gfp_t a, const gfp_prime_data_t *prime_data ) {
+    gfp_t temp;
+    bigint_subtract_var( temp, prime_data->prime, a, prime_data->words );
+    int is_zero = bigint_cr_is_zero_var(a, prime_data->words);
+    bigint_cr_select_2(res, temp, a, is_zero, prime_data->words);
+}
