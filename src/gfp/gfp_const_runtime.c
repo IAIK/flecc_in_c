@@ -123,3 +123,22 @@ void gfp_cr_mont_multiply_sos( gfp_t res, const gfp_t a, const gfp_t b, const gf
     carry = 1 + bigint_subtract_var(temp_buffer, temp_buffer + length, prime_data->prime, length);
     bigint_cr_select_2(res, temp_buffer + length, temp_buffer, global_carry | carry, prime_data->words);
 }
+
+/**
+ * divides a number by two and stores the result IN CONSTANT TIME
+ * if number is even, divide by 2
+ * if number is odd, add prime and divide by 2
+ * @param res the result
+ * @param a the operand to divide
+ * @param prime_data the prime number data to reduce the result
+ */
+void gfp_cr_halving( gfp_t res, const gfp_t a, const gfp_prime_data_t *prime_data ) {
+    uint_t do_addition = a[0] & 1;
+    gfp_t temp;
+    uint_t carry = bigint_add_var( temp, a, prime_data->prime, prime_data->words );
+    bigint_cr_select_2(res, a, temp, do_addition, prime_data->words);
+
+    bigint_shift_right_one_var( res, res, prime_data->words );
+    carry &= do_addition;
+    res[prime_data->words - 1] |= carry << ( BITS_PER_WORD - 1 );
+}

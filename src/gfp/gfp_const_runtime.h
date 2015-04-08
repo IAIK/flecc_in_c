@@ -17,6 +17,7 @@ extern "C" {
 void gfp_cr_add( gfp_t res, const gfp_t a, const gfp_t b, const gfp_prime_data_t *prime_data );
 void gfp_cr_subtract( gfp_t res, const gfp_t a, const gfp_t b, const gfp_prime_data_t *prime_data );
 void gfp_cr_mont_multiply_sos( gfp_t res, const gfp_t a, const gfp_t b, const gfp_prime_data_t *prime_data );
+void gfp_cr_halving( gfp_t res, const gfp_t a, const gfp_prime_data_t *prime_data );
 
 
 

@@ -73,7 +73,7 @@
 
 #define gfp_add( res, a, b ) gfp_cr_add( res, a, b, &param->prime_data )
 #define gfp_subtract( res, a, b ) gfp_cr_subtract( res, a, b, &param->prime_data )
-#define gfp_halving( res, a ) gfp_gen_halving( res, a, &param->prime_data )
+#define gfp_halving( res, a ) gfp_cr_halving( res, a, &param->prime_data )
 #define gfp_negate( res, a ) gfp_gen_negate( res, a, &param->prime_data )
 #define gfp_multiply( res, a, b ) gfp_mont_multiply( res, a, b, &param->prime_data )
 #define gfp_square( res, a ) gfp_mont_multiply( res, a, a, &param->prime_data )
