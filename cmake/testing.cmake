@@ -37,14 +37,9 @@ IF(NOT TARGET "check")
   add_dependencies("check" "suite")
 ENDIF()
 
-
-# copy the helper script into the build directory
-configure_file("${CMAKE_SOURCE_DIR}/cmake/run_with_stdin_pipe.sh"
-               "${CMAKE_BINARY_DIR}/run_with_stdin_pipe.sh" COPYONLY)
-
 # adds a test with a file for stdin
 macro(add_stdin_test name target stdinfile)
   add_test(NAME "${name}"
-           COMMAND "${CMAKE_BINARY_DIR}/run_with_stdin_pipe.sh"
+           COMMAND "${CMAKE_SOURCE_DIR}/cmake/run_with_stdin_pipe.sh"
                    $<TARGET_FILE:${target}> "${stdinfile}")
 endmacro()
