@@ -78,8 +78,6 @@ rbtree tree = NULL;
 long stats_num_pollard_rho_tests = 0;
 long stats_pollard_rho_tests_sum_iterations = 0;
 
-pthread_mutex_t stats_branch_additions_lock;
-
 pthread_mutex_t stats_loops_lock;
 volatile int stats_loops[LOOP_DETECTION_SIZE];
 volatile long stats_loops_sum = 0;
@@ -508,10 +506,6 @@ void pr_ecdlp_pollard_rho(gfp_t scalar, const eccp_point_affine_t *P, const eccp
         return;
     }
     if (pthread_mutex_init(&stats_loops_lock, NULL) != 0) {
-        printf("pthread_mutex_init failed\n");
-        return;
-    }
-    if (pthread_mutex_init(&stats_branch_additions_lock, NULL) != 0) {
         printf("pthread_mutex_init failed\n");
         return;
     }
