@@ -88,7 +88,7 @@ FILE(GLOB TestrunnerSources "test_ecdlp/*.c")
 ADD_EXECUTABLE("test_ecdlp" EXCLUDE_FROM_ALL ${TestrunnerSources})
 SET_TARGET_PROPERTIES("test_ecdlp" PROPERTIES
   COMPILE_FLAGS "-DARCHITECTURE=${ARCHITECTURE}")
-TARGET_LINK_LIBRARIES("test_ecdlp" "flecc_in_c")
+TARGET_LINK_LIBRARIES("test_ecdlp" "flecc_in_c" pthread)
 
 # generate a test target
 #-----------------------------------------
