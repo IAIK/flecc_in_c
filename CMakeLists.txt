@@ -79,7 +79,7 @@ FILE(GLOB TestrunnerSources "testrunner/*.c")
 ADD_EXECUTABLE("testrunner" EXCLUDE_FROM_ALL ${TestrunnerSources})
 SET_TARGET_PROPERTIES("testrunner" PROPERTIES
   COMPILE_FLAGS "-DARCHITECTURE=${ARCHITECTURE}")
-TARGET_LINK_LIBRARIES("testrunner" "flecc_in_c")
+TARGET_LINK_LIBRARIES("testrunner" "flecc_in_c" m) # m is the maths libs
 add_to_suite("testrunner")
 
 # build the test ecdlp
