@@ -559,6 +559,7 @@ void pr_ecdlp_pollard_rho(gfp_t scalar, const eccp_point_affine_t *P, const eccp
     pthread_mutex_destroy(&fifo_lock);
     pthread_mutex_destroy(&num_iterations_lock);
     pthread_mutex_destroy(&finished_computing_lock);
+    pthread_mutex_destroy(&stats_loops_lock);
     while(tree->root != NULL) {
         eccp_ecdlp_triple *to_free = tree->root->key;
         rbtree_delete(tree, tree->root->key, (compare_func)&pr_triple_compare);
