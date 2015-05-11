@@ -46,14 +46,14 @@
 #include "eccp_ecdlp.h"
 #include "utils/rand.h"
 #include "io/io_gen.h"
+#include "rbtree.h"
 
-#define NUM_BRANCHES 16
-#define NUM_THREADS 4
-#define DISTINGUISHING_BITS 6
+#define NUM_BRANCHES 128
+#define NUM_THREADS 8
+//#define DISTINGUISHING_BITS 20
 #define SIZE_FIFO 32
-#define MAX_DISTINGUISHED_POINTS 1000000
 #define USE_NEGATION_MAP 1
-#define LOOP_DETECTION_SIZE 100
+#define LOOP_DETECTION_SIZE 20
 #define DEBUG_INSERTION 0
 
 
@@ -69,17 +69,16 @@ volatile uint32_t finished_computing = 0;
 pthread_mutex_t finished_computing_lock;
 pthread_mutex_t num_iterations_lock;
 long stats_num_iterations = 0;
-eccp_ecdlp_triple* distinguished_triples[MAX_DISTINGUISHED_POINTS];
 long stats_num_distinguished_triples = 0;
 long stats_num_discarded_triples = 0;
 eccp_point_affine_t *globalP, *globalQ;
 eccp_parameters_t *param = 0;
+rbtree tree = NULL;
 
 long stats_num_pollard_rho_tests = 0;
 long stats_pollard_rho_tests_sum_iterations = 0;
 
 pthread_mutex_t stats_branch_additions_lock;
-long stats_num_branch_additions = 0;
 
 pthread_mutex_t stats_loops_lock;
 volatile int stats_loops[LOOP_DETECTION_SIZE];
@@ -142,6 +141,15 @@ void pr_triple_copy(eccp_ecdlp_triple *dest, const eccp_ecdlp_triple *src) {
 }
 
 /**
+ * Compares two triples.
+ * @param dest
+ * @param src
+ */
+int pr_triple_compare(eccp_ecdlp_triple *left, const eccp_ecdlp_triple *right) {
+    return eccp_affine_point_compare(&left->R, &right->R, param);
+}
+
+/**
  * Double the Point
  */
 void pr_triple_double(eccp_ecdlp_triple *triple) {
@@ -166,9 +174,6 @@ void pr_triple_add(eccp_ecdlp_triple *res, const eccp_ecdlp_triple *opa, const e
  */
 void pr_triple_add_branch_index(eccp_ecdlp_triple *triple, int index) {
     pr_triple_add(triple, triple, &branches[index]);
-    pthread_mutex_lock(&stats_branch_additions_lock);
-    stats_num_branch_additions++;
-    pthread_mutex_unlock(&stats_branch_additions_lock);
 }
 
 /**
@@ -225,12 +230,12 @@ void pr_triple_generate(eccp_ecdlp_triple *to_comp) {
  */
 void print_loop_stats() {
     int j;
-    printf("loop detected %u %ld %ld --", stats_loops_max, stats_num_branch_additions, stats_num_distinguished_triples);
+    printf("loop detected %u %ld %ld --", stats_loops_max, stats_num_iterations, stats_num_distinguished_triples);
     for(j=0; j <= stats_loops_max; j++) {
         printf(" %u", stats_loops[j]);
     }
     printf("-- ");
-    double r = (double)stats_num_branch_additions/(double)stats_loops[1];
+    double r = (double)stats_num_iterations/(double)stats_loops[1];
     printf("%.1f ", r);
 
     for(j=2; j <= stats_loops_max; j++) {
@@ -260,14 +265,11 @@ int pr_triple_loop_detection(eccp_ecdlp_triple *triple, eccp_ecdlp_triple_loop_d
             }
 */
         if(eccp_affine_point_compare(&loop_detection->triple[index].R, &triple->R, param) == 0) {
-#if (DEBUG_INSERTION == 1)
-            printf("WARNING: loop detected\n");
-#endif
             if(bigint_compare_var(loop_detection->triple[index].a, triple->a, param->order_n_data.words) != 0) {
                 if(bigint_compare_var(loop_detection->triple[index].b, triple->b, param->order_n_data.words) != 0) {
                     printf("WARNING: loop falsely detected ... solution found\n");
-//                    pr_send_to_master(&loop_detection->triple[index]);
-//                    pr_send_to_master(triple);
+                    pr_send_to_master(&loop_detection->triple[index]);
+                    pr_send_to_master(triple);
                 } else {
                     printf("WARNING: loop falsely detected\n");
                 }
@@ -325,6 +327,7 @@ int pr_triple_loop_detection(eccp_ecdlp_triple *triple, eccp_ecdlp_triple_loop_d
  * @return 1 if distinguished
  */
 int pr_triple_is_distinguished(const eccp_ecdlp_triple *triple) {
+    int DISTINGUISHING_BITS = param->order_n_data.bits / 4;
     if (bigint_get_msb_var(triple->R.x, param->prime_data.words) < (param->prime_data.bits - DISTINGUISHING_BITS)) {
         return 1;
     }
@@ -389,8 +392,8 @@ void pr_get_latest_point(eccp_ecdlp_triple *computed) {
  * @param scalar if a collision is found, the scalar is computed
  */
 void pr_add_tree(eccp_ecdlp_triple *to_insert, gfp_t scalar) {
-    int j = 0;
     gfp_t temp1, temp2;
+    eccp_ecdlp_triple *found;
 
     if (to_insert->R.identity == 1) {
         printf("WARNING(pr_add_tree): Point is identity\n");
@@ -405,36 +408,37 @@ void pr_add_tree(eccp_ecdlp_triple *to_insert, gfp_t scalar) {
         return;
     }
 
-    // check for doubles 
-    for (j = 0; j < stats_num_distinguished_triples; j++) {
-        if (eccp_affine_point_compare(&to_insert->R, &distinguished_triples[j]->R, param) == 0) {
-            if (bigint_compare_var(to_insert->a, distinguished_triples[j]->a, param->order_n_data.words) == 0) {
-                // same point already in database --> discard it
-#if (DEBUG_INSERTION == 1)
-                printf("WARNING(pr_add_tree): discard some triple\n");
+    found = rbtree_lookup(tree, to_insert, (compare_func)&pr_triple_compare);
+    if(found != NULL) {
+        if (bigint_compare_var(to_insert->a, found->a, param->order_n_data.words) == 0) {
+            // same point already in database --> discard it
+#if (1 == 0)
+            printf("WARNING(pr_add_tree): discard some triple\n");
 #endif
-                stats_num_discarded_triples++;
-                return;
-            }
-#if (DEBUG_INSERTION == 1)
-            printf("INFO(pr_add_tree): found solution\n");
-#endif
-            gfp_gen_subtract(temp1, to_insert->b, distinguished_triples[j]->b, &param->order_n_data);
-            gfp_binary_euclidean_inverse(temp2, temp1, &param->order_n_data);
-            gfp_gen_subtract(temp1, distinguished_triples[j]->a, to_insert->a, &param->order_n_data);
-            gfp_mult_two_mont(scalar, temp1, temp2, &param->order_n_data);
-
-            finished_computing = 1;
-            pthread_mutex_unlock(&finished_computing_lock);
-            break;
+            stats_num_discarded_triples++;
+            return;
         }
+#if (DEBUG_INSERTION == 1)
+        printf("INFO(pr_add_tree): found solution\n");
+#endif
+        gfp_gen_subtract(temp1, to_insert->b, found->b, &param->order_n_data);
+        gfp_binary_euclidean_inverse(temp2, temp1, &param->order_n_data);
+        gfp_gen_subtract(temp1, found->a, to_insert->a, &param->order_n_data);
+        gfp_mult_two_mont(scalar, temp1, temp2, &param->order_n_data);
+
+        finished_computing = 1;
+        pthread_mutex_unlock(&finished_computing_lock);
     }
+    
+    stats_num_distinguished_triples++;
+    rbtree_insert(tree, to_insert, to_insert, (compare_func)&pr_triple_compare);
 #if (DEBUG_INSERTION == 1)
     pthread_mutex_lock(&num_iterations_lock);
-    printf("inserted %ld %ld %ld\n", stats_num_distinguished_triples, stats_num_iterations, stats_num_branch_additions);
+    if(stats_num_distinguished_triples % 100 == 0) {
+        printf("INFO(inserted %ld %ld)\n", stats_num_distinguished_triples, stats_num_iterations);
+    }
     pthread_mutex_unlock(&num_iterations_lock);
 #endif
-    distinguished_triples[stats_num_distinguished_triples++] = to_insert;
 }
 
 /**
@@ -457,12 +461,20 @@ void *pr_attack_thread(void *_to_comp_) {
 #if (USE_NEGATION_MAP == 1)
         pr_triple_negation_map(to_comp);
 #endif
+
+        if(local_iterations >= 10000) {
+            pthread_mutex_lock(&num_iterations_lock);
+            stats_num_iterations += local_iterations;
+            local_iterations = 0;
+            pthread_mutex_unlock(&num_iterations_lock);
+        }
     }
 
-    pthread_mutex_unlock(&finished_computing_lock);
     pthread_mutex_lock(&num_iterations_lock);
     stats_num_iterations += local_iterations;
     pthread_mutex_unlock(&num_iterations_lock);
+
+    pthread_mutex_unlock(&finished_computing_lock);
     pthread_exit(NULL);
 }
 
@@ -522,12 +534,12 @@ void pr_ecdlp_pollard_rho(gfp_t scalar, const eccp_point_affine_t *P, const eccp
     fifo_size = 0;
     fifo_read_index = 0;
     fifo_write_index = 0;
-    stats_num_branch_additions = 0;
     stats_loops_max = 0;
     stats_loops_sum = 0;
     for(j = 0; j < LOOP_DETECTION_SIZE; j++) {
         stats_loops[j] = 0;
     }
+    tree = rbtree_create();
     
     for (j = 0; j < NUM_THREADS; j++) {
         pr_triple_generate(&computing[j]);
@@ -553,9 +565,12 @@ void pr_ecdlp_pollard_rho(gfp_t scalar, const eccp_point_affine_t *P, const eccp
     pthread_mutex_destroy(&fifo_lock);
     pthread_mutex_destroy(&num_iterations_lock);
     pthread_mutex_destroy(&finished_computing_lock);
-    for (j = 0; j < stats_num_distinguished_triples; j++) {
-        free(distinguished_triples[j]);
+    while(tree->root != NULL) {
+        eccp_ecdlp_triple *to_free = tree->root->key;
+        rbtree_delete(tree, tree->root->key, (compare_func)&pr_triple_compare);
+        free(to_free);
     }
+    free(tree);
     
     // verify result
     eccp_jacobian_point_multiply_L2R_NAF(&temp, P, scalar, param);
@@ -563,7 +578,7 @@ void pr_ecdlp_pollard_rho(gfp_t scalar, const eccp_point_affine_t *P, const eccp
         printf("ERROR(pr_ecdlp_pollard_rho): resulting scalar verification failed\n");
     }
 
-    printf("%ld iterations, %ld points, %ld discarded, %ld loops, %ld additions\n", stats_num_iterations, stats_num_distinguished_triples, stats_num_discarded_triples, stats_loops_sum, stats_num_branch_additions);
+    printf("%ld iterations, %ld points, %ld discarded, %ld loops\n", stats_num_iterations, stats_num_distinguished_triples, stats_num_discarded_triples, stats_loops_sum);
     stats_pollard_rho_tests_sum_iterations += stats_num_iterations;
     stats_num_pollard_rho_tests++;
     if(stats_num_pollard_rho_tests > 0) {

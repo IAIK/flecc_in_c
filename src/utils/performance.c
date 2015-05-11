@@ -42,7 +42,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#define NUM_ITERATIONS 1000
+#define NUM_ITERATIONS 10000
 
 /**
  * Platform dependent function that returns a cycle counter
@@ -129,7 +129,7 @@ void performance_test_gfp_mul(eccp_parameters_t *param) {
         stop_time = perf_get_cycle_counter();
         runtime[run_number] = stop_time - start_time;
     }
-#if 0
+#if 1
     for(run_number = 0; run_number < NUM_ITERATIONS; run_number++) {
         printf("%lu\n", runtime[run_number]);
     }

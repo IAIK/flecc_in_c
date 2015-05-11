@@ -6,6 +6,9 @@ SET(VERSION_MAJOR "1")
 SET(VERSION_MINOR "0")
 SET(VERSION_PATCH "0")
 
+#enable Assembler support
+ENABLE_LANGUAGE(ASM)
+
 SET(DEFAULT_BUILD_TYPE MinSizeRel)
 
 SET(DEFAULT_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/static")
@@ -54,7 +57,7 @@ INCLUDE(CPack)
 
 # build the flecc_in_c library
 #-----------------------------------------
-FILE(GLOB_RECURSE FleccLibSources "src/*.c")
+FILE(GLOB_RECURSE FleccLibSources "src/*.c" "src/*.S")
 ADD_LIBRARY("flecc_in_c" ${sourceFile} ${FleccLibSources})
 SET_TARGET_PROPERTIES("flecc_in_c" PROPERTIES
         COMPILE_FLAGS "-DARCHITECTURE=${ARCHITECTURE}")

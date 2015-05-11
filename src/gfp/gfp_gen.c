@@ -137,6 +137,7 @@ void gfp_reduce( gfp_t a, const gfp_prime_data_t *prime_data ) {
 
 /**
  * Binary euclidean inversion algorithm. Alg. 2.22 in Guide to ECC.
+ * Note that this algorithm does only guarantee to work for prime fields!
  * @param result the inverted number
  * @param to_invert the number to invert
  * @param prime_data the prime number data to reduce the result
@@ -147,6 +148,10 @@ void gfp_binary_euclidean_inverse( gfp_t result, const gfp_t to_invert, const gf
     gfp_t x1;
     gfp_t x2;
     int cmp1, cmp2, carry;
+
+    if(bigint_is_zero_var(to_invert ,prime_data->words))
+      return;
+    
     bigint_copy_var(u, to_invert, prime_data->words);
     bigint_copy_var(v, prime_data->prime, prime_data->words);
     bigint_clear_var(x1, prime_data->words); x1[0] = 1;

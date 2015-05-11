@@ -202,9 +202,9 @@ void bigint_shift_left_var( uint_t *res, const uint_t *a, const int left, const 
 
 /**
  * Shifts a biginteger to the right
+ * @param res the destination big integer
  * @param a the data to shift
  * @param right the number of bits to shift
- * @param destination big integer
  * @param length number of words in a and res
  */
 void bigint_shift_right_var( uint_t *res, const uint_t *a, const int right, const int length ) {
