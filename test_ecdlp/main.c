@@ -97,6 +97,7 @@ int main(int argc, char** argv) {
     eccp_parameters_t param;
     eccp_point_affine_t P, Q;
     gfp_t scalar;
+    int j;
     init_param_itsec2012_30(&param);
 
     // disable buffering of stdout
@@ -109,7 +110,7 @@ int main(int argc, char** argv) {
     
     eccp_affine_point_copy(&P, &param.base_point, &param);
     
-    for(int j=0; j < 1000; j++) {
+    for(j=0; j < 1000; j++) {
         gfp_rand(scalar, &param.order_n_data);
         eccp_jacobian_point_multiply_L2R_NAF(&Q, &P, scalar, &param);
         

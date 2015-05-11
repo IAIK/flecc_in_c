@@ -496,10 +496,10 @@ void eccp_jacobian_point_multiply_L2R_NAF( eccp_point_affine_t *result, const ec
     eccp_point_projective_t result_projective;
     int bit, scalar_helper_size = WORDS_PER_BITS(param->order_n_data.bits + 1);
     
-    // compute NAF
-    bigint_clear_var(scalar_helper, WORDS_PER_BITS(MIN_BITS_PER_GFP+1));
+    // compute NAF (3 * scalar)
+    scalar_helper[scalar_helper_size - 1] = 0;
     bigint_copy_var(scalar_helper, scalar, param->order_n_data.words);
-    bigint_shift_left_var(scalar_helper, scalar_helper, 1, WORDS_PER_BITS(MIN_BITS_PER_GFP+1));
+    bigint_shift_left_var(scalar_helper, scalar_helper, 1, scalar_helper_size);
     scalar_helper[scalar_helper_size - 1] += bigint_add_var(scalar_helper, scalar_helper, scalar, param->order_n_data.words);
 
     // prepare points
@@ -507,7 +507,7 @@ void eccp_jacobian_point_multiply_L2R_NAF( eccp_point_affine_t *result, const ec
     eccp_affine_point_negate(&P_neg, P, param);
     
     bit = bigint_get_msb_var( scalar_helper, scalar_helper_size );
-    while( bit > 0 ) {
+    while( bit >= 0 ) {
         eccp_jacobian_point_double( &result_projective, &result_projective, param );
         if( (bigint_test_bit_var( scalar_helper, bit, scalar_helper_size ) == 1) && 
             (bigint_test_bit_var( scalar, bit, param->order_n_data.words ) == 0) ) {
