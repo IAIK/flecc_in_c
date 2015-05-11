@@ -395,14 +395,17 @@ void pr_add_tree(eccp_ecdlp_triple *to_insert, gfp_t scalar) {
 
     if (to_insert->R.identity == 1) {
         printf("WARNING(pr_add_tree): Point is identity\n");
+	free(to_insert);
         return;
     }
     if (!eccp_affine_point_is_valid(&to_insert->R, param)) {
         printf("WARNING(pr_add_tree): Point is not valid\n");
+	free(to_insert);
         return;
     }
     if (!pr_triple_is_valid(to_insert)) {
         printf("WARNING(pr_add_tree): Triple is not valid\n");
+	free(to_insert);
         return;
     }
 
@@ -414,6 +417,7 @@ void pr_add_tree(eccp_ecdlp_triple *to_insert, gfp_t scalar) {
             printf("WARNING(pr_add_tree): discard some triple\n");
 #endif
             stats_num_discarded_triples++;
+	    free(to_insert);
             return;
         }
 #if (DEBUG_INSERTION == 1)
@@ -426,6 +430,8 @@ void pr_add_tree(eccp_ecdlp_triple *to_insert, gfp_t scalar) {
 
         finished_computing = 1;
         pthread_mutex_unlock(&finished_computing_lock);
+	free(to_insert);
+	return;
     }
     
     stats_num_distinguished_triples++;
@@ -450,7 +456,7 @@ void *pr_attack_thread(void *_to_comp_) {
     eccp_ecdlp_triple *to_comp = (eccp_ecdlp_triple*) _to_comp_;
 
     loop_detection.index = 0;
-    loop_detection.size = LOOP_DETECTION_SIZE;
+    loop_detection.size = 0;
     
     while (pthread_mutex_trylock(&finished_computing_lock) != 0) {
         local_iterations += pr_triple_loop_detection(to_comp, &loop_detection) + 1;
