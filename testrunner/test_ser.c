@@ -164,6 +164,64 @@ void read_eccp_affine_point( char *buffer,
 }
 
 /**
+ * Reads parameters from the default input source. 
+ * @param buffer the buffer to be used
+ * @param buf_length the length of the buffer to be used
+ * @param param the to-be-initialized elliptic curve parameters
+ */
+void read_elliptic_curve_parameters (char *buffer, const int buf_length, eccp_parameters_t *param) {
+    // 1. name of curve as string (discarded)
+    io_read(buffer, buf_length);
+
+    // 2. number of bits of prime field
+    read_bigint(buffer, buf_length, &param->prime_data.bits, WORDS_PER_BITS(32));
+    if(param->prime_data.bits > BITS_PER_GFP) {
+        return;
+    }
+    param->prime_data.words = WORDS_PER_BITS(param->prime_data.bits);
+    param->prime_data.montgomery_domain = 1;
+    
+    // 3. init the prime field
+    read_bigint(buffer, buf_length, param->prime_data.prime, param->prime_data.words);
+    gfp_mont_compute_R( param->prime_data.gfp_one, &( param->prime_data ) );
+    gfp_mont_compute_R_squared( param->prime_data.r_squared, &( param->prime_data ) );
+    param->prime_data.n0 = gfp_mont_compute_n0( &( param->prime_data ) );
+
+    // 4. number of bits of group order
+    read_bigint(buffer, buf_length, &param->order_n_data.bits, WORDS_PER_BITS(32));
+    if(param->order_n_data.bits > BITS_PER_GFP) {
+        return;
+    }
+    param->order_n_data.words = WORDS_PER_BITS(param->order_n_data.bits);
+    param->order_n_data.montgomery_domain = 0;
+    
+    // 5. init the prime field for the group order
+    read_bigint(buffer, buf_length, param->order_n_data.prime, param->order_n_data.words);
+    gfp_mont_compute_R( param->order_n_data.gfp_one, &( param->order_n_data ) );
+    gfp_mont_compute_R_squared( param->order_n_data.r_squared, &( param->order_n_data ) );
+    param->order_n_data.n0 = gfp_mont_compute_n0( &( param->order_n_data ) );
+
+    // 6. elliptic curve parameters
+    read_gfp(buffer, buf_length, param->param_a, &param->prime_data, 1);
+    read_gfp(buffer, buf_length, param->param_b, &param->prime_data, 1);
+    
+    // 7. the co-factor
+    read_bigint(buffer, buf_length, &param->h, WORDS_PER_BITS(32));
+    
+    // 8. the base point
+    read_gfp(buffer, buf_length, param->base_point.x, &param->prime_data, 1);
+    read_gfp(buffer, buf_length, param->base_point.y, &param->prime_data, 1);
+    param->base_point.identity = 0;
+
+    // 9. finalize
+    param->curve_type = CUSTOM;
+    param->eccp_mul = &eccp_protected_point_multiply;
+    param->eccp_mul_base_point = NULL;
+    param->base_point_precomputed_table = NULL;
+    param->base_point_precomputed_table_width = 0;
+}
+
+/**
  * Extracts the test_id from the read buffer and writes it to a pre-allocated
  * memory location.
  * @param test_id the destination for the test_id
@@ -197,9 +255,8 @@ unsigned test_ser() {
     uint_t bi_var_b[WORDS_PER_GFP];
     uint_t bi_var_c[2 * WORDS_PER_GFP];
     uint_t bi_var_expected[2 * WORDS_PER_GFP];
-    curve_type_t curve;
     eccp_parameters_t curve_params;
-    eccp_parameters_t *param;
+    eccp_parameters_t *param = &curve_params;
     int length;
 
     eccp_point_affine_t ecaff_var_a;
@@ -211,9 +268,12 @@ unsigned test_ser() {
     eccp_point_projective_t ecproj_var_b;
     eccp_point_projective_t ecproj_var_c;
 
-    curve = read_curve_type( buffer, READ_BUFFER_SIZE );
-    param_load( &curve_params, curve );
-    param = &curve_params;
+    curve_params.curve_type = read_curve_type( buffer, READ_BUFFER_SIZE );
+    if(curve_params.curve_type == CUSTOM) {
+        read_elliptic_curve_parameters(buffer, READ_BUFFER_SIZE, param);
+    } else {
+        param_load( param, curve_params.curve_type );
+    }
     length = curve_params.prime_data.words;
 
     eccp_point_affine_t comb_table[JCB_COMB_WOZ_TBL_SIZE(TBL_WIDTH)];
