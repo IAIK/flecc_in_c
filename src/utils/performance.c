@@ -42,7 +42,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#define NUM_ITERATIONS 10000
+#define NUM_ITERATIONS 1000
 
 /**
  * Platform dependent function that returns a cycle counter

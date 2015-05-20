@@ -23,16 +23,14 @@ inline void bigint_copy( uint_t *dest, const uint_t *source ) {
 
 inline int bigint_add( uint_t *res, const uint_t *a, const uint_t *b ) {
     ulong_t temp;
-    uint_t a0 = a[0], a1 = a[1], a2 = a[2];
-    uint_t b0 = b[0], b1 = b[1], b2 = b[2];
     
-    temp = a0 + b0;
-    res[0] = temp;
-    temp = a1 + b1 + (temp >> BITS_PER_WORD);
-    res[1] = temp;
-    temp = a2 + b2 + (temp >> BITS_PER_WORD);
-    res[2] = temp;
-    return temp >> BITS_PER_WORD;
+    temp = (ulong_t)a[0] + (ulong_t)b[0];
+    res[0] = temp; temp >>= BITS_PER_WORD;
+    temp += (ulong_t)a[1] + (ulong_t)b[1];
+    res[1] = temp; temp >>= BITS_PER_WORD;
+    temp += (ulong_t)a[2] + (ulong_t)b[2];
+    res[2] = temp; temp >>= BITS_PER_WORD;
+    return temp;
 }
 
 inline int bigint_subtract( uint_t *res, const uint_t *a, const uint_t *b ) {
@@ -40,25 +38,25 @@ inline int bigint_subtract( uint_t *res, const uint_t *a, const uint_t *b ) {
     uint_t a0 = a[0], a1 = a[1], a2 = a[2];
     uint_t b0 = b[0], b1 = b[1], b2 = b[2];
     
-    temp = a0 - b0;
-    res[0] = temp;
-    temp = a1 - b1 + (temp >> BITS_PER_WORD);
+    temp = (slong_t)a0 - (slong_t)b0;
+    res[0] = temp; 
+    temp = (slong_t)a1 - (slong_t)b1 + (temp >> BITS_PER_WORD);
     res[1] = temp;
-    temp = a2 - b2 + (temp >> BITS_PER_WORD);
+    temp = (slong_t)a2 - (slong_t)b2 + (temp >> BITS_PER_WORD);
     res[2] = temp;
     return temp >> BITS_PER_WORD;
 }
 
-inline int bigint_compare( const uint_t *a, const uint_t *b ) {
+inline slong_t bigint_compare( const uint_t *a, const uint_t *b ) {
     slong_t temp;
     
-    temp = a[2] - b[2];
+    temp = (slong_t)a[2] - b[2];
     if(temp != 0)
         return temp;
-    temp = a[1] - b[1];
+    temp = (slong_t)a[1] - b[1];
     if(temp != 0)
         return temp;
-    temp = a[0] - b[0];
+    temp = (slong_t)a[0] - b[0];
     return temp;
 }
 
@@ -106,8 +104,8 @@ void gfp_opt_3_add( gfp_t res, const gfp_t a, const gfp_t b ) {
     if( carry ) {
         bigint_subtract( res, res, prime );
     } else {
-        if( bigint_compare( res, prime_data->prime ) >= 0 ) {
-            bigint_subtract( res, res, prime_data->prime );
+        if( bigint_compare( res, prime ) >= 0 ) {
+            bigint_subtract( res, res, prime );
         }
     }
 }
@@ -146,28 +144,28 @@ void gfp_opt_3_multiply( gfp_t res, const gfp_t a, const gfp_t b ) {
     c2 = product; product >>= BITS_PER_WORD;
     c3 = product;
     
-    product = (ulong_t)a1 * (ulong_t)b0 + c1;
+    product = (ulong_t)a1 * (ulong_t)b0 + (ulong_t)c1;
     c1 = product; product >>= BITS_PER_WORD;
-    product += (ulong_t)a1 * (ulong_t)b1 + c2;
+    product += (ulong_t)a1 * (ulong_t)b1 + (ulong_t)c2;
     c2 = product; product >>= BITS_PER_WORD;
-    product += (ulong_t)a1 * (ulong_t)b2 + c3;
+    product += (ulong_t)a1 * (ulong_t)b2 + (ulong_t)c3;
     c3 = product; product >>= BITS_PER_WORD;
     c4 = product;
     
-    product = (ulong_t)a2 * (ulong_t)b0 + c2;
+    product = (ulong_t)a2 * (ulong_t)b0 + (ulong_t)c2;
     c2 = product; product >>= BITS_PER_WORD;
-    product += (ulong_t)a2 * (ulong_t)b1 + c3;
+    product += (ulong_t)a2 * (ulong_t)b1 + (ulong_t)c3;
     c3 = product; product >>= BITS_PER_WORD;
-    product += (ulong_t)a2 * (ulong_t)b2 + c4;
+    product += (ulong_t)a2 * (ulong_t)b2 + (ulong_t)c4;
     c4 = product; product >>= BITS_PER_WORD;
     c5 = product;
     
     temp = prime_data->n0 * c0;
-    product = (ulong_t)temp * (ulong_t)p0 + c0;
+    product = (ulong_t)temp * (ulong_t)p0 + (ulong_t)c0;
     product >>= BITS_PER_WORD; // c0 = product;
-    product += (ulong_t)temp * (ulong_t)p1 + c1;
+    product += (ulong_t)temp * (ulong_t)p1 + (ulong_t)c1;
     c1 = product; product >>= BITS_PER_WORD;
-    product += (ulong_t)temp * (ulong_t)p2 + c2;
+    product += (ulong_t)temp * (ulong_t)p2 + (ulong_t)c2;
     c2 = product; product >>= BITS_PER_WORD;
     product += c3;
     c3 = product; product >>= BITS_PER_WORD;
@@ -178,11 +176,11 @@ void gfp_opt_3_multiply( gfp_t res, const gfp_t a, const gfp_t b ) {
     global_carry = product;
     
     temp = prime_data->n0 * c1;
-    product = (ulong_t)temp * (ulong_t)p0 + c1;
+    product = (ulong_t)temp * (ulong_t)p0 + (ulong_t)c1;
     product >>= BITS_PER_WORD; // c1 = product;
-    product += (ulong_t)temp * (ulong_t)p1 + c2;
+    product += (ulong_t)temp * (ulong_t)p1 + (ulong_t)c2;
     c2 = product; product >>= BITS_PER_WORD;
-    product += (ulong_t)temp * (ulong_t)p2 + c3;
+    product += (ulong_t)temp * (ulong_t)p2 + (ulong_t)c3;
     c3 = product; product >>= BITS_PER_WORD;
     product += c4;
     c4 = product; product >>= BITS_PER_WORD;
@@ -190,12 +188,12 @@ void gfp_opt_3_multiply( gfp_t res, const gfp_t a, const gfp_t b ) {
     c5 = product; product >>= BITS_PER_WORD;
     global_carry += product;
     
-    temp = prime_data->n0 * c1;
-    product = (ulong_t)temp * (ulong_t)p0 + c2;
+    temp = prime_data->n0 * c2;
+    product = (ulong_t)temp * (ulong_t)p0 + (ulong_t)c2;
     product >>= BITS_PER_WORD; // c2 = product;
-    product += (ulong_t)temp * (ulong_t)p1 + c3;
+    product += (ulong_t)temp * (ulong_t)p1 + (ulong_t)c3;
     c3 = product; product >>= BITS_PER_WORD;
-    product += (ulong_t)temp * (ulong_t)p2 + c4;
+    product += (ulong_t)temp * (ulong_t)p2 + (ulong_t)c4;
     c4 = product; product >>= BITS_PER_WORD;
     product += c5;
     c5 = product; product >>= BITS_PER_WORD;

@@ -276,6 +276,7 @@ unsigned test_ser() {
     }
     length = curve_params.prime_data.words;
     
+    // TODO: BEAUTIFY!!!
     gfp_opt_3_init(&param->prime_data);
 
     eccp_point_affine_t comb_table[JCB_COMB_WOZ_TBL_SIZE(TBL_WIDTH)];

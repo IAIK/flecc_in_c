@@ -126,7 +126,7 @@ void gfp_mont_multiply_sos( gfp_t res, const gfp_t a, const gfp_t b, const gfp_p
  * @param a the number to invert (within the montgomery domain)
  * @param prime_data the used prime data needed to do the multiplication
  */
-void gfp_mont_inverse( gfp_t res, const gfp_t a, const gfp_prime_data_t *prime_data ) {
+void gfp_mont_inverse_binary( gfp_t res, const gfp_t a, const gfp_prime_data_t *prime_data ) {
     gfp_t u;
     gfp_t v;
     gfp_t x1;
