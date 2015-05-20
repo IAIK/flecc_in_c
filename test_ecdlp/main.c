@@ -98,7 +98,6 @@ int main(int argc, char** argv) {
     char buffer[READ_BUFFER_SIZE];
     eccp_point_affine_t P, Q;
     gfp_t scalar;
-    int j;
     eccp_parameters_t curve_params;
     eccp_parameters_t *param = &curve_params;
 
@@ -106,6 +105,9 @@ int main(int argc, char** argv) {
     setvbuf(stdout, NULL, _IONBF, 0);
     printf("ecdlp_test started\n");
 
+    srand(0);
+    printf("seed: %u\n", rand());
+    
     io_init( stdin, stdout );
     gfp_opt_3_init(&param->prime_data);
     read_elliptic_curve_parameters(buffer, READ_BUFFER_SIZE, param);

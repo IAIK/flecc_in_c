@@ -533,6 +533,8 @@ void pr_ecdlp_pollard_rho(gfp_t scalar, const eccp_point_affine_t *P, const eccp
     }
     tree = rbtree_create();
     
+    srand(time(NULL));
+    
     pr_triple_generate(&computing);
     
     performance_test_eccp_mul_(&computing);
