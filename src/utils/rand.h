@@ -40,6 +40,9 @@
 
 #include "../types.h"
 
+void srand1(unsigned int seed);
+int rand1();
+
 void bigint_rand_fipsXXX_set_seed( uint_t *seed, const int length );
 void bigint_rand_fipsXXX( uint_t *dest, const int length );
 

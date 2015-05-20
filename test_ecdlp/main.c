@@ -105,8 +105,7 @@ int main(int argc, char** argv) {
     setvbuf(stdout, NULL, _IONBF, 0);
     printf("ecdlp_test started\n");
 
-    srand(0);
-    printf("seed: %u\n", rand());
+    printf("seed: %u\n", rand1());
     
     io_init( stdin, stdout );
     gfp_opt_3_init(&param->prime_data);

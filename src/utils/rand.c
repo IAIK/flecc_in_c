@@ -39,6 +39,36 @@
 #include "rand.h"
 #include "../bi/bi.h"
 
+uint32_t state1 = 1;
+
+void srand1(unsigned int seed)
+{
+  state1 = seed;
+}
+
+/**                                                                                                                                                                                        
+ * The PRNG. It is initially seeded with 1.                                                                                                                                                
+ * @return a new random number                                                                                                                                                             
+ */
+int rand1()
+{
+  /*                                                                                                                                                                                       
+   * 32-bit Galois LFSR                                                                                                                                                                    
+   *                                                                                                                                                                                       
+   * We tap at bits 32,30,26,25                                                                                                                                                            
+   *                                                                                                                                                                                       
+   * See https://en.wikipedia.org/wiki/Linear_feedback_shift_register                                                                                                                      
+   */
+  uint32_t lsb = state1 & 1;
+  state1 >>= 1;
+  if (lsb == 1)
+  {
+    state1 ^= 0xA3000000u;
+  }
+
+  return state1 ^ (state1%123456) * 13357;
+}
+
 /**
  * Use the deterministic rand() function to initialize dest with random data
  * @param dest
@@ -47,7 +77,7 @@
 void bigint_rand_insecure_var( uint_t *dest, const int length ) {
     int word;
     for( word = 0; word < length; word++ ) {
-        *dest++ = rand();
+        *dest++ = rand1();
     }
 }
 
