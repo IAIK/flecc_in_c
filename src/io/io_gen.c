@@ -149,7 +149,8 @@ void io_sprint_bytes_var( char *buffer, const uint8_t *value, const int length )
 void io_print_bigint_var( const uint_t *value, const int length ) {
     char buffer[BYTES_PER_GFP * 4 + WORDS_PER_GFP * 2 + 10];
     bigint_print_var( buffer, value, length );
-    io_println( buffer );
+    io_print( buffer );
+    io_print( " ");
 }
 
 /**
@@ -182,5 +183,4 @@ void io_print_integer( const uint_t value ) {
 void io_print_affine_point( const eccp_point_affine_t *point, const eccp_parameters_t *param ) {
     io_print_bigint_var(point->x, param->prime_data.words);
     io_print_bigint_var(point->y, param->prime_data.words);
-    io_print_integer(point->identity);
 }

@@ -13,6 +13,7 @@ extern "C" {
 #endif
 
 #include "types.h"
+#include "test_ser.h"
 
 /**
  * aP + bQ
@@ -26,7 +27,7 @@ typedef struct _eccp_ecdlp_triple_ {
     eccp_point_affine_t R;
 } eccp_ecdlp_triple;
 
-void pr_add_tree(eccp_ecdlp_triple *to_insert, gfp_t scalar);
+void pr_add_tree(const eccp_ecdlp_triple *to_insert, gfp_t scalar);
 void pr_get_latest_point(eccp_ecdlp_triple *computed);
 void pr_send_to_master(const eccp_ecdlp_triple *comp);
 int pr_triple_is_distinguished(const eccp_ecdlp_triple *triple);

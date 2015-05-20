@@ -414,7 +414,6 @@ void bigint_print_var( char *buffer, const uint_t *to_print, const int length ) 
         *buffer++ = lookup[( to_print[index] >> 8 ) & 0xF];
         *buffer++ = lookup[( to_print[index] >> 4 ) & 0xF];
         *buffer++ = lookup[to_print[index] & 0xF];
-        *buffer++ = ' ';
     }
 #endif
 #if BYTES_PER_WORD == 8

@@ -89,34 +89,37 @@ int param_is_valid(const eccp_parameters_t *param) {
     }
     return 1;
 }
+#define READ_BUFFER_SIZE 10000
 
 /*
  * 
  */
 int main(int argc, char** argv) {
-    eccp_parameters_t param;
+    char buffer[READ_BUFFER_SIZE];
     eccp_point_affine_t P, Q;
     gfp_t scalar;
     int j;
-    init_param_itsec2012_30(&param);
+    eccp_parameters_t curve_params;
+    eccp_parameters_t *param = &curve_params;
 
     // disable buffering of stdout
     setvbuf(stdout, NULL, _IONBF, 0);
-
     printf("ecdlp_test started\n");
+
     io_init( stdin, stdout );
-    if(param_is_valid(&param) == 0)
+    gfp_opt_3_init(&param->prime_data);
+    read_elliptic_curve_parameters(buffer, READ_BUFFER_SIZE, param);
+
+    if(param_is_valid(param) == 0)
         return -1;
+
+    read_gfp( buffer, READ_BUFFER_SIZE, Q.x, &param->prime_data, 1 );
+    read_gfp( buffer, READ_BUFFER_SIZE, Q.y, &param->prime_data, 1 );
+    Q.identity = 0;
     
-    eccp_affine_point_copy(&P, &param.base_point, &param);
-    
-    for(j=0; j < 1000; j++) {
-        gfp_rand(scalar, &param.order_n_data);
-        eccp_jacobian_point_multiply_L2R_NAF(&Q, &P, scalar, &param);
-        
-        bigint_clear_var(scalar, param.order_n_data.words);
-        pr_ecdlp_pollard_rho(scalar, &P, &Q, &param);
-    }
+    eccp_affine_point_copy(&P, &param->base_point, param);
+
+    pr_ecdlp_pollard_rho(scalar, &P, &Q, param);
     
     return (EXIT_SUCCESS);
 }

@@ -39,6 +39,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <math.h>
 
 #include "eccp/eccp.h"
 #include "gfp/gfp.h"
@@ -49,7 +50,6 @@
 #include "rbtree.h"
 
 #define NUM_BRANCHES 128
-#define NUM_THREADS 8
 //#define DISTINGUISHING_BITS 20
 #define SIZE_FIFO 32
 #define USE_NEGATION_MAP 1
@@ -58,13 +58,12 @@
 
 
 eccp_ecdlp_triple branches[NUM_BRANCHES];
-eccp_ecdlp_triple computing[NUM_THREADS];
+eccp_ecdlp_triple computing;
 eccp_ecdlp_triple fifo[SIZE_FIFO];
 uint32_t fifo_read_index = 0;
 uint32_t fifo_write_index = 0;
 uint32_t fifo_size = 0;
 pthread_mutex_t fifo_lock;
-pthread_t threads[NUM_THREADS];
 volatile uint32_t finished_computing = 0;
 pthread_mutex_t finished_computing_lock;
 pthread_mutex_t num_iterations_lock;
@@ -125,6 +124,7 @@ void pr_triple_print(const eccp_ecdlp_triple *triple) {
     io_print_affine_point(&triple->R, param);
     io_print_bigint_var(triple->a, param->order_n_data.words);
     io_print_bigint_var(triple->b, param->order_n_data.words);
+    io_print( "\n");
 }
 
 /**
@@ -338,7 +338,7 @@ int pr_triple_is_distinguished(const eccp_ecdlp_triple *triple) {
  */
 void pr_triple_send_if_distinguished(const eccp_ecdlp_triple *triple) {
     if (pr_triple_is_distinguished(triple) == 1) {
-        pr_send_to_master(triple);
+        pr_add_tree(triple, NULL);
     }
 }
 
@@ -389,53 +389,24 @@ void pr_get_latest_point(eccp_ecdlp_triple *computed) {
  * @param to_insert
  * @param scalar if a collision is found, the scalar is computed
  */
-void pr_add_tree(eccp_ecdlp_triple *to_insert, gfp_t scalar) {
-    gfp_t temp1, temp2;
-    eccp_ecdlp_triple *found;
-
+void pr_add_tree(const eccp_ecdlp_triple *to_insert, gfp_t scalar) {
     if (to_insert->R.identity == 1) {
         printf("WARNING(pr_add_tree): Point is identity\n");
-	free(to_insert);
         return;
     }
     if (!eccp_affine_point_is_valid(&to_insert->R, param)) {
         printf("WARNING(pr_add_tree): Point is not valid\n");
-	free(to_insert);
         return;
     }
     if (!pr_triple_is_valid(to_insert)) {
         printf("WARNING(pr_add_tree): Triple is not valid\n");
-	free(to_insert);
         return;
     }
 
-    found = rbtree_lookup(tree, to_insert, (compare_func)&pr_triple_compare);
-    if(found != NULL) {
-        if (bigint_compare_var(to_insert->a, found->a, param->order_n_data.words) == 0) {
-            // same point already in database --> discard it
-#if (1 == 0)
-            printf("WARNING(pr_add_tree): discard some triple\n");
-#endif
-            stats_num_discarded_triples++;
-	    free(to_insert);
-            return;
-        }
-#if (DEBUG_INSERTION == 1)
-        printf("INFO(pr_add_tree): found solution\n");
-#endif
-        gfp_gen_subtract(temp1, to_insert->b, found->b, &param->order_n_data);
-        gfp_binary_euclidean_inverse(temp2, temp1, &param->order_n_data);
-        gfp_gen_subtract(temp1, found->a, to_insert->a, &param->order_n_data);
-        gfp_mult_two_mont(scalar, temp1, temp2, &param->order_n_data);
-
-        finished_computing = 1;
-        pthread_mutex_unlock(&finished_computing_lock);
-	free(to_insert);
-	return;
-    }
-    
     stats_num_distinguished_triples++;
-    rbtree_insert(tree, to_insert, to_insert, (compare_func)&pr_triple_compare);
+    
+    pr_triple_print(to_insert);
+    
 #if (DEBUG_INSERTION == 1)
     pthread_mutex_lock(&num_iterations_lock);
     if(stats_num_distinguished_triples % 100 == 0) {
@@ -458,7 +429,7 @@ void *pr_attack_thread(void *_to_comp_) {
     loop_detection.index = 0;
     loop_detection.size = 0;
     
-    while (pthread_mutex_trylock(&finished_computing_lock) != 0) {
+    while (1 == 1) {
         local_iterations += pr_triple_loop_detection(to_comp, &loop_detection) + 1;
         pr_triple_send_if_distinguished(to_comp);
         pr_triple_add_branch(to_comp);
@@ -466,20 +437,65 @@ void *pr_attack_thread(void *_to_comp_) {
         pr_triple_negation_map(to_comp);
 #endif
 
-        if(local_iterations >= 10000) {
-            pthread_mutex_lock(&num_iterations_lock);
-            stats_num_iterations += local_iterations;
-            local_iterations = 0;
-            pthread_mutex_unlock(&num_iterations_lock);
+        if(stats_num_distinguished_triples % 100 == 0) {
+//            printf("INFO(inserted %ld %ld)\n", stats_num_distinguished_triples, local_iterations);
         }
     }
+}
 
-    pthread_mutex_lock(&num_iterations_lock);
-    stats_num_iterations += local_iterations;
-    pthread_mutex_unlock(&num_iterations_lock);
+#define NUM_ITERATIONS 1000
+extern unsigned long perf_get_cycle_counter();
 
-    pthread_mutex_unlock(&finished_computing_lock);
-    pthread_exit(NULL);
+void performance_print_statistics_(unsigned long *runtime) {
+    unsigned long sum, min, max, templ;
+    int run_number;
+    double temp;
+    double average, stddev;
+
+    sum = max = min = runtime[0];
+    for(run_number = 1; run_number < NUM_ITERATIONS; run_number++) {
+        templ = runtime[run_number];
+        sum += templ;
+        if(max < templ)
+            max = templ;
+        if(min > templ)
+            min = templ;
+    }
+    average = (double)sum/(double)NUM_ITERATIONS;
+
+    stddev = 0.0;
+    for(run_number = 0; run_number < NUM_ITERATIONS; run_number++) {
+        temp = (double)runtime[run_number] - average;
+        stddev += temp * temp;
+    }
+    stddev /= (double)NUM_ITERATIONS;
+    stddev = sqrt(stddev);
+    
+    printf("min(%lu) avg(%.2f) max(%lu) stddev(%.2f %.2f%%)\n", min, average, max, stddev, stddev/average*100.0);
+}
+
+
+void performance_test_eccp_mul_(eccp_ecdlp_triple *computing) {
+    unsigned long runtime[NUM_ITERATIONS];
+    int run_number;
+    unsigned long start_time, stop_time;
+    
+    for(run_number = 0; run_number < 10000; run_number++) {
+        pr_triple_add_branch(computing);
+    }
+
+    for(run_number = 0; run_number < NUM_ITERATIONS; run_number++) {
+        start_time = perf_get_cycle_counter();
+        pr_triple_add_branch(computing);
+        stop_time = perf_get_cycle_counter();
+        runtime[run_number] = stop_time - start_time;
+    }
+#if 0
+    for(run_number = 0; run_number < NUM_ITERATIONS; run_number++) {
+        printf("%lu\n", runtime[run_number]);
+    }
+#endif
+    performance_print_statistics_(runtime);
 }
 
 /**
@@ -490,8 +506,6 @@ void *pr_attack_thread(void *_to_comp_) {
  * @param param param elliptic curve parameters
  */
 void pr_ecdlp_pollard_rho(gfp_t scalar, const eccp_point_affine_t *P, const eccp_point_affine_t *Q, const eccp_parameters_t *local_param) {
-    eccp_point_affine_t temp;
-    eccp_ecdlp_triple *latest;
     int j;
 
     srand(time(NULL));
@@ -499,34 +513,12 @@ void pr_ecdlp_pollard_rho(gfp_t scalar, const eccp_point_affine_t *P, const eccp
     globalQ = (eccp_point_affine_t*) Q;
     param = (eccp_parameters_t*) local_param;
 
-    if (pthread_mutex_init(&fifo_lock, NULL) != 0) {
-        printf("pthread_mutex_init failed\n");
-        return;
-    }
-    if (pthread_mutex_init(&num_iterations_lock, NULL) != 0) {
-        printf("pthread_mutex_init failed\n");
-        return;
-    }
-    if (pthread_mutex_init(&finished_computing_lock, NULL) != 0) {
-        printf("pthread_mutex_init failed\n");
-        return;
-    }
-    if (pthread_mutex_init(&stats_loops_lock, NULL) != 0) {
-        printf("pthread_mutex_init failed\n");
-        return;
-    }
-    // this mutex is only unlocked when we want the client threads to finish
-    pthread_mutex_lock(&finished_computing_lock);
-    
     // Prepare all branches
     for (j = 0; j < NUM_BRANCHES; j++) {
         pr_triple_generate(&branches[j]);
     }
 
     /* Initialize and set thread detached attribute */
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
     finished_computing = 0;
     stats_num_distinguished_triples = 0;
     stats_num_iterations = 0;
@@ -541,49 +533,10 @@ void pr_ecdlp_pollard_rho(gfp_t scalar, const eccp_point_affine_t *P, const eccp
     }
     tree = rbtree_create();
     
-    for (j = 0; j < NUM_THREADS; j++) {
-        pr_triple_generate(&computing[j]);
-
-        // start the thread ...
-        if (pthread_create(&threads[j], &attr, &pr_attack_thread, (void *) &computing[j]) != 0) {
-            printf("pthread_create failed\n");
-        }
-    }
-
-    while (finished_computing == 0) {
-        latest = malloc(sizeof (eccp_ecdlp_triple));
-//        pr_triple_generate(latest);
-        pr_get_latest_point(latest);
-        pr_add_tree(latest, scalar);
-    }
-
-    // do some cleaning up
-    pthread_attr_destroy(&attr);
-    for (j = 0; j < NUM_THREADS; j++) {
-        pthread_join(threads[j], NULL);
-    }
-    pthread_mutex_destroy(&fifo_lock);
-    pthread_mutex_destroy(&num_iterations_lock);
-    pthread_mutex_destroy(&finished_computing_lock);
-    pthread_mutex_destroy(&stats_loops_lock);
-    while(tree->root != NULL) {
-        eccp_ecdlp_triple *to_free = tree->root->key;
-        rbtree_delete(tree, tree->root->key, (compare_func)&pr_triple_compare);
-        free(to_free);
-    }
-    free(tree);
+    pr_triple_generate(&computing);
     
-    // verify result
-    eccp_jacobian_point_multiply_L2R_NAF(&temp, P, scalar, param);
-    if(eccp_affine_point_compare(&temp, Q, param) != 0) {
-        printf("ERROR(pr_ecdlp_pollard_rho): resulting scalar verification failed\n");
-    }
+    performance_test_eccp_mul_(&computing);
 
-    printf("%ld iterations, %ld points, %ld discarded, %ld loops\n", stats_num_iterations, stats_num_distinguished_triples, stats_num_discarded_triples, stats_loops_sum);
-    stats_pollard_rho_tests_sum_iterations += stats_num_iterations;
-    stats_num_pollard_rho_tests++;
-    if(stats_num_pollard_rho_tests > 0) {
-        printf("average: %ld, %ld iterations\n", stats_pollard_rho_tests_sum_iterations / stats_num_pollard_rho_tests, stats_num_pollard_rho_tests);
-    }
+    pr_attack_thread(&computing);
 }
 
