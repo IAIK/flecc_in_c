@@ -1,6 +1,6 @@
 #!/bin/bash 
 
-export SSHPASS=~/Downloads/sshpass-1.05/sshpass
+export SSHPASS=../sshpass-1.05/sshpass
 
 echo "put *.res" > script
 echo "exit" >> script
