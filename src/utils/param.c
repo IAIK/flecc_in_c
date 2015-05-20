@@ -141,6 +141,8 @@ curve_type_t param_get_curve_type_from_name( const char *buffer , const int buff
         curve = SECP384R1;
     } else if( string_max_buffer_match( buffer, buffer_length, "secp521r1", 9 ) == 0 ) {
         curve = SECP521R1;
+    } else if( string_max_buffer_match( buffer, buffer_length, "custom", 6 ) == 0 ) {
+        curve = CUSTOM;
     }
 
     return curve;
@@ -153,12 +155,6 @@ curve_type_t param_get_curve_type_from_name( const char *buffer , const int buff
  * @param type the type of curve to be used
  */
 void param_load( eccp_parameters_t *param, const curve_type_t type ) {
-    param->curve_type = type;
-    param->eccp_mul = &eccp_protected_point_multiply;
-    param->eccp_mul_base_point = NULL;
-    param->base_point_precomputed_table = NULL;
-    param->base_point_precomputed_table_width = 0;
-    
     if( type == SECP192R1 ) {
         int bi_length = WORDS_PER_BITS( SECP192R1_PRIME_BITS );
 
@@ -329,5 +325,14 @@ void param_load( eccp_parameters_t *param, const curve_type_t type ) {
         bigint_copy_var( param->base_point.x, SECP521R1_BASE_X, bi_length );
         bigint_copy_var( param->base_point.y, SECP521R1_BASE_Y, bi_length );
         param->base_point.identity = 0;
+    } else {
+        memset(param, 0, sizeof(eccp_parameters_t));
     }
+    
+    param->curve_type = type;
+    param->eccp_mul = &eccp_protected_point_multiply;
+    param->eccp_mul_base_point = NULL;
+    param->base_point_precomputed_table = NULL;
+    param->base_point_precomputed_table_width = 0;
+    
 }
