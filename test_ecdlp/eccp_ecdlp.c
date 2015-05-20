@@ -479,6 +479,9 @@ void performance_test_eccp_mul_(eccp_ecdlp_triple *computing) {
     unsigned long runtime[NUM_ITERATIONS];
     int run_number;
     unsigned long start_time, stop_time;
+    eccp_ecdlp_triple_loop_detection loop_detection;
+    loop_detection.index = 0;
+    loop_detection.size = 0;
     
     for(run_number = 0; run_number < 10000; run_number++) {
         pr_triple_add_branch(computing);
@@ -486,7 +489,14 @@ void performance_test_eccp_mul_(eccp_ecdlp_triple *computing) {
 
     for(run_number = 0; run_number < NUM_ITERATIONS; run_number++) {
         start_time = perf_get_cycle_counter();
+#if 1
+        pr_triple_loop_detection(computing, &loop_detection);
+        pr_triple_send_if_distinguished(computing);
         pr_triple_add_branch(computing);
+        pr_triple_negation_map(computing);
+#else
+        pr_triple_add_branch(computing);
+#endif
         stop_time = perf_get_cycle_counter();
         runtime[run_number] = stop_time - start_time;
     }
