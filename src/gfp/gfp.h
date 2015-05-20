@@ -88,4 +88,25 @@
 
 #endif
 
+#if 1
+
+#include "gfp_opt_3.h"
+
+#undef gfp_add
+#undef gfp_subtract
+#undef gfp_multiply
+#undef gfp_inverse
+
+void gfp_opt_3_add( gfp_t res, const gfp_t a, const gfp_t b );
+void gfp_opt_3_subtract( gfp_t res, const gfp_t a, const gfp_t b );
+void gfp_opt_3_multiply( gfp_t res, const gfp_t a, const gfp_t b );
+void gfp_opt_3_inverse( gfp_t res, const gfp_t a );
+
+#define gfp_add( res, a, b ) gfp_opt_3_add( res, a, b )
+#define gfp_subtract( res, a, b ) gfp_opt_3_subtract( res, a, b )
+#define gfp_multiply( res, a, b ) gfp_opt_3_multiply( res, a, b )
+#define gfp_inverse( res, a ) gfp_opt_3_inverse( res, a )
+
+#endif
+
 #endif /* GFP_H_ */

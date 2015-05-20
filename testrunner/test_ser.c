@@ -215,6 +215,8 @@ unsigned test_ser() {
     param_load( &curve_params, curve );
     param = &curve_params;
     length = curve_params.prime_data.words;
+    
+    gfp_opt_3_init(&param->prime_data);
 
     eccp_point_affine_t comb_table[JCB_COMB_WOZ_TBL_SIZE(TBL_WIDTH)];
     param->base_point_precomputed_table = comb_table;
