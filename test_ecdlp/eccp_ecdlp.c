@@ -460,7 +460,9 @@ void attack() {
             gfp_gen_add(triple->a, triple->a, branch->a, &param->order_n_data);
             gfp_gen_add(triple->b, triple->b, branch->b, &param->order_n_data);
 
+//            pr_triple_negation_map(triple);
             pr_triple_send_if_distinguished(triple);
+//            pr_triple_loop_detection(triple, &loop_detection[j]);
         }    
     }
 }
