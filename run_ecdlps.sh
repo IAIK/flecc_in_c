@@ -18,7 +18,7 @@ while [ 1 ]; do
     export filename=$(hostname -f)-$(date +"%y-%m-%d-%T").res
 
     echo "generating $filename"
-    ./bin/test_ecdlp < ../ecdlp_challenges/ecdlp_ITSEC2015_80.chal > $filename &
+    ./bin/test_ecdlp < ../ecdlp_challenges/ecdlp_ITSEC2015_88.chal > $filename &
     sleep 1
     let COUNTER=COUNTER+1 
   done

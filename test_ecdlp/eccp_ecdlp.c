@@ -49,6 +49,7 @@
 #include "io/io_gen.h"
 #include "rbtree.h"
 
+#define NUM_SIMUL_INV 50
 #define NUM_BRANCHES 128
 //#define DISTINGUISHING_BITS 20
 #define SIZE_FIFO 32
@@ -58,7 +59,6 @@
 
 
 eccp_ecdlp_triple branches[NUM_BRANCHES];
-eccp_ecdlp_triple computing;
 eccp_ecdlp_triple fifo[SIZE_FIFO];
 uint32_t fifo_read_index = 0;
 uint32_t fifo_write_index = 0;
@@ -91,6 +91,11 @@ typedef struct _eccp_ecdlp_triple_loop_detection_ {
     int size;
 } eccp_ecdlp_triple_loop_detection;
 
+eccp_ecdlp_triple computing[NUM_SIMUL_INV];
+eccp_ecdlp_triple_loop_detection loop_detection[NUM_SIMUL_INV];
+gfp_t to_invert[NUM_SIMUL_INV];
+gfp_t to_invert_T1[NUM_SIMUL_INV];
+gfp_t to_invert_T2[NUM_SIMUL_INV];
 
 /**
  * Verifies that the equation X = cP + dQ holds.
@@ -266,8 +271,6 @@ int pr_triple_loop_detection(eccp_ecdlp_triple *triple, eccp_ecdlp_triple_loop_d
             if(bigint_compare_var(loop_detection->triple[index].a, triple->a, param->order_n_data.words) != 0) {
                 if(bigint_compare_var(loop_detection->triple[index].b, triple->b, param->order_n_data.words) != 0) {
                     printf("WARNING: loop falsely detected ... solution found\n");
-                    pr_send_to_master(&loop_detection->triple[index]);
-                    pr_send_to_master(triple);
                 } else {
                     printf("WARNING: loop falsely detected\n");
                 }
@@ -343,48 +346,6 @@ void pr_triple_send_if_distinguished(const eccp_ecdlp_triple *triple) {
 }
 
 /**
- * Send the given triple to the master thread.
- * @param comp
- */
-void pr_send_to_master(const eccp_ecdlp_triple *comp) {
-    pthread_mutex_lock(&fifo_lock);
-    while (fifo_size >= SIZE_FIFO) {
-        pthread_mutex_unlock(&fifo_lock);
-        usleep(1000);
-        if (pthread_mutex_trylock(&finished_computing_lock) == 0) {
-            pthread_mutex_unlock(&finished_computing_lock);
-            return;
-        }
-        pthread_mutex_lock(&fifo_lock);
-    }
-
-    pr_triple_copy(&fifo[fifo_write_index], comp);
-
-    fifo_write_index = (fifo_write_index + 1) % SIZE_FIFO;
-    fifo_size = fifo_size + 1;
-    pthread_mutex_unlock(&fifo_lock);
-}
-
-/**
- * Called by master thread to receive the latest triple from the fifo.
- * @param computed
- */
-void pr_get_latest_point(eccp_ecdlp_triple *computed) {
-    pthread_mutex_lock(&fifo_lock);
-    while (fifo_size == 0) {
-        pthread_mutex_unlock(&fifo_lock);
-        usleep(100000);
-        pthread_mutex_lock(&fifo_lock);
-    }
-
-    pr_triple_copy(computed, &fifo[fifo_read_index]);
-
-    fifo_read_index = (fifo_read_index + 1) % SIZE_FIFO;
-    fifo_size = fifo_size - 1;
-    pthread_mutex_unlock(&fifo_lock);
-}
-
-/**
  * Add the given triple to the data structure, check for duplicates, quit all processing.
  * @param to_insert
  * @param scalar if a collision is found, the scalar is computed
@@ -440,6 +401,67 @@ void *pr_attack_thread(void *_to_comp_) {
         if(stats_num_distinguished_triples % 100 == 0) {
 //            printf("INFO(inserted %ld %ld)\n", stats_num_distinguished_triples, local_iterations);
         }
+    }
+}
+
+void attack() {
+    int j, index;
+    eccp_ecdlp_triple *triple;
+    eccp_ecdlp_triple *branch;
+    gfp_t temp;
+    gfp_t lambda, temp1, temp2;
+    
+    while(1 == 1) {
+        // 1. collect to invert
+        for(j = 0; j < NUM_SIMUL_INV; j++) {
+            triple = &computing[j];
+            index = triple->R.x[0] & (NUM_BRANCHES - 1);
+            branch = &branches[index];
+            gfp_subtract( to_invert[j], branch->R.x, triple->R.x );
+        }    
+        // 2. do inverse
+        gfp_copy(to_invert_T1[0], to_invert[0] );
+        for(j = 1; j < NUM_SIMUL_INV; j++) {
+            gfp_multiply( to_invert_T1[j], to_invert_T1[j-1], to_invert[j]);
+        }
+        gfp_inverse(temp, to_invert_T1[NUM_SIMUL_INV-1]);
+        gfp_multiply(to_invert_T2[NUM_SIMUL_INV-1], temp, to_invert_T1[NUM_SIMUL_INV-2]);
+        for(j = NUM_SIMUL_INV-2; j >= 1; j--) {
+            gfp_multiply( temp, temp, to_invert[j+1]);
+            gfp_multiply( to_invert_T2[j], temp, to_invert_T1[j-1]);
+        }
+        gfp_multiply(to_invert_T2[0], temp, to_invert[1]);
+
+#if 0
+        for(j = 0; j < NUM_SIMUL_INV; j++) {
+            gfp_multiply(temp, to_invert_T2[j], to_invert[j]);
+            if(!bigint_is_equal_var(temp, param->prime_data.gfp_one, param->prime_data.words)) {
+                printf("error\n");
+            } 
+        }
+#endif
+        
+        // 3. point addition, etc...
+        for(j = 0; j < NUM_SIMUL_INV; j++) {
+            triple = &computing[j];
+            index = triple->R.x[0] & (NUM_BRANCHES - 1);
+            branch = &branches[index];
+            // eccp_affine_point_add(&res->R, &opa->R, &opb->R, param);
+            gfp_subtract( temp2, branch->R.y, triple->R.y );
+            gfp_multiply( lambda, to_invert_T2[j], temp2 ); // (y2-y1) / (x2-x1)
+            gfp_square( temp1, lambda );
+            gfp_subtract( temp1, temp1, triple->R.x );
+            gfp_subtract( temp1, temp1, branch->R.x ); // L^2 - x1 - x2
+            gfp_subtract( temp2, triple->R.x, temp1 ); // (x1 - x3)
+            gfp_copy( triple->R.x, temp1 );
+            gfp_multiply( temp1, temp2, lambda );
+            gfp_subtract( triple->R.y, temp1, triple->R.y ); // L*(x1-x3)-y1
+            
+            gfp_gen_add(triple->a, triple->a, branch->a, &param->order_n_data);
+            gfp_gen_add(triple->b, triple->b, branch->b, &param->order_n_data);
+
+            pr_triple_send_if_distinguished(triple);
+        }    
     }
 }
 
@@ -542,13 +564,20 @@ void pr_ecdlp_pollard_rho(gfp_t scalar, const eccp_point_affine_t *P, const eccp
         stats_loops[j] = 0;
     }
     tree = rbtree_create();
+    for(j = 0; j < NUM_SIMUL_INV; j++) {
+        loop_detection[j].size = 0;
+        loop_detection[j].index = 0;
+    }
     
     srand1(time(NULL));
     
-    pr_triple_generate(&computing);
+    for(j = 0; j < NUM_SIMUL_INV; j++) {
+        pr_triple_generate(&computing[j]);
+    }
     
-    performance_test_eccp_mul_(&computing);
+    performance_test_eccp_mul_(&computing[0]);
 
-    pr_attack_thread(&computing);
+    attack();
+//    pr_attack_thread(&computing[0]);
 }
 
