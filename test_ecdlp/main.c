@@ -91,6 +91,33 @@ int param_is_valid(const eccp_parameters_t *param) {
 }
 #define READ_BUFFER_SIZE 10000
 
+void read_and_compute_ecdlp(char *buffer, gfp_t scalar, const eccp_point_affine_t *P, const eccp_point_affine_t *Q, const eccp_parameters_t *param) {
+    gfp_t a1, a2, b1, b2, temp1, temp2;
+    eccp_point_affine_t Q_ref;
+    
+    read_gfp( buffer, READ_BUFFER_SIZE, a1, &param->order_n_data, 1 );
+    read_gfp( buffer, READ_BUFFER_SIZE, b1, &param->order_n_data, 1 );
+    read_gfp( buffer, READ_BUFFER_SIZE, a2, &param->order_n_data, 1 );
+    read_gfp( buffer, READ_BUFFER_SIZE, b2, &param->order_n_data, 1 );
+    
+    gfp_gen_subtract(temp1, b1, b2, &param->order_n_data);
+    gfp_binary_euclidean_inverse(temp2, temp1, &param->order_n_data);
+    gfp_gen_subtract(temp1, a2, a1, &param->order_n_data);
+    gfp_mult_two_mont(scalar, temp1, temp2, &param->order_n_data);
+    
+    io_print( "scalar: ");
+    io_print_bigint_var(scalar, param->order_n_data.words);
+    io_print( "\n");
+
+    eccp_generic_mul_wrapper(&Q_ref, P, scalar, param);
+    
+    if(eccp_affine_point_compare(&Q_ref, Q, param) == 0) {
+        io_print("scalar verified ;-)\n");
+    } else {
+        io_print("scalar is wrong :-(\n");
+    }
+}
+
 /*
  * 
  */
@@ -120,6 +147,8 @@ int main(int argc, char** argv) {
     
     eccp_affine_point_copy(&P, &param->base_point, param);
 
+//    read_and_compute_ecdlp(buffer, scalar, &P, &Q, param);
+    
     pr_ecdlp_pollard_rho(scalar, &P, &Q, param);
     
     return (EXIT_SUCCESS);
