@@ -50,6 +50,7 @@
 #include "gfp_gen.h"
 #include "gfp_mont.h"
 #include "gfp_const_runtime.h"
+#include "gfp_opt_3.h"
 
 /* performance optimized vs. constant runtime implementations */
 #if 0
@@ -89,8 +90,6 @@
 #endif
 
 #if 0
-
-#include "gfp_opt_3.h"
 
 #undef gfp_add
 #undef gfp_subtract
