@@ -1,17 +1,29 @@
 # This script discovers the Doxygen binary and creates a doxygen target when
 # binary and configuration file could be found.
 #
-# The following variables can be used to customize the function:
+# Processed variables:
 #   DOXYGEN_CONFIG_IN_FILE................(mandatory) path to the config file
 #   DEFAULT_DOXYGEN_OUTPUT_DIR............custom output directory for the documentation
+#   SUB_PROJECT...........................doxygen support is disabled for sub projects
 #
+# Provided targets:
+#   doxygen...............generate the doxygen documentation of the project
+#
+# Provided macros/functions:
+#   ---
+
 # As feedback if the target is available the DOXYGEN_GENERATION_POSSIBLE variable
 # is set.
 #
 
+# the master project is responsible for the documentation target
+IF(SUB_PROJECT)
+  RETURN()
+ENDIF()
+
 FIND_PACKAGE(Doxygen)
 SET(DOXYFILE_FOUND false)
-SET( DOXYGEN_GENERATION_POSSIBLE 0)
+SET(DOXYGEN_GENERATION_POSSIBLE 0)
 
 IF(EXISTS ${DOXYGEN_CONFIG_IN_FILE} )
   SET(DOXYFILE_FOUND true)
@@ -56,9 +68,9 @@ IF( DOXYGEN_FOUND )
     ADD_CUSTOM_TARGET(doxygen ${DOXYGEN_EXECUTABLE} "${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.doxygen")
 
   ELSE( DOXYFILE_FOUND )
-    MESSAGE( STATUS "Doxygen configuration file (${DOXYGEN_CONFIG_IN_FILE}) not found." )
-    MESSAGE( STATUS "Documentation target will not be added!" )
+    INFO_MSG("Doxygen configuration file (${DOXYGEN_CONFIG_IN_FILE}) not found." )
+    INFO_MSG("Documentation target will not be added!" )
   ENDIF( DOXYFILE_FOUND )
 ELSE( DOXYGEN_FOUND )
-  MESSAGE( STATUS "Doxygen not found. Documentation can not be generated!" )
+  INFO_MSG("Doxygen not found. Documentation can not be generated!" )
 ENDIF( DOXYGEN_FOUND )

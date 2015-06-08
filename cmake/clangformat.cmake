@@ -3,17 +3,34 @@
 # Files which should be formated have to be added using add_file_to_format
 # function.
 #
-# The following variables can be used to customize the functionality:
+# Processed variables:
 #   CLANGFORMAT_SYTLE.............style which should be applied
 #                                 (gets exported into the cache)
 #   DEFAULT_CLANGFORMAT_SYTLE.....when CLANGFORMAT_SYTLE is undefined then this
 #                                 default style is used to define it
+#   SUB_PROJECT...................building the current project as sub project
+#                                 disables the format functionality in order to
+#                                 prevent reformat operations across projects
+#
+# Provided targets:
+#   format...............reformat the specified source files
+#
+# Provided macros/functions:
+#   add_file_to_format...specifiy files which should be formatted
+#
 #
 # When neither CLANGFORMAT_SYTLE nor DEFAULT_CLANGFORMAT_SYTLE is set then
 # "file" is set as fallback style.
 #
 # As feedback if the targets are available the CLANGFORMAT_POSSIBLE variable
 # is set.
+
+# clang format enabled master projects should not reformat the sub project
+IF(SUB_PROJECT)
+  FUNCTION(add_file_to_format)
+  ENDFUNCTION()
+  RETURN()
+ENDIF()
 
 # Use LLVM as default style if nothing has been specified
 IF(NOT DEFAULT_CLANGFORMAT_SYTLE)
@@ -32,7 +49,7 @@ FIND_PROGRAM(CLANGFORMAT_EXECUTABLE NAMES "clang-format")
 MARK_AS_ADVANCED(CLANGFORMAT_EXECUTABLE CLANGFORMAT_SYTLE)
 
 IF(NOT CLANGFORMAT_EXECUTABLE)
-  MESSAGE(STATUS "clang-format couldn't be found. Source code formatting will not be available.")
+  INFO_MSG("clang-format couldn't be found. Source code formatting will not be available.")
 ENDIF()
 
 # create format target
