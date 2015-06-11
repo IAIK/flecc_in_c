@@ -54,7 +54,7 @@ INCLUDE(CPack)
 #-----------------------------------------
 FILE(GLOB_RECURSE FleccLibSources "src/*.c")
 SET(LIBNAME "flecc_in_c-${ARCHITECTURE}")
-ADD_LIBRARY("${LIBNAME}" ${sourceFile} ${FleccLibSources})
+ADD_LIBRARY("${LIBNAME}" ${FleccLibSources})
 SET_TARGET_PROPERTIES("${LIBNAME}" PROPERTIES
         COMPILE_FLAGS "-DARCHITECTURE=${ARCHITECTURE}")
 
