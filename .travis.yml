@@ -2,7 +2,7 @@ language: c
 
 install:
   - sudo apt-get update -qq
-  - sudo apt-get install -qq lcov genhtml
+  - sudo apt-get install -qq lcov
   - gem install coveralls-lcov
 
 script:
