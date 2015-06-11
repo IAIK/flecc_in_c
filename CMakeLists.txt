@@ -1,10 +1,10 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.9) 
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7)
 
 # set project name
 PROJECT(flecc_in_c C)
 SET(VERSION_MAJOR "1")
 SET(VERSION_MINOR "0")
-SET(VERSION_PATCH "1")
+SET(VERSION_PATCH "2")
 
 #enable Assembler support
 ENABLE_LANGUAGE(ASM)
@@ -53,13 +53,17 @@ set(CPACK_SOURCE_GENERATOR "TGZ")
 set(CPACK_SOURCE_IGNORE_FILES "${PROJECT_BINARY_DIR}/" "/[.]git/")
 INCLUDE(CPack)
 
+FIND_PACKAGE ( Threads REQUIRED ) # required for ecdlp test
+FIND_PACKAGE ( StandardMathLibrary REQUIRED )
+
 # build the flecc_in_c library
 #-----------------------------------------
 FILE(GLOB_RECURSE FleccLibSources "src/*.c")
 SET(LIBNAME "flecc_in_c-${ARCHITECTURE}")
-ADD_LIBRARY("${LIBNAME}" ${sourceFile} ${FleccLibSources})
+ADD_LIBRARY("${LIBNAME}" ${FleccLibSources})
 SET_TARGET_PROPERTIES("${LIBNAME}" PROPERTIES
         COMPILE_FLAGS "-DARCHITECTURE=${ARCHITECTURE}")
+TARGET_LINK_LIBRARIES("${LIBNAME}" ${STANDARD_MATH_LIBRARY})
 
 install_lib(TARGETS "${LIBNAME}" DESTINATION "lib${LIBDIR_INSTALL_SUFFIX}")
 install_lib(DIRECTORY "src/" DESTINATION "include/flecc_in_c"
@@ -87,7 +91,7 @@ FILE(GLOB TestrunnerSources "test_ecdlp/*.c")
 ADD_EXECUTABLE("test_ecdlp" EXCLUDE_FROM_ALL ${TestrunnerSources})
 SET_TARGET_PROPERTIES("test_ecdlp" PROPERTIES
   COMPILE_FLAGS "-DARCHITECTURE=${ARCHITECTURE}")
-TARGET_LINK_LIBRARIES("test_ecdlp" "flecc_in_c" pthread)
+TARGET_LINK_LIBRARIES("test_ecdlp" "${LIBNAME}" ${CMAKE_THREAD_LIBS_INIT})
 
 # generate a test target
 #-----------------------------------------
