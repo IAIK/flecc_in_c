@@ -1,20 +1,21 @@
 language: c
 
-install:
+before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq lcov
   - gem install coveralls-lcov
 
+before_script:
+  - mkdir _build
+  - cd _build
+
+# configure, build and run the test suite with coverage support
 script:
-  - mkdir _build 
-  - cd _build 
   - cmake -DTEST_COVERAGE=1 ..
   - make suite
-
-after_success:
-  # run the test suite and generate coverage report
   - make coverage
-  - lcov -l _coverage/flecc_in_c.info
 
-  # send data to coveralls
+# generate coverage reports
+after_script:
+  - lcov -l _coverage/flecc_in_c.info
   - coveralls-lcov _coverage/flecc_in_c.info
