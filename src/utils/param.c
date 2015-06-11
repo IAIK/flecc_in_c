@@ -39,6 +39,7 @@
 #include <string.h>
 #include "../bi/bi.h"
 #include "../gfp/gfp.h"
+#include "../eccp/eccp.h"
 
 extern const uint_t SECP192R1_ORDER_N[6];
 extern const uint_t SECP192R1_PRIME[6];
@@ -91,23 +92,57 @@ extern const uint_t SECP521R1_BASE_X[16];
 extern const uint_t SECP521R1_BASE_Y[16];
 
 /**
+ * Compare two buffers which both have length limitations.
+ * @param buffer1
+ * @param length1 length of first buffer
+ * @param buffer2 
+ * @param length2 length of second buffer
+ * @return 
+ */
+int string_max_buffer_match(const char *buffer1, const size_t length1, const char *buffer2, const size_t length2) {
+    size_t i, min_length;
+    char *buffer1_ = (char*) buffer1;
+    char *buffer2_ = (char*) buffer2;
+    
+    min_length = length1;
+    if (length2 < length1) {
+        min_length = length2;
+    }
+    
+    for(i = 0; i < min_length-1; i++) {
+        if(*buffer1_ != *buffer2_)
+            break;
+        buffer1_++;
+        buffer2_++;
+    }
+    
+    return *buffer1_ - *buffer2_;
+}
+
+/**
  * Determines the type of curve from the string in the buffer.
  * @param buffer the string defining the type of curve
  * @return type of curve
  */
-curve_type_t param_get_curve_type_from_name( const char *buffer ) {
+curve_type_t param_get_curve_type_from_name( const char *buffer , const int buffer_length ) {
     curve_type_t curve = UNKNOWN;
 
-    if( strncmp( buffer, "secp192r1", 9 ) == 0 ) {
+    if(buffer_length == 0) {
+        return curve;
+    }
+    
+    if( string_max_buffer_match( buffer, buffer_length, "secp192r1", 9 ) == 0 ) {
         curve = SECP192R1;
-    } else if( strncmp( buffer, "secp224r1", 9 ) == 0 ) {
+    } else if( string_max_buffer_match( buffer, buffer_length, "secp224r1", 9 ) == 0 ) {
         curve = SECP224R1;
-    } else if( strncmp( buffer, "secp256r1", 9 ) == 0 ) {
+    } else if( string_max_buffer_match( buffer, buffer_length, "secp256r1", 9 ) == 0 ) {
         curve = SECP256R1;
-    } else if( strncmp( buffer, "secp384r1", 9 ) == 0 ) {
+    } else if( string_max_buffer_match( buffer, buffer_length, "secp384r1", 9 ) == 0 ) {
         curve = SECP384R1;
-    } else if( strncmp( buffer, "secp521r1", 9 ) == 0 ) {
+    } else if( string_max_buffer_match( buffer, buffer_length, "secp521r1", 9 ) == 0 ) {
         curve = SECP521R1;
+    } else if( string_max_buffer_match( buffer, buffer_length, "custom", 6 ) == 0 ) {
+        curve = CUSTOM;
     }
 
     return curve;
@@ -116,12 +151,10 @@ curve_type_t param_get_curve_type_from_name( const char *buffer ) {
 /**
  * Loads parameters for a given type of curve and stores them
  * into the structure referenced by param.
- * @param param the structure thath is filled with elliptic curve parameters
+ * @param param the structure that is filled with elliptic curve parameters
  * @param type the type of curve to be used
  */
 void param_load( eccp_parameters_t *param, const curve_type_t type ) {
-    param->curve_type = type;
-
     if( type == SECP192R1 ) {
         int bi_length = WORDS_PER_BITS( SECP192R1_PRIME_BITS );
 
@@ -173,7 +206,7 @@ void param_load( eccp_parameters_t *param, const curve_type_t type ) {
         // set prime data (group order)
         param->order_n_data.bits = SECP224R1_ORDER_N_BITS;
         param->order_n_data.words = WORDS_PER_BITS( SECP224R1_ORDER_N_BITS );
-        param->order_n_data.montgomery_domain = 1;
+        param->order_n_data.montgomery_domain = 0;
         bigint_copy_var( param->order_n_data.prime, SECP224R1_ORDER_N, param->order_n_data.words );
 
         // compute Montgomery constants (group order)
@@ -207,7 +240,7 @@ void param_load( eccp_parameters_t *param, const curve_type_t type ) {
         // set prime data (group order)
         param->order_n_data.bits = SECP256R1_ORDER_N_BITS;
         param->order_n_data.words = WORDS_PER_BITS( SECP256R1_ORDER_N_BITS );
-        param->order_n_data.montgomery_domain = 1;
+        param->order_n_data.montgomery_domain = 0;
         bigint_copy_var( param->order_n_data.prime, SECP256R1_ORDER_N, param->order_n_data.words );
 
         // compute Montgomery constants (group order)
@@ -241,7 +274,7 @@ void param_load( eccp_parameters_t *param, const curve_type_t type ) {
         // set prime data (group order)
         param->order_n_data.bits = SECP384R1_ORDER_N_BITS;
         param->order_n_data.words = WORDS_PER_BITS( SECP384R1_ORDER_N_BITS );
-        param->order_n_data.montgomery_domain = 1;
+        param->order_n_data.montgomery_domain = 0;
         bigint_copy_var( param->order_n_data.prime, SECP384R1_ORDER_N, param->order_n_data.words );
 
         // compute Montgomery constants (group order)
@@ -275,7 +308,7 @@ void param_load( eccp_parameters_t *param, const curve_type_t type ) {
         // set prime data (group order)
         param->order_n_data.bits = SECP521R1_ORDER_N_BITS;
         param->order_n_data.words = WORDS_PER_BITS( SECP521R1_ORDER_N_BITS );
-        param->order_n_data.montgomery_domain = 1;
+        param->order_n_data.montgomery_domain = 0;
         bigint_copy_var( param->order_n_data.prime, SECP521R1_ORDER_N, param->order_n_data.words );
 
         // compute Montgomery constants (group order)
@@ -292,5 +325,14 @@ void param_load( eccp_parameters_t *param, const curve_type_t type ) {
         bigint_copy_var( param->base_point.x, SECP521R1_BASE_X, bi_length );
         bigint_copy_var( param->base_point.y, SECP521R1_BASE_Y, bi_length );
         param->base_point.identity = 0;
+    } else {
+        memset(param, 0, sizeof(eccp_parameters_t));
     }
+    
+    param->curve_type = type;
+    param->eccp_mul = &eccp_protected_point_multiply;
+    param->eccp_mul_base_point = NULL;
+    param->base_point_precomputed_table = NULL;
+    param->base_point_precomputed_table_width = 0;
+    
 }

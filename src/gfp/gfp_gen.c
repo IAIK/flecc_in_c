@@ -134,3 +134,74 @@ void gfp_reduce( gfp_t a, const gfp_prime_data_t *prime_data ) {
         bigint_subtract_var( a, a, prime_data->prime, prime_data->words );
     }
 }
+
+/**
+ * Binary euclidean inversion algorithm. Alg. 2.22 in Guide to ECC.
+ * Note that this algorithm does only guarantee to work for prime fields!
+ * @param result the inverted number
+ * @param to_invert the number to invert
+ * @param prime_data the prime number data to reduce the result
+ */
+void gfp_binary_euclidean_inverse( gfp_t result, const gfp_t to_invert, const gfp_prime_data_t *prime_data) {
+    gfp_t u;
+    gfp_t v;
+    gfp_t x1;
+    gfp_t x2;
+    int cmp1, cmp2, carry;
+
+    if(bigint_is_zero_var(to_invert ,prime_data->words))
+      return;
+    
+    bigint_copy_var(u, to_invert, prime_data->words);
+    bigint_copy_var(v, prime_data->prime, prime_data->words);
+    bigint_clear_var(x1, prime_data->words); x1[0] = 1;
+    bigint_clear_var(x2, prime_data->words);
+
+    while(1) {
+        cmp1 = bigint_is_one_var(u, prime_data->words);
+        cmp2 = bigint_is_one_var(v, prime_data->words);
+        if((cmp1 == 1) || (cmp2 == 1))
+            break;
+
+        while(BIGINT_IS_EVEN(u)) {
+            bigint_shift_right_one_var(u, u, prime_data->words);
+            carry = 0;
+            if(BIGINT_IS_ODD(x1)) {
+                carry = bigint_add_var(x1, x1, prime_data->prime, prime_data->words);
+            }
+            bigint_shift_right_one_var(x1, x1, prime_data->words);
+            if(carry == 1) {
+                x1[prime_data->words-1] |= 1 << (BITS_PER_WORD-1);
+            }
+        }
+
+        while(BIGINT_IS_EVEN(v)) {
+            bigint_shift_right_one_var(v, v, prime_data->words);
+            carry = 0;
+            if(BIGINT_IS_ODD(x2)) {
+                carry = bigint_add_var(x2, x2, prime_data->prime, prime_data->words);
+            }
+            bigint_shift_right_one_var(x2, x2, prime_data->words);
+            if(carry == 1) {
+                x2[prime_data->words-1] |= 1 << (BITS_PER_WORD-1);
+            }
+        }
+
+        if(bigint_compare_var(u, v, prime_data->words) >= 0) {
+            bigint_subtract_var(u, u, v, prime_data->words);
+            /* bigint_subtract(x1, x1, x2); */
+            gfp_gen_subtract(x1, x1, x2, prime_data);
+        } else {
+            bigint_subtract_var(v, v, u, prime_data->words);
+            /* bigint_subtract(x2, x2, x1); */
+            gfp_gen_subtract(x2, x2, x1, prime_data);
+        }
+    }
+    /* if u == 1*/
+    if(cmp1 == 1) {
+        bigint_copy_var(result, x1, prime_data->words);
+    } else {
+        bigint_copy_var(result, x2, prime_data->words);
+    }
+    gfp_reduce(result, prime_data);
+}

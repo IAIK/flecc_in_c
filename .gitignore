@@ -40,3 +40,5 @@ _*/
 *.bbl
 *.toc
 *.blg
+/testgenerator/build/
+/testgenerator/dist/

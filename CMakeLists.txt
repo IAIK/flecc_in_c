@@ -1,10 +1,13 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.10) 
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.9) 
 
 # set project name
 PROJECT(flecc_in_c C)
 SET(VERSION_MAJOR "1")
 SET(VERSION_MINOR "0")
 SET(VERSION_PATCH "1")
+
+#enable Assembler support
+ENABLE_LANGUAGE(ASM)
 
 SET(DEFAULT_BUILD_TYPE MinSizeRel)
 
@@ -77,6 +80,14 @@ SET_TARGET_PROPERTIES("testrunner" PROPERTIES
   COMPILE_FLAGS "-DARCHITECTURE=${ARCHITECTURE}")
 TARGET_LINK_LIBRARIES("testrunner" "${LIBNAME}")
 add_to_suite("testrunner")
+
+# build the test ecdlp
+#-----------------------------------------
+FILE(GLOB TestrunnerSources "test_ecdlp/*.c")
+ADD_EXECUTABLE("test_ecdlp" EXCLUDE_FROM_ALL ${TestrunnerSources})
+SET_TARGET_PROPERTIES("test_ecdlp" PROPERTIES
+  COMPILE_FLAGS "-DARCHITECTURE=${ARCHITECTURE}")
+TARGET_LINK_LIBRARIES("test_ecdlp" "flecc_in_c" pthread)
 
 # generate a test target
 #-----------------------------------------

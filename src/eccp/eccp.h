@@ -39,6 +39,9 @@
 #define ECCP_H_
 
 #include "eccp_affine.h"
+#include "eccp_generic.h"
 #include "eccp_jacobian.h"
+#include "eccp_std_projective.h"
+#include "eccp_protected.h"
 
 #endif /* ECCP_H_ */

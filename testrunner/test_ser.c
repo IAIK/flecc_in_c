@@ -1,34 +1,45 @@
+/****************************************************************************
+**
+** Copyright (C) 2014 Stiftung Secure Information and 
+**                    Communication Technologies SIC and
+**                    Graz University of Technology
+** Contact: http://opensource.iaik.tugraz.at
+**
+** This file is part of <product_name>.
+**
+** $BEGIN_LICENSE:DEFAULT$
+** Commercial License Usage
+** Licensees holding valid commercial licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and SIC. For further information
+** contact us at http://opensource.iaik.tugraz.at.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 3.0 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.  Please review the following information to
+** ensure the GNU General Public License version 3.0 requirements will be
+** met: http://www.gnu.org/copyleft/gpl.html.
+** 
+** This software is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+** GNU General Public License for more details.
+**
+** You should have received a copy of the GNU General Public License
+** along with this software. If not, see http://www.gnu.org/licenses/.
+**
+** $END_LICENSE:DEFAULT$
+**
+****************************************************************************/
+
 /*
  * test_ser.c
  *
  *  Created on: 14.03.2014
  *      Author: Thomas Unterluggauer
- */
-
-/*
- * Copyright (C) 2014 Stiftung Secure Information and
- *                    Communication Technologies SIC
- * http://www.sic.st
- *
- * All rights reserved.
- *
- * This source is provided for inspection purposes and recompilation only,
- * unless specified differently in a contract with IAIK. This source has to
- * be kept in strict confidence and must not be disclosed to any third party
- * under any circumstances. Redistribution in source and binary forms, with
- * or without modification, are <not> permitted in any case!
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
  */
 
 #include <stdio.h>
@@ -37,6 +48,7 @@
 #include "gfp/gfp.h"
 #include "utils/param.h"
 #include "utils/assert.h"
+#include "utils/performance.h"
 #include "eccp/eccp.h"
 #include "utils/parse.h"
 #include "protocols/protocols.h"
@@ -97,8 +109,8 @@ int line_starts_with( const char *line, const char *to_compare ) {
  * @return the type of curve
  */
 curve_type_t read_curve_type( char *buffer, const int buf_length ) {
-    int i = io_read( buffer, buf_length );
-    return param_get_curve_type_from_name( buffer );
+    int length = io_read( buffer, buf_length );
+    return param_get_curve_type_from_name( buffer, length);
 }
 
 /**
@@ -152,6 +164,64 @@ void read_eccp_affine_point( char *buffer,
 }
 
 /**
+ * Reads parameters from the default input source. 
+ * @param buffer the buffer to be used
+ * @param buf_length the length of the buffer to be used
+ * @param param the to-be-initialized elliptic curve parameters
+ */
+void read_elliptic_curve_parameters (char *buffer, const int buf_length, eccp_parameters_t *param) {
+    // 1. name of curve as string (discarded)
+    io_read(buffer, buf_length);
+
+    // 2. number of bits of prime field
+    read_bigint(buffer, buf_length, &param->prime_data.bits, WORDS_PER_BITS(32));
+    if(param->prime_data.bits > BITS_PER_GFP) {
+        return;
+    }
+    param->prime_data.words = WORDS_PER_BITS(param->prime_data.bits);
+    param->prime_data.montgomery_domain = 1;
+    
+    // 3. init the prime field
+    read_bigint(buffer, buf_length, param->prime_data.prime, param->prime_data.words);
+    gfp_mont_compute_R( param->prime_data.gfp_one, &( param->prime_data ) );
+    gfp_mont_compute_R_squared( param->prime_data.r_squared, &( param->prime_data ) );
+    param->prime_data.n0 = gfp_mont_compute_n0( &( param->prime_data ) );
+
+    // 4. number of bits of group order
+    read_bigint(buffer, buf_length, &param->order_n_data.bits, WORDS_PER_BITS(32));
+    if(param->order_n_data.bits > BITS_PER_GFP) {
+        return;
+    }
+    param->order_n_data.words = WORDS_PER_BITS(param->order_n_data.bits);
+    param->order_n_data.montgomery_domain = 0;
+    
+    // 5. init the prime field for the group order
+    read_bigint(buffer, buf_length, param->order_n_data.prime, param->order_n_data.words);
+    gfp_mont_compute_R( param->order_n_data.gfp_one, &( param->order_n_data ) );
+    gfp_mont_compute_R_squared( param->order_n_data.r_squared, &( param->order_n_data ) );
+    param->order_n_data.n0 = gfp_mont_compute_n0( &( param->order_n_data ) );
+
+    // 6. elliptic curve parameters
+    read_gfp(buffer, buf_length, param->param_a, &param->prime_data, 1);
+    read_gfp(buffer, buf_length, param->param_b, &param->prime_data, 1);
+    
+    // 7. the co-factor
+    read_bigint(buffer, buf_length, &param->h, WORDS_PER_BITS(32));
+    
+    // 8. the base point
+    read_gfp(buffer, buf_length, param->base_point.x, &param->prime_data, 1);
+    read_gfp(buffer, buf_length, param->base_point.y, &param->prime_data, 1);
+    param->base_point.identity = 0;
+
+    // 9. finalize
+    param->curve_type = CUSTOM;
+    param->eccp_mul = &eccp_protected_point_multiply;
+    param->eccp_mul_base_point = NULL;
+    param->base_point_precomputed_table = NULL;
+    param->base_point_precomputed_table_width = 0;
+}
+
+/**
  * Extracts the test_id from the read buffer and writes it to a pre-allocated
  * memory location.
  * @param test_id the destination for the test_id
@@ -170,6 +240,8 @@ void extract_test_id( char *test_id, const int id_length, const char *buffer ) {
     }
 }
 
+#define TBL_WIDTH 5
+
 /**
  * Reads test cases from the default input stream and executes and verifies them
  * @return the number of failed tests
@@ -183,9 +255,8 @@ unsigned test_ser() {
     uint_t bi_var_b[WORDS_PER_GFP];
     uint_t bi_var_c[2 * WORDS_PER_GFP];
     uint_t bi_var_expected[2 * WORDS_PER_GFP];
-    curve_type_t curve;
     eccp_parameters_t curve_params;
-    eccp_parameters_t *param;
+    eccp_parameters_t *param = &curve_params;
     int length;
 
     eccp_point_affine_t ecaff_var_a;
@@ -197,10 +268,21 @@ unsigned test_ser() {
     eccp_point_projective_t ecproj_var_b;
     eccp_point_projective_t ecproj_var_c;
 
-    curve = read_curve_type( buffer, READ_BUFFER_SIZE );
-    param_load( &curve_params, curve );
-    param = &curve_params;
+    curve_params.curve_type = read_curve_type( buffer, READ_BUFFER_SIZE );
+    if(curve_params.curve_type == CUSTOM) {
+        read_elliptic_curve_parameters(buffer, READ_BUFFER_SIZE, param);
+    } else {
+        param_load( param, curve_params.curve_type );
+    }
     length = curve_params.prime_data.words;
+    
+    // TODO: BEAUTIFY!!!
+    gfp_opt_3_init(&param->prime_data);
+
+    eccp_point_affine_t comb_table[JCB_COMB_WOZ_TBL_SIZE(TBL_WIDTH)];
+    param->base_point_precomputed_table = comb_table;
+    param->base_point_precomputed_table_width = TBL_WIDTH;
+    eccp_jacobian_point_multiply_COMB_WOZ_precompute(param);
 
     while( 1 ) {
         io_read( buffer, READ_BUFFER_SIZE );
@@ -350,7 +432,7 @@ unsigned test_ser() {
             read_bigint( buffer, READ_BUFFER_SIZE, bi_var_a, length );
             read_bigint( buffer, READ_BUFFER_SIZE, bi_var_b, length );
             read_bigint( buffer, READ_BUFFER_SIZE, bi_var_expected, length );
-            gfp_gen_subtract( bi_var_c, bi_var_a, bi_var_b, &( curve_params.prime_data ) );
+            gfp_subtract( bi_var_c, bi_var_a, bi_var_b );
             errors += assert_bigint( test_id, bi_var_expected, bi_var_c, length );
         } else if( line_starts_with( buffer, "gfp_halve" ) ) {
 
@@ -535,13 +617,25 @@ unsigned test_ser() {
             eccp_affine_to_jacobian( &ecproj_var_a, &ecaff_var_a, param );
             int is_valid = eccp_jacobian_point_is_valid( &ecproj_var_a, param );
             errors += assert_integer( test_id, expected, is_valid );
-        } else if( line_starts_with( buffer, "eccp_jacobian_point_multiply" ) ) {
+        } else if( line_starts_with( buffer, "eccp_point_multiply" ) ) {
 
             read_eccp_affine_point( buffer, READ_BUFFER_SIZE, &ecaff_var_a, &( curve_params.prime_data ), 1 );
             read_bigint( buffer, READ_BUFFER_SIZE, bi_var_a, param->order_n_data.words );
             read_eccp_affine_point( buffer, READ_BUFFER_SIZE, &ecaff_var_expected, &( curve_params.prime_data ), 1 );
 
-            eccp_jacobian_point_multiply_L2R_DA( &ecaff_var_c, &ecaff_var_a, bi_var_a, param );
+            param->eccp_mul( &ecaff_var_c, &ecaff_var_a, bi_var_a, param );
+
+            errors += assert_integer( test_id, ecaff_var_expected.identity, ecaff_var_c.identity );
+            if( ecaff_var_expected.identity == 0 ) {
+                errors += assert_bigint( test_id, ecaff_var_expected.x, ecaff_var_c.x, length );
+                errors += assert_bigint( test_id, ecaff_var_expected.y, ecaff_var_c.y, length );
+            }
+        } else if( line_starts_with( buffer, "eccp_comb_point_multiply" ) ) {
+
+            read_bigint( buffer, READ_BUFFER_SIZE, bi_var_a, param->order_n_data.words );
+            read_eccp_affine_point( buffer, READ_BUFFER_SIZE, &ecaff_var_expected, &( curve_params.prime_data ), 1 );
+
+            param->eccp_mul_base_point( &ecaff_var_c, bi_var_a, param );
 
             errors += assert_integer( test_id, ecaff_var_expected.identity, ecaff_var_c.identity );
             if( ecaff_var_expected.identity == 0 ) {
@@ -793,6 +887,10 @@ unsigned test_ser() {
             hash_sha256_to_byte_array( hash, &sha2_state );
 
             errors += assert_byte_array( test_id, expected_hash, hash, 32 );
+        } else if(line_starts_with( buffer, "performance_test_eccp_mul" ) ) {
+            performance_test_eccp_mul(param);
+        } else if(line_starts_with( buffer, "performance_test_gfp_mul" ) ) {
+            performance_test_gfp_mul(param);
         }
     }
     return errors;

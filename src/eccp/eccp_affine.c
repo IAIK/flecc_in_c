@@ -68,14 +68,11 @@ int eccp_affine_point_is_valid( const eccp_point_affine_t *A, const eccp_paramet
     gfp_square( left, A->y );
 
     /* check if y^2 == x^3 + a*x + b */
-    if( gfp_compare( left, right ) == 0 )
-        return 1;
-    else
-        return 0;
+    return gfp_is_equal(left, right);
 }
 
 /**
- *  Compares the two given points for equality. (identity is smaller, the compare x and y coordinates)
+ *  Compares the two given points for equality. (identity is smaller, then compare x and y coordinates)
  *  @param A
  *  @param B
  *  @param param elliptic curve parameters
@@ -91,11 +88,11 @@ int eccp_affine_point_compare( const eccp_point_affine_t *A, const eccp_point_af
     }
     if( B->identity == 1 )
         return 1;
-    compare = gfp_compare( A->x, B->x );
+    compare = bigint_compare_var( A->x, B->x, param->prime_data.words );
     if( compare != 0 ) {
         return compare;
     } else {
-        return gfp_compare( A->y, B->y );
+        return bigint_compare_var( A->y, B->y, param->prime_data.words );
     }
 }
 
@@ -132,8 +129,8 @@ void eccp_affine_point_add( eccp_point_affine_t *res,
         eccp_affine_point_copy( res, A, param );
         return;
     }
-    if( gfp_compare( A->x, B->x ) == 0 ) {
-        if( gfp_compare( A->y, B->y ) == 0 ) {
+    if( gfp_is_equal( A->x, B->x ) ) {
+        if( gfp_is_equal( A->y, B->y ) ) {
             // CASE: A is equal to B
             eccp_affine_point_double( res, A, param );
             return;
@@ -160,6 +157,22 @@ void eccp_affine_point_add( eccp_point_affine_t *res,
 }
 
 /**
+ * Subtracts two affine points. Handles the case of R=A and R=B.
+ * @param res res = minuend - subtrahend
+ * @param minuend positive point
+ * @param subtrahend point that is subtracted
+ * @param param elliptic curve parameters
+ */
+void eccp_affine_point_subtract( eccp_point_affine_t *res,
+                            const eccp_point_affine_t *minuend,
+                            const eccp_point_affine_t *subtrahend,
+                            const eccp_parameters_t *param ) {
+    eccp_point_affine_t temp;
+    eccp_affine_point_negate(&temp, subtrahend, param);
+    eccp_affine_point_add(res, minuend, &temp, param);
+}
+
+/**
  * Doubles an affine point. Handles the case of R=A.
  * @param res
  * @param A
@@ -173,7 +186,7 @@ void eccp_affine_point_double( eccp_point_affine_t *res, const eccp_point_affine
         return;
     }
     gfp_negate( temp1, A->y );
-    if( gfp_compare( temp1, A->y ) == 0 ) {
+    if( gfp_is_equal( temp1, A->y ) ) {
         // this handles the special case of doubling a point of order 2
         res->identity = 1;
         return;

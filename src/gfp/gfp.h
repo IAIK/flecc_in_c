@@ -49,23 +49,67 @@
 #include "../bi/bi.h"
 #include "gfp_gen.h"
 #include "gfp_mont.h"
+#include "gfp_const_runtime.h"
+#include "gfp_opt_3.h"
+
+/* performance optimized vs. constant runtime implementations */
+#if 0
 
 #define gfp_add( res, a, b ) gfp_gen_add( res, a, b, &param->prime_data )
 #define gfp_subtract( res, a, b ) gfp_gen_subtract( res, a, b, &param->prime_data )
 #define gfp_halving( res, a ) gfp_gen_halving( res, a, &param->prime_data )
 #define gfp_negate( res, a ) gfp_gen_negate( res, a, &param->prime_data )
-#define gfp_multiply( res, a, b ) gfp_mont_multiply_sos( res, a, b, &param->prime_data )
-#define gfp_square( res, a ) gfp_mont_multiply_sos( res, a, a, &param->prime_data )
+#define gfp_multiply( res, a, b ) gfp_mont_multiply( res, a, b, &param->prime_data )
+#define gfp_square( res, a ) gfp_mont_multiply( res, a, a, &param->prime_data )
 #define gfp_inverse( res, a ) gfp_mont_inverse( res, a, &param->prime_data )
 #define gfp_exponent( res, a, exponent, exponent_length )                                                                        \
     gfp_mont_exponent( res, a, exponent, exponent_length, &param->prime_data )
 
 #define gfp_clear( dest ) bigint_clear_var( dest, param->prime_data.words )
 #define gfp_copy( dest, src ) bigint_copy_var( dest, src, param->prime_data.words )
-#define gfp_compare( a, b ) bigint_compare_var( a, b, param->prime_data.words )
+#define gfp_is_equal( a, b ) bigint_is_equal_var( a, b, param->prime_data.words )
 #define gfp_is_zero( a ) bigint_is_zero_var( a, param->prime_data.words )
 
-// #define gfp_compare(a,b,prime_data)
-// bigint_compare_var(a,b,(prime_data)->words)
+#else
+
+#define gfp_add( res, a, b ) gfp_cr_add( res, a, b, &param->prime_data )
+#define gfp_subtract( res, a, b ) gfp_cr_subtract( res, a, b, &param->prime_data )
+#define gfp_halving( res, a ) gfp_cr_halving( res, a, &param->prime_data )
+#define gfp_negate( res, a ) gfp_cr_negate( res, a, &param->prime_data )
+#define gfp_multiply( res, a, b ) gfp_mont_multiply( res, a, b, &param->prime_data )
+#define gfp_square( res, a ) gfp_mont_multiply( res, a, a, &param->prime_data )
+#define gfp_inverse( res, a ) gfp_mont_inverse_fermat( res, a, &param->prime_data )
+#define gfp_exponent( res, a, exponent, exponent_length )                                                                        \
+    gfp_mont_exponent( res, a, exponent, exponent_length, &param->prime_data )
+
+#define gfp_clear( dest ) bigint_clear_var( dest, param->prime_data.words )
+#define gfp_copy( dest, src ) bigint_copy_var( dest, src, param->prime_data.words )
+#define gfp_is_equal( a, b ) bigint_cr_is_equal_var( a, b, param->prime_data.words )
+#define gfp_is_zero( a ) bigint_cr_is_zero_var( a, param->prime_data.words )
+
+#endif
+
+#if 0
+
+#undef gfp_add
+#undef gfp_subtract
+#undef gfp_multiply
+#undef gfp_mont_multiply
+#undef gfp_inverse
+#undef gfp_mont_inverse
+
+void gfp_opt_3_add( gfp_t res, const gfp_t a, const gfp_t b );
+void gfp_opt_3_subtract( gfp_t res, const gfp_t a, const gfp_t b );
+void gfp_opt_3_multiply( gfp_t res, const gfp_t a, const gfp_t b );
+void gfp_opt_3_inverse( gfp_t res, const gfp_t a );
+
+#define gfp_add( res, a, b ) gfp_opt_3_add( res, a, b )
+#define gfp_subtract( res, a, b ) gfp_opt_3_subtract( res, a, b )
+#define gfp_multiply( res, a, b ) gfp_opt_3_multiply( res, a, b )
+#define gfp_mont_multiply( res, a, b, prime_data ) gfp_opt_3_multiply( res, a, b )
+#define gfp_inverse( res, a ) gfp_opt_3_inverse( res, a )
+#define gfp_mont_inverse( res, a, prime_data ) gfp_opt_3_inverse( res, a )
+
+#endif
 
 #endif /* GFP_H_ */
