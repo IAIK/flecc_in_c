@@ -2,6 +2,9 @@
 
 A Flexible Elliptic Curve Library in C
 
+[![Build Status](https://travis-ci.org/IAIK/flecc_in_c.svg?branch=develop)](https://travis-ci.org/IAIK/flecc_in_c)
+[![Coverage Status](https://coveralls.io/repos/IAIK/flecc_in_c/badge.svg?branch=develop)](https://coveralls.io/r/IAIK/flecc_in_c?branch=develop)
+
 ## Build Requirements
 
 * cmake

@@ -11,7 +11,7 @@ script:
   - cmake -DTEST_COVERAGE=1 ..
   - make suite
 
-after_script:
+after_success:
   # run the test suite and generate coverage report
   - make coverage
   - lcov -l _coverage/flecc_in_c.info
