@@ -7,4 +7,4 @@ SET(CMAKE_CXX_COMPILER clang++)
 # extend the compile flags with the needed parameters
 SET(TOOLCHAIN_C_FLAGS       "-ffunction-sections -fdata-sections -fsanitize=address")
 SET(TOOLCHAIN_CXX_FLAGS     "-ffunction-sections -fdata-sections -fsanitize=address")
-SET(TOOLCHAIN_LINKER_FLAGS  "-Wl,-gc-sections")
+SET(TOOLCHAIN_LINKER_FLAGS  "-Wl,-dead_strip")
