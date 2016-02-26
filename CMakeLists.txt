@@ -1,130 +1,119 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7)
+cmake_minimum_required(VERSION 2.8.12)
 
-# set project name
-PROJECT(flecc_in_c C)
-SET(VERSION_MAJOR "1")
-SET(VERSION_MINOR "0")
-SET(VERSION_PATCH "2")
+project(flecc_in_c C)
+set(VERSION_MAJOR "1")
+set(VERSION_MINOR "1")
+set(VERSION_PATCH "0")
 
-#enable Assembler support
-ENABLE_LANGUAGE(ASM)
+enable_language(ASM)
 
-SET(DEFAULT_BUILD_TYPE MinSizeRel)
+set(DEFAULT_BUILD_TYPE MinSizeRel)
 
-SET(DEFAULT_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/static")
-SET(DEFAULT_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
-SET(DEFAULT_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
-
-SET(DEFAULT_C_FLAGS_GCC "-Wall")
-SET(DEFAULT_ECLIPSE_SUPPORT_STATE "ON")
-SET(DEFAULT_32BIT_COMPILE_STATE "OFF")
+set(DEFAULT_C_FLAGS_GCC "-Wall")
 
 # set default Architecture
-IF(NOT ARCHITECTURE)
-  SET(ARCHITECTURE "ARCH_X86"
+if(NOT ARCHITECTURE)
+  set(ARCHITECTURE "ARCH_X86"
   CACHE STRING "ARCH_X86, ARCH_X86_64, ARCH_CORTEXA8, ARCH_CORTEXA9, ARCH_CORTEXA11,..." FORCE)
-ENDIF(NOT ARCHITECTURE)
+endif()
 
-SET(DOXYGEN_CONFIG_IN_FILE "${PROJECT_SOURCE_DIR}/doc/template.doxy.in")
+set(DOXYGEN_CONFIG_IN_FILE "${PROJECT_SOURCE_DIR}/doc/template.doxy.in")
 
 #------------------------------------------------------------------------------
 # General config
 #------------------------------------------------------------------------------
 # add the project internal module directory to the module path
-SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
-INCLUDE(forceOutOfSourceBuild)       # prohibit in-source builds
-INCLUDE(setDefaultSettings)          # processes and applies the DEFAULT variables
-INCLUDE(messages)                    # helper functions for messages
-INCLUDE(clangformat)                 # add support for batch code reformating
-INCLUDE(doxygenSupport)              # adds doxygen support
-INCLUDE(installSupport)              # add uninstall target and install helpers
-INCLUDE(testCoverage)                # adds coverage test targets
-INCLUDE(testing)                     # enables ctest and generates suite and check
-INCLUDE(versionSupport)              # build up version strings
+include(forceOutOfSourceBuild)       # prohibit in-source builds
+include(setDefaultSettings)          # processes and applies the DEFAULT variables
+include(messages)                    # helper functions for messages
+include(clangformat)                 # add support for batch code reformating
+include(doxygenSupport)              # adds doxygen support
+include(installSupport)              # add uninstall target and install helpers
+include(testCoverage)                # adds coverage test targets
+include(testing)                     # enables ctest and generates suite and check
+include(versionSupport)              # build up version strings
 
 #------------------------------------------------------------------------------
 # Project config
 #------------------------------------------------------------------------------
-INCLUDE_DIRECTORIES( "src" "testrunner" )
-
 set(CPACK_GENERATOR "TGZ")
 set(CPACK_SOURCE_GENERATOR "TGZ")
 set(CPACK_SOURCE_IGNORE_FILES "${PROJECT_BINARY_DIR}/" "/[.]git/")
-INCLUDE(CPack)
+include(CPack)
 
-FIND_PACKAGE ( Threads REQUIRED ) # required for ecdlp test
-FIND_PACKAGE ( StandardMathLibrary REQUIRED )
+find_package( StandardMathLibrary REQUIRED )
 
 # build the flecc_in_c library
 #-----------------------------------------
-FILE(GLOB_RECURSE FleccLibSources "src/*.c")
-SET(LIBNAME "flecc_in_c-${ARCHITECTURE}")
-ADD_LIBRARY("${LIBNAME}" ${FleccLibSources})
-SET_TARGET_PROPERTIES("${LIBNAME}" PROPERTIES
-        COMPILE_FLAGS "-DARCHITECTURE=${ARCHITECTURE}")
-TARGET_LINK_LIBRARIES("${LIBNAME}" ${STANDARD_MATH_LIBRARY})
+file(GLOB_RECURSE FleccLibSources "flecc_in_c/*.c")
+set(LIBNAME "${CMAKE_PROJECT_NAME}-${ARCHITECTURE}")
+add_library("${LIBNAME}" ${FleccLibSources})
+target_compile_definitions("${LIBNAME}" INTERFACE "ARCHITECTURE=${ARCHITECTURE}")
+target_link_libraries("${LIBNAME}" ${STANDARD_MATH_LIBRARY})
+target_include_directories("${LIBNAME}" PRIVATE "flecc_in_c"
+  PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+         $<INSTALL_INTERFACE:include>)
 
-install_lib(TARGETS "${LIBNAME}" DESTINATION "lib${LIBDIR_INSTALL_SUFFIX}")
-install_lib(DIRECTORY "src/" DESTINATION "include/flecc_in_c"
+install_lib(TARGETS "${LIBNAME}" EXPORT "${CMAKE_PROJECT_NAME}" DESTINATION "lib${LIBDIR_INSTALL_SUFFIX}")
+install_lib(DIRECTORY "flecc_in_c/" DESTINATION "include/flecc_in_c"
                          FILES_MATCHING PATTERN "*.h")
+export_and_install_config("${CMAKE_PROJECT_NAME}")
 
-OPTION(INSTALL_DOXYGEN "Install the doxygen documentation with the library." OFF)
-IF(INSTALL_DOXYGEN)
+option(INSTALL_DOXYGEN "Install the doxygen documentation with the library." OFF)
+if(INSTALL_DOXYGEN)
   # hack to build the doxygen documentation before installing
   install_lib(CODE "execute_process(COMMAND ${CMAKE_COMMAND} --build . --target doxygen WORKING_DIRECTORY \"${CMAKE_CURRENT_BINARY_DIR}\")")
   install_lib(DIRECTORY "${DOXYGEN_OUTPUT_DIR}/" DESTINATION "share/doc/flecc_in_c-${VERSION_FULL}/doxygen")
-ENDIF(INSTALL_DOXYGEN)
+endif()
 
 # build the test runner
 #-----------------------------------------
-FILE(GLOB TestrunnerSources "testrunner/*.c")
-ADD_EXECUTABLE("testrunner" EXCLUDE_FROM_ALL ${TestrunnerSources})
-SET_TARGET_PROPERTIES("testrunner" PROPERTIES
-  COMPILE_FLAGS "-DARCHITECTURE=${ARCHITECTURE}")
-TARGET_LINK_LIBRARIES("testrunner" "${LIBNAME}")
+file(GLOB TestrunnerSources "testrunner/*.c")
+add_executable("testrunner" EXCLUDE_FROM_ALL ${TestrunnerSources})
+target_link_libraries("testrunner" "${LIBNAME}")
 add_to_suite("testrunner")
 
 # build the test ecdlp
 #-----------------------------------------
-FILE(GLOB TestrunnerSources "test_ecdlp/*.c")
-ADD_EXECUTABLE("test_ecdlp" EXCLUDE_FROM_ALL ${TestrunnerSources})
-SET_TARGET_PROPERTIES("test_ecdlp" PROPERTIES
-  COMPILE_FLAGS "-DARCHITECTURE=${ARCHITECTURE}")
-TARGET_LINK_LIBRARIES("test_ecdlp" "${LIBNAME}" ${CMAKE_THREAD_LIBS_INIT})
+find_package( Threads REQUIRED )
+file(GLOB TestrunnerSources "test_ecdlp/*.c")
+add_executable("test_ecdlp" EXCLUDE_FROM_ALL ${TestrunnerSources})
+target_link_libraries("test_ecdlp" "${LIBNAME}" ${CMAKE_THREAD_LIBS_INIT})
 
 # generate a test target
 #-----------------------------------------
-FILE(GLOB FleccLibSources "tests/*.tst")
-FOREACH(loop ${FleccLibSources})
+file(GLOB FleccLibSources "tests/*.tst")
+foreach(loop ${FleccLibSources})
   get_filename_component(name "${loop}" NAME_WE)
   add_stdin_test("${name}" "testrunner" "${loop}")
-ENDFOREACH()
+endforeach()
 
 # register source files for reformating
-SET(FormatBlacklist "${CMAKE_SOURCE_DIR}/src/utils/param_const.c")
-FILE(GLOB_RECURSE Sources "src/*.h" "src/*.c" "testrunner/*.h" "testrunner/*.c")
-LIST(REMOVE_ITEM Sources ${FormatBlacklist})
+set(FormatBlacklist "${CMAKE_SOURCE_DIR}/flecc_in_c/utils/param_const.c")
+file(GLOB_RECURSE Sources "flecc_in_c/*.h" "flecc_in_c/*.c" "testrunner/*.h" "testrunner/*.c")
+list(REMOVE_ITEM Sources ${FormatBlacklist})
 add_file_to_format(${Sources})
 
 #------------------------------------------------------------------------------
 # Print help dialog (assuming make based build system)
 #------------------------------------------------------------------------------
-HELP_MSG("---------------------------------------------------------------------")
-HELP_MSG("Configuration for ${CMAKE_PROJECT_NAME} ${VERSION_FULL} done.")
-HELP_MSG("INSTALL PREFIX:      ${CMAKE_INSTALL_PREFIX}")
-HELP_MSG("BUILD TYPE:          ${CMAKE_BUILD_TYPE}")
-HELP_MSG("")
-HELP_MSG("Available targets:")
-HELP_TARGET(install        "Installing the library.")
-HELP_TARGET(uninstall      "Uninstall the previously installed library.")
-HELP_TARGET(package        "Build and pack the library.")
-HELP_TARGET(package_source "Pack the source directory for distribution.")
-HELP_TARGET(suite          "Build the test suite.")
-HELP_TARGET(check          "Build and execute the test suite.")
-HELP_TARGET(doxygen        "Build doxygen documentation.")
-HELP_TARGET(covReset       "Delete coverate counter files.")
-HELP_TARGET(covGenerate    "Analyze counter files and generate report.")
-HELP_TARGET(coverage       "Reset Counters + run tests + generate report.")
-HELP_TARGET(format         "Format the source files using clang-format.")
-HELP_MSG("---------------------------------------------------------------------")
+help_msg("---------------------------------------------------------------------")
+help_msg("Configuration for ${CMAKE_PROJECT_NAME} ${VERSION_FULL} done.")
+help_msg("INSTALL PREFIX:      ${CMAKE_INSTALL_PREFIX}")
+help_msg("BUILD TYPE:          ${CMAKE_BUILD_TYPE}")
+help_msg("")
+help_msg("Available targets:")
+help_target(install        "Installing the library.")
+help_target(uninstall      "Uninstall the previously installed library.")
+help_target(package        "Build and pack the library.")
+help_target(package_source "Pack the source directory for distribution.")
+help_target(suite          "Build the test suite.")
+help_target(check          "Build and execute the test suite.")
+help_target(doxygen        "Build doxygen documentation.")
+help_target(covReset       "Delete coverate counter files.")
+help_target(covGenerate    "Analyze counter files and generate report.")
+help_target(coverage       "Reset Counters + run tests + generate report.")
+help_target(format         "Format the source files using clang-format.")
+help_msg("---------------------------------------------------------------------")
