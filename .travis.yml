@@ -1,8 +1,16 @@
 language: c
+sudo: required
+
+addons:
+  apt:
+    sources:
+    - george-edison55-precise-backports   # cmake 3.x
+    packages:
+    - cmake-data
+    - cmake
+    - lcov
 
 before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq lcov
   - gem install coveralls-lcov
 
 before_script:
