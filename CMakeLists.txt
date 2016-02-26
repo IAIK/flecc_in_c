@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.0.0)
 
 project(flecc_in_c C)
 set(VERSION_MAJOR "1")

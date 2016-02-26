@@ -4,7 +4,7 @@ sudo: required
 addons:
   apt:
     sources:
-    - kubuntu-backports                   # cmake 2.8.12
+    - george-edison55-precise-backports   # cmake 3.x
     packages:
     - cmake
     - lcov
