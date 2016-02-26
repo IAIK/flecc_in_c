@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 2.8.12)
 
 project(flecc_in_c C)
 set(VERSION_MAJOR "1")
-set(VERSION_MINOR "0")
-set(VERSION_PATCH "2")
+set(VERSION_MINOR "1")
+set(VERSION_PATCH "0")
 
 enable_language(ASM)
 
