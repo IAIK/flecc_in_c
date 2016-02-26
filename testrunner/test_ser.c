@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Stiftung Secure Information and 
+** Copyright (C) 2014 Stiftung Secure Information and
 **                    Communication Technologies SIC and
 **                    Graz University of Technology
 ** Contact: http://opensource.iaik.tugraz.at
@@ -22,7 +22,7 @@
 ** packaging of this file.  Please review the following information to
 ** ensure the GNU General Public License version 3.0 requirements will be
 ** met: http://www.gnu.org/copyleft/gpl.html.
-** 
+**
 ** This software is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
@@ -43,17 +43,17 @@
  */
 
 #include <stdio.h>
-#include "io/io.h"
-#include "bi/bi.h"
-#include "gfp/gfp.h"
-#include "utils/param.h"
-#include "utils/assert.h"
-#include "utils/performance.h"
-#include "eccp/eccp.h"
-#include "utils/parse.h"
-#include "protocols/protocols.h"
-#include "hash/sha1.h"
-#include "hash/sha2.h"
+#include <flecc_in_c/io/io.h>
+#include <flecc_in_c/bi/bi.h>
+#include <flecc_in_c/gfp/gfp.h>
+#include <flecc_in_c/utils/param.h>
+#include <flecc_in_c/utils/assert.h>
+#include <flecc_in_c/utils/performance.h>
+#include <flecc_in_c/eccp/eccp.h>
+#include <flecc_in_c/utils/parse.h>
+#include <flecc_in_c/protocols/protocols.h>
+#include <flecc_in_c/hash/sha1.h>
+#include <flecc_in_c/hash/sha2.h>
 
 //#define READ_BUFFER_SIZE 4*BYTES_PER_GFP+2*WORDS_PER_GFP+10
 #define READ_BUFFER_SIZE 10000
@@ -164,7 +164,7 @@ void read_eccp_affine_point( char *buffer,
 }
 
 /**
- * Reads parameters from the default input source. 
+ * Reads parameters from the default input source.
  * @param buffer the buffer to be used
  * @param buf_length the length of the buffer to be used
  * @param param the to-be-initialized elliptic curve parameters
@@ -180,7 +180,7 @@ void read_elliptic_curve_parameters (char *buffer, const int buf_length, eccp_pa
     }
     param->prime_data.words = WORDS_PER_BITS(param->prime_data.bits);
     param->prime_data.montgomery_domain = 1;
-    
+
     // 3. init the prime field
     read_bigint(buffer, buf_length, param->prime_data.prime, param->prime_data.words);
     gfp_mont_compute_R( param->prime_data.gfp_one, &( param->prime_data ) );
@@ -194,7 +194,7 @@ void read_elliptic_curve_parameters (char *buffer, const int buf_length, eccp_pa
     }
     param->order_n_data.words = WORDS_PER_BITS(param->order_n_data.bits);
     param->order_n_data.montgomery_domain = 0;
-    
+
     // 5. init the prime field for the group order
     read_bigint(buffer, buf_length, param->order_n_data.prime, param->order_n_data.words);
     gfp_mont_compute_R( param->order_n_data.gfp_one, &( param->order_n_data ) );
@@ -204,10 +204,10 @@ void read_elliptic_curve_parameters (char *buffer, const int buf_length, eccp_pa
     // 6. elliptic curve parameters
     read_gfp(buffer, buf_length, param->param_a, &param->prime_data, 1);
     read_gfp(buffer, buf_length, param->param_b, &param->prime_data, 1);
-    
+
     // 7. the co-factor
     read_bigint(buffer, buf_length, &param->h, WORDS_PER_BITS(32));
-    
+
     // 8. the base point
     read_gfp(buffer, buf_length, param->base_point.x, &param->prime_data, 1);
     read_gfp(buffer, buf_length, param->base_point.y, &param->prime_data, 1);
@@ -275,7 +275,7 @@ unsigned test_ser() {
         param_load( param, curve_params.curve_type );
     }
     length = curve_params.prime_data.words;
-    
+
     // TODO: BEAUTIFY!!!
     gfp_opt_3_init(&param->prime_data);
 

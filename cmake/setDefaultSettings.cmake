@@ -6,7 +6,7 @@
 # In addition to the default values toolchain variables are processed as well.
 # They are automatically appended to the CMAKE flags. Therefore the default
 # values are not used in this case.
-# 
+#
 # Processed variables:
 # * Defining of the default output directories for the different artifacts:
 #   DEFAULT_ARCHIVE_OUTPUT_DIRECTORY....directory for static libs
@@ -44,68 +44,76 @@
 #   ---
 #
 # Provided macros/functions:
-#   CACHE_WITH_DEFAULT..................cache the variable and use a default
+#   cache_with_default..................cache the variable and use a default
 #                                       value if it was empty
-#   CACHE_NEW_WITH_DEFAULT..............cache the variable and use a default
+#   cache_new_with_default..............cache the variable and use a default
 #                                       value if it was undefined
 #
 
 # enable the compilation database
-SET(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
+set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
 
 # helper macro to to export a variable to the cache
 # the variable is set to an default value when it was empty
-# e.g. CACHE_WITH_DEFAULT(MD_ENGINE "foo" "STRING" "The used markdown engine.")
-MACRO(CACHE_WITH_DEFAULT name default type description)
-  IF(NOT ${name})
-    SET("${name}" "${default}" CACHE "${type}" "${description}" FORCE)
-  ELSE()
-    SET("${name}" "${${name}}" CACHE "${type}" "${description}" FORCE)
-  ENDIF()
-ENDMACRO()
+# e.g. cache_with_default(MD_ENGINE "foo" "STRING" "The used markdown engine.")
+macro(cache_with_default name default type description)
+  if(NOT ${name})
+    set("${name}" "${default}" CACHE "${type}" "${description}" FORCE)
+  else()
+    set("${name}" "${${name}}" CACHE "${type}" "${description}" FORCE)
+  endif()
+endmacro()
 
 # helper macro to to export a variable to the cache
 # the variable is set to an default value when it was undefined
-# e.g. CACHE_WITH_DEFAULT(MD_ENGINE "foo" "STRING" "The used markdown engine.")
-MACRO(CACHE_NEW_WITH_DEFAULT name default type description)
-  IF(NOT DEFINED "${name}")
-    SET("${name}" "${default}" CACHE "${type}" "${description}" FORCE)
-  ELSE()
-    SET("${name}" "${${name}}" CACHE "${type}" "${description}" FORCE)
-  ENDIF()
-ENDMACRO()
+# e.g. cache_with_default(MD_ENGINE "foo" "STRING" "The used markdown engine.")
+macro(cache_new_with_default name default type description)
+  if(NOT DEFINED "${name}")
+    set("${name}" "${default}" CACHE "${type}" "${description}" FORCE)
+  else()
+    set("${name}" "${${name}}" CACHE "${type}" "${description}" FORCE)
+  endif()
+endmacro()
 
 # determine if the project is built as subproject of another project
-IF("SUB_PROJECT_${PROJECT_NAME}" OR NOT "${PROJECT_NAME}" STREQUAL "${CMAKE_PROJECT_NAME}")
-  SET(SUB_PROJECT TRUE)
-  CACHE_WITH_DEFAULT("SUB_PROJECT_${PROJECT_NAME}" "TRUE" "BOOL" "The project is built as subproject. (no install, no documentation, no format)")
-ENDIF()
-MARK_AS_ADVANCED("SUB_PROJECT_${PROJECT_NAME}")
+if("SUB_PROJECT_${PROJECT_NAME}" OR NOT "${PROJECT_NAME}" STREQUAL "${CMAKE_PROJECT_NAME}")
+  set(SUB_PROJECT TRUE)
+  cache_with_default("SUB_PROJECT_${PROJECT_NAME}"
+                     "TRUE"
+                     "BOOL"
+                     "The project is built as subproject. (no install, no documentation, no format)"
+  )
+  mark_as_advanced("SUB_PROJECT_${PROJECT_NAME}")
+endif()
 
 #------------------------------------------------------------------------------
 # Set build directories
 #------------------------------------------------------------------------------
 # place all the built static libraries into a common directory
-CACHE_WITH_DEFAULT(CMAKE_ARCHIVE_OUTPUT_DIRECTORY
+cache_with_default(CMAKE_ARCHIVE_OUTPUT_DIRECTORY
                    "${DEFAULT_ARCHIVE_OUTPUT_DIRECTORY}"
                    "PATH"
-                   "Single output directory for building all static and import libraries.")
+                   "Single output directory for building all static and import libraries."
+)
 
 # place all the built shared libraries into a common directory
-CACHE_WITH_DEFAULT(CMAKE_LIBRARY_OUTPUT_DIRECTORY
+cache_with_default(CMAKE_LIBRARY_OUTPUT_DIRECTORY
                    "${DEFAULT_LIBRARY_OUTPUT_DIRECTORY}"
                    "PATH"
-                   "Single output directory for building all shared libraries.")
+                   "Single output directory for building all shared libraries."
+)
 
 # place all the built binaries into a common directory
-CACHE_WITH_DEFAULT(CMAKE_RUNTIME_OUTPUT_DIRECTORY
+cache_with_default(CMAKE_RUNTIME_OUTPUT_DIRECTORY
                    "${DEFAULT_RUNTIME_OUTPUT_DIRECTORY}"
                    "PATH"
-                   "Single output directory for building all executables.")
+                   "Single output directory for building all executables."
+)
 
-MARK_AS_ADVANCED(CMAKE_ARCHIVE_OUTPUT_DIRECTORY
+mark_as_advanced(CMAKE_ARCHIVE_OUTPUT_DIRECTORY
                  CMAKE_LIBRARY_OUTPUT_DIRECTORY
-                 CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+                 CMAKE_RUNTIME_OUTPUT_DIRECTORY
+)
 
 #------------------------------------------------------------------------------
 # Set build type
@@ -113,62 +121,64 @@ MARK_AS_ADVANCED(CMAKE_ARCHIVE_OUTPUT_DIRECTORY
 # set the default build type to the value of ${TOOLCHAIN_BUILD_TYPE} or
 # ${DEFAULT_BUILD_TYPE}
 # (Values: None, Debug, Release, RelWithDebInfo, MinSizeRel)
-CACHE_WITH_DEFAULT(CMAKE_BUILD_TYPE
+cache_with_default(CMAKE_BUILD_TYPE
                    "${TOOLCHAIN_BUILD_TYPE}"
                    "STRING"
-                   "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel.")
+                   "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
+)
 
-CACHE_WITH_DEFAULT(CMAKE_BUILD_TYPE
+cache_with_default(CMAKE_BUILD_TYPE
                    "${DEFAULT_BUILD_TYPE}"
                    "STRING"
-                   "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel.")
+                   "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
+)
 
 #------------------------------------------------------------------------------
 # Set compiler flags
 #------------------------------------------------------------------------------
-IF("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
-  SET(CLANG "1")
-ENDIF()
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+  set(CLANG "1")
+endif()
 
 # set flags using the toolchain variables
 #----------------------------------------
-IF(TOOLCHAIN_C_FLAGS)
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${TOOLCHAIN_C_FLAGS}")
-ENDIF()
+if(TOOLCHAIN_C_FLAGS)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${TOOLCHAIN_C_FLAGS}")
+endif()
 
-IF(TOOLCHAIN_CXX_FLAGS)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TOOLCHAIN_CXX_FLAGS}")
-ENDIF()
+if(TOOLCHAIN_CXX_FLAGS)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TOOLCHAIN_CXX_FLAGS}")
+endif()
 
-IF(TOOLCHAIN_ASM_FLAGS)
-  SET(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} ${TOOLCHAIN_ASM_FLAGS}")
-ENDIF()
+if(TOOLCHAIN_ASM_FLAGS)
+  set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} ${TOOLCHAIN_ASM_FLAGS}")
+endif()
 
 # set flags using the default variables
 #----------------------------------------
-IF(NOT CMAKE_C_FLAGS)
-  IF((CMAKE_COMPILER_IS_GNUCC OR MINGW OR CLANG) AND DEFAULT_C_FLAGS_GCC)
-    SET(CMAKE_C_FLAGS "${DEFAULT_C_FLAGS_GCC}" CACHE STRING
+if(NOT CMAKE_C_FLAGS)
+  if((CMAKE_COMPILER_IS_GNUCC OR MINGW OR CLANG) AND DEFAULT_C_FLAGS_GCC)
+    set(CMAKE_C_FLAGS "${DEFAULT_C_FLAGS_GCC}" CACHE STRING
       "Flags used by the compiler during all build types." FORCE)
-  ENDIF()
+  endif()
 
-  IF(MSVC AND DEFAULT_C_FLAGS_MSVC)
-    SET(CMAKE_C_FLAGS "${DEFAULT_C_FLAGS_MSVC}" CACHE STRING
+  if(MSVC AND DEFAULT_C_FLAGS_MSVC)
+    set(CMAKE_C_FLAGS "${DEFAULT_C_FLAGS_MSVC}" CACHE STRING
       "Flags used by the compiler during all build types." FORCE)
-  ENDIF()
-ENDIF()
+  endif()
+endif()
 
-IF(NOT CMAKE_CXX_FLAGS)
-  IF((CMAKE_COMPILER_IS_GNUCC OR MINGW OR CLANG) AND DEFAULT_CXX_FLAGS_GCC)
-    SET(CMAKE_CXX_FLAGS "${DEFAULT_CXX_FLAGS_GCC}" CACHE STRING
+if(NOT CMAKE_CXX_FLAGS)
+  if((CMAKE_COMPILER_IS_GNUCC OR MINGW OR CLANG) AND DEFAULT_CXX_FLAGS_GCC)
+    set(CMAKE_CXX_FLAGS "${DEFAULT_CXX_FLAGS_GCC}" CACHE STRING
       "Flags used by the compiler during all build types." FORCE)
-  ENDIF()
+  endif()
 
-  IF(MSVC AND DEFAULT_CXX_FLAGS_MSVC)
-    SET(CMAKE_CXX_FLAGS "${DEFAULT_CXX_FLAGS_MSVC}" CACHE STRING
+  if(MSVC AND DEFAULT_CXX_FLAGS_MSVC)
+    set(CMAKE_CXX_FLAGS "${DEFAULT_CXX_FLAGS_MSVC}" CACHE STRING
       "Flags used by the compiler during all build types." FORCE)
-  ENDIF()
-ENDIF()
+  endif()
+endif()
 
 #------------------------------------------------------------------------------
 # Set linker flags
@@ -176,74 +186,74 @@ ENDIF()
 
 # set flags using the toolchain variables
 #----------------------------------------
-IF(TOOLCHAIN_LINKER_FLAGS)
-  SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${TOOLCHAIN_LINKER_FLAGS}")
-ENDIF()
+if(TOOLCHAIN_LINKER_FLAGS)
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${TOOLCHAIN_LINKER_FLAGS}")
+endif()
 
-IF(TOOLCHAIN_LINKER_FLAGS)
-  SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${TOOLCHAIN_LINKER_FLAGS}")
-ENDIF()
+if(TOOLCHAIN_LINKER_FLAGS)
+  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${TOOLCHAIN_LINKER_FLAGS}")
+endif()
 
 # set flags using the default variables
 #----------------------------------------
-IF(NOT CMAKE_EXE_LINKER_FLAGS)
-  IF((CMAKE_COMPILER_IS_GNUCC OR MINGW OR CLANG) AND DEFAULT_EXE_LINKER_FLAGS_GCC)
-    SET(CMAKE_EXE_LINKER_FLAGS "${DEFAULT_EXE_LINKER_FLAGS_GCC}" CACHE STRING
+if(NOT CMAKE_EXE_LINKER_FLAGS)
+  if((CMAKE_COMPILER_IS_GNUCC OR MINGW OR CLANG) AND DEFAULT_EXE_LINKER_FLAGS_GCC)
+    set(CMAKE_EXE_LINKER_FLAGS "${DEFAULT_EXE_LINKER_FLAGS_GCC}" CACHE STRING
       "Flags used by the linker." FORCE)
-  ENDIF()
+  endif()
 
-  IF(MSVC AND DEFAULT_EXE_LINKER_FLAGS_MSVC)
-    SET(CMAKE_EXE_LINKER_FLAGS "${DEFAULT_EXE_LINKER_FLAGS_MSVC}" CACHE STRING
+  if(MSVC AND DEFAULT_EXE_LINKER_FLAGS_MSVC)
+    set(CMAKE_EXE_LINKER_FLAGS "${DEFAULT_EXE_LINKER_FLAGS_MSVC}" CACHE STRING
       "Flags used by the linker." FORCE)
-  ENDIF()
-ENDIF()
+  endif()
+endif()
 
-IF(NOT CMAKE_SHARED_LINKER_FLAGS)
-  IF((CMAKE_COMPILER_IS_GNUCC OR MINGW OR CLANG) AND DEFAULT_SHARED_LINKER_FLAGS_GCC)
-    SET(CMAKE_SHARED_LINKER_FLAGS "${DEFAULT_SHARED_LINKER_FLAGS_GCC}" CACHE STRING
+if(NOT CMAKE_SHARED_LINKER_FLAGS)
+  if((CMAKE_COMPILER_IS_GNUCC OR MINGW OR CLANG) AND DEFAULT_SHARED_LINKER_FLAGS_GCC)
+    set(CMAKE_SHARED_LINKER_FLAGS "${DEFAULT_SHARED_LINKER_FLAGS_GCC}" CACHE STRING
       "Flags used by the linker during the creation of shared libs." FORCE)
-  ENDIF()
+  endif()
 
-  IF(MSVC AND DEFAULT_SHARED_LINKER_FLAGS_MSVC)
-    SET(CMAKE_SHARED_LINKER_FLAGS "${DEFAULT_SHARED_LINKER_FLAGS_MSVC}" CACHE STRING
+  if(MSVC AND DEFAULT_SHARED_LINKER_FLAGS_MSVC)
+    set(CMAKE_SHARED_LINKER_FLAGS "${DEFAULT_SHARED_LINKER_FLAGS_MSVC}" CACHE STRING
       "Flags used by the linker during the creation of shared libs." FORCE)
-  ENDIF()
-ENDIF()
+  endif()
+endif()
 
 #------------------------------------------------------------------------------
 # Enable optional features
 #------------------------------------------------------------------------------
 # add option to enable eclipse support (GCC only)
-IF(CMAKE_COMPILER_IS_GNUCC AND CMAKE_COMPILER_IS_GNUCXX AND DEFINED DEFAULT_ECLIPSE_SUPPORT_STATE)
-  OPTION(ENABLE_ECLIPSE_SUPPORT "Adds compile flags for easier error parsing." "${DEFAULT_ECLIPSE_SUPPORT_STATE}")
-ENDIF()
+if(CMAKE_COMPILER_IS_GNUCC AND CMAKE_COMPILER_IS_GNUCXX AND DEFINED DEFAULT_ECLIPSE_SUPPORT_STATE)
+  option(ENABLE_ECLIPSE_SUPPORT "Adds compile flags for easier error parsing." "${DEFAULT_ECLIPSE_SUPPORT_STATE}")
+endif()
 
 # when building with eclipse support add the specific compile flag
-IF(CMAKE_COMPILER_IS_GNUCC AND CMAKE_COMPILER_IS_GNUCXX AND ENABLE_ECLIPSE_SUPPORT)
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
-ENDIF()
+if(CMAKE_COMPILER_IS_GNUCC AND CMAKE_COMPILER_IS_GNUCXX AND ENABLE_ECLIPSE_SUPPORT)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
+endif()
 
 # add option to cross compile to 32-bit on a 64-bit mashine (GCC only)
-IF(CMAKE_SIZEOF_VOID_P EQUAL 8 AND (CMAKE_COMPILER_IS_GNUCC OR CLANG) AND DEFINED DEFAULT_32BIT_COMPILE_STATE)
-  OPTION(BUILD_32_BITS "Cross compile to 32-bit artifacts." "${DEFAULT_32BIT_COMPILE_STATE}")
-ENDIF()
+if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND (CMAKE_COMPILER_IS_GNUCC OR CLANG) AND DEFINED DEFAULT_32BIT_COMPILE_STATE)
+  option(BUILD_32_BITS "Cross compile to 32-bit artifacts." "${DEFAULT_32BIT_COMPILE_STATE}")
+endif()
 
 # when building for 32 bits add the specific compile flag (-m32 for gcc)
-IF(CMAKE_SIZEOF_VOID_P EQUAL 8 AND (CMAKE_COMPILER_IS_GNUCC OR CLANG) AND BUILD_32_BITS)
-  MESSAGE(STATUS "Building executables and libraries in 32 bits.")
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
-ENDIF()
+if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND (CMAKE_COMPILER_IS_GNUCC OR CLANG) AND BUILD_32_BITS)
+  message(STATUS "Building executables and libraries in 32 bits.")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
+endif()
 
 # add an option to specifiy a library install suffix
 # only on 64bit unix maschines
-SET(DEFAULT_LIBDIR_INSTALL_SUFFIX_INT "")
-IF(CMAKE_SIZEOF_VOID_P EQUAL 8 AND UNIX)
-  SET(DEFAULT_LIBDIR_INSTALL_SUFFIX_INT "64")
-ENDIF()
+set(DEFAULT_LIBDIR_INSTALL_SUFFIX_INT "")
+if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND UNIX)
+  set(DEFAULT_LIBDIR_INSTALL_SUFFIX_INT "64")
+endif()
 
-CACHE_NEW_WITH_DEFAULT(LIBDIR_INSTALL_SUFFIX
+cache_new_with_default(LIBDIR_INSTALL_SUFFIX
                        "${DEFAULT_LIBDIR_INSTALL_SUFFIX_INT}"
                        "STRING"
                        "Define suffix of library directory name (32/64)")

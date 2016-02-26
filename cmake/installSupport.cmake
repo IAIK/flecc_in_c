@@ -1,5 +1,5 @@
 # This script provides install related targets and functions. This includes
-# an simple uninstall target.
+# a simple uninstall target.
 #
 # Processed variables:
 #   SUB_PROJECT...........install_lib is a NOP in sub projects
@@ -8,30 +8,66 @@
 #   uninstall.............uninstalls files based on the install_manifest
 #
 # Provided macros/functions:
-#   install_lib...........wrapper for cmakes install function
+#   install_lib..................wrapper for cmakes install function
+#   export_and_install_config....Exports and installs config targets given a
+#                                export name.
 
-FUNCTION(install_lib)
-  IF(SUB_PROJECT)
-    RETURN()
-  ENDIF()
+function(install_lib)
+  if(SUB_PROJECT)
+    return()
+  endif()
   install(${ARGV})
-ENDFUNCTION()
+endfunction()
 
 # the master project is responsible for the installation
-IF(SUB_PROJECT)
-  RETURN()
-ENDIF()
+if(SUB_PROJECT)
+  return()
+endif()
 
-IF(WIN32)
+if(WIN32)
   list(APPEND CPACK_GENERATOR "NSIS" "ZIP")
-ENDIF()
+endif()
 
 # configure file which is needed for uninstall target
-CONFIGURE_FILE(
-  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+configure_file(
+  "${CMAKE_SOURCE_DIR}/cmake/scripts/cmake_uninstall.cmake.in"
+  "${CMAKE_BINARY_DIR}/cmake_uninstall.cmake"
   IMMEDIATE @ONLY)
 
 # add uninstall target to the make file
-ADD_CUSTOM_TARGET(uninstall
-  "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake") 
+add_custom_target(uninstall
+  "${CMAKE_COMMAND}" -P "${CMAKE_BINARY_DIR}/cmake_uninstall.cmake")
+
+function(export_and_install_config export_name)
+  include(CMakePackageConfigHelpers)
+  set(config_install_dir "lib${LIBDIR_INSTALL_SUFFIX}/cmake/${export_name}")
+  set(version_config "${CMAKE_BINARY_DIR}/${export_name}-config-version.cmake")
+  set(project_config "${CMAKE_BINARY_DIR}/${export_name}-config.cmake")
+
+  # generate the version, config and target files into the build directory
+  write_basic_package_version_file(
+    "${version_config}"
+    VERSION ${VERSION_FULL}
+    COMPATIBILITY AnyNewerVersion
+  )
+  configure_package_config_file(
+    "${CMAKE_SOURCE_DIR}/cmake/scripts/target-config.cmake.in"
+    "${project_config}"
+    INSTALL_DESTINATION "${config_install_dir}"
+  )
+  export(
+    EXPORT ${export_name}
+    FILE "${CMAKE_BINARY_DIR}/${export_name}-targets.cmake"
+  )
+
+  # install version, config and target files
+  install(
+    FILES "${version_config}" "${project_config}"
+    DESTINATION "${config_install_dir}"
+  )
+  install(
+    EXPORT "${export_name}"
+    DESTINATION "${config_install_dir}"
+    FILE "${export_name}-targets.cmake"
+  )
+endfunction()
