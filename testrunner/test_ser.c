@@ -69,7 +69,7 @@
  * @return the message length
  */
 int read_message( char *buffer, const int buf_length, uint8_t *message, const int message_length ) {
-    int nibbles = io_read( buffer, READ_BUFFER_SIZE );
+    int nibbles = io_gen_readline( buffer, READ_BUFFER_SIZE );
     return parse_hex_message( (char *)message, message_length, buffer, nibbles );
 }
 
@@ -80,7 +80,7 @@ int read_message( char *buffer, const int buf_length, uint8_t *message, const in
  * @return the integer that was read
  */
 int read_integer( char *buffer, const int buf_length ) {
-    io_read( buffer, buf_length );
+    io_gen_readline( buffer, buf_length );
     return parse_integer( buffer );
 }
 
@@ -109,7 +109,7 @@ int line_starts_with( const char *line, const char *to_compare ) {
  * @return the type of curve
  */
 curve_type_t read_curve_type( char *buffer, const int buf_length ) {
-    int length = io_read( buffer, buf_length );
+    int length = io_gen_readline( buffer, buf_length );
     return param_get_curve_type_from_name( buffer, length);
 }
 
@@ -121,7 +121,7 @@ curve_type_t read_curve_type( char *buffer, const int buf_length ) {
  * @param bi_length the length of the big integer to be read
  */
 void read_bigint( char *buffer, const int buf_length, uint_t *big_int, const int bi_length ) {
-    int len = io_read( buffer, buf_length );
+    int len = io_gen_readline( buffer, buf_length );
     bigint_parse_hex_var( big_int, bi_length, buffer, len );
 }
 
@@ -171,7 +171,7 @@ void read_eccp_affine_point( char *buffer,
  */
 void read_elliptic_curve_parameters (char *buffer, const int buf_length, eccp_parameters_t *param) {
     // 1. name of curve as string (discarded)
-    io_read(buffer, buf_length);
+    io_gen_readline(buffer, buf_length);
 
     // 2. number of bits of prime field
     read_bigint(buffer, buf_length, &param->prime_data.bits, WORDS_PER_BITS(32));
@@ -285,7 +285,7 @@ unsigned test_ser() {
     eccp_jacobian_point_multiply_COMB_WOZ_precompute(param);
 
     while( 1 ) {
-        io_read( buffer, READ_BUFFER_SIZE );
+        io_gen_readline( buffer, READ_BUFFER_SIZE );
 
         extract_test_id( test_id, 50, buffer );
 

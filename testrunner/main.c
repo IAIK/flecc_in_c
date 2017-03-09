@@ -41,9 +41,7 @@
 #include "test_ser.h"
 
 int main( void ) {
-    // FILE *fp = fopen("tests/bigint.tst", "r");
-    io_init( stdin, stdout );
-    io_print("testrunner started\n");
+    puts("testrunner started\n");
     unsigned errors = test_ser();
 
     return errors == 0 ? EXIT_SUCCESS : EXIT_FAILURE;

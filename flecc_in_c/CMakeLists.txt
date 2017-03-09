@@ -1,10 +1,6 @@
-# build the flecc_in_c library
-#-----------------------------------------
 file(GLOB_RECURSE Sources "*.c")
 
 add_library(flecc_in_c ${Sources})
-set_target_properties(flecc_in_c PROPERTIES SUFFIX "-${ARCHITECTURE}")
-target_compile_definitions(flecc_in_c INTERFACE "ARCHITECTURE=${ARCHITECTURE}")
 target_link_libraries(flecc_in_c ${STANDARD_MATH_LIBRARY})
 target_include_directories(flecc_in_c PRIVATE "."
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
