@@ -14,40 +14,42 @@
 #                                           is piped in via stdin
 #
 
-# the master project is responsible for testing
-if(SUB_PROJECT)
-  macro(add_to_suite)
-  endmacro()
-  macro(add_stdin_test)
-  endmacro()
-  return()
-endif()
-
-# enable the ctest support
-enable_testing()
-
-# add suite target which is used as meta target for building the tests
-if(NOT TARGET "suite")
-  add_custom_target("suite")
-endif()
-
-# add check command which calls ctest
-# it additionally depends on the suite target to build the test cases
-if(NOT TARGET "check")
-  add_custom_target("check" COMMAND ${CMAKE_CTEST_COMMAND}
-                            WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-                            COMMENT "Executing test suite.")
-  add_dependencies("check" "suite")
+if(NOT SUB_PROJECT)
+  # enable the ctest support
+  enable_testing()
 endif()
 
 # adds an arbitrary target to the test suite as building dependency
 macro(add_to_suite target)
+  if(SUB_PROJECT)
+    return()
+  endif()
+
+  # add suite target which is used as meta target for building the tests
+  if(NOT TARGET "suite")
+    add_custom_target("suite")
+  endif()
+
+  # add check command which calls ctest
+  # it additionally depends on the suite target to build the test cases
+  if(NOT TARGET "check")
+    add_custom_target("check" COMMAND ${CMAKE_CTEST_COMMAND}
+                              WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+                              COMMENT "Executing test suite.")
+    add_dependencies("check" "suite")
+  endif()
+
   add_dependencies("suite" ${target})
 endmacro()
 
 # adds a test with a file for stdin
 macro(add_stdin_test name target stdinfile)
+  if(SUB_PROJECT)
+    return()
+  endif()
+
   add_test(NAME "${name}"
-           COMMAND "${CMAKE_SOURCE_DIR}/cmake/scripts/run_with_stdin_pipe.sh"
-                   $<TARGET_FILE:${target}> "${stdinfile}")
+           COMMAND "${CMAKE_COMMAND}" -D "PROGRAM:STRING=$<TARGET_FILE:${target}>"
+                                      -D "INPUT_FILE:FILEPATH=${stdinfile}"
+                                      -P "${PROJECT_SOURCE_DIR}/cmake/scripts/run.cmake")
 endmacro()

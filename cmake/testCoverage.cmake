@@ -30,19 +30,18 @@ if(SUB_PROJECT)
   return()
 endif()
 
-# Only gcc is currently supported.
-if(NOT (CMAKE_COMPILER_IS_GNUCC OR MINGW) )
-  info_msg("Only gcc based compilers are supported for coverage testing.")
-  info_msg("Coverage testing will not be available.")
-  return()
+if(CLANG) # "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang"
+  find_program(LLVM_COV_COMMAND NAMES llvm-cov)
+  mark_as_advanced(LLVM_COV_COMMAND)
+  set(LCOV_GCOV_ARG --gcov-tool "${PROJECT_SOURCE_DIR}/cmake/scripts/llvm-gcov.sh")
 endif()
 
 # Search for lcov and genhtml and skip coverage support on error.
 find_program(LCOV_COMMAND NAMES lcov)
 find_program(GENHTML_COMMAND NAMES genhtml)
 mark_as_advanced(LCOV_COMMAND GENHTML_COMMAND)
-if(NOT LCOV_COMMAND OR NOT GENHTML_COMMAND)
-  info_msg("lcov and/or genhtml couldn't be found.")
+if(NOT LCOV_COMMAND OR NOT GENHTML_COMMAND OR (CLANG AND NOT LLVM_COV_COMMAND))
+  info_msg("lcov, genhtml, or llvm-cov couldn't be found.")
   info_msg("Coverage testing will not be available.")
   return()
 endif()
@@ -50,9 +49,9 @@ endif()
 # add option to enable coverage builds
 option(TEST_COVERAGE "Adds compile flags coverage testing." "OFF")
 if(TEST_COVERAGE)
-  set(CMAKE_C_FLAGS          "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
-  set(CMAKE_CXX_FLAGS        "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lgcov")
+  set(CMAKE_C_FLAGS          "${CMAKE_C_FLAGS} --coverage")
+  set(CMAKE_CXX_FLAGS        "${CMAKE_CXX_FLAGS} --coverage")
+  # C and CXX FLAGS are also used during linking
 else()
   return()
 endif()
@@ -88,10 +87,10 @@ add_custom_target(covGenerate
                   COMMAND "${CMAKE_COMMAND}" -E remove "${COVERAGE_OUTPUT_DIR}/base.info"
                   COMMAND "${CMAKE_COMMAND}" -E remove "${COVERAGE_OUTPUT_DIR}/coverage.info"
                   COMMAND "${CMAKE_COMMAND}" -E remove "${COVERAGE_OUTPUT_DIR}/${CMAKE_PROJECT_NAME}.info"
-                  COMMAND "${LCOV_COMMAND}" -i -c -d "${PROJECT_BINARY_DIR}" -o "${COVERAGE_OUTPUT_DIR}/base.info"
-                  COMMAND "${LCOV_COMMAND}" -c -d "${PROJECT_BINARY_DIR}" -o "${COVERAGE_OUTPUT_DIR}/coverage.info"
-                  COMMAND "${LCOV_COMMAND}" -a "${COVERAGE_OUTPUT_DIR}/base.info" -a "${COVERAGE_OUTPUT_DIR}/coverage.info" -o "${COVERAGE_OUTPUT_DIR}/${CMAKE_PROJECT_NAME}.info"
-                  COMMAND "${LCOV_COMMAND}" -r "${COVERAGE_OUTPUT_DIR}/${CMAKE_PROJECT_NAME}.info" "/usr/include/*" -o "${COVERAGE_OUTPUT_DIR}/${CMAKE_PROJECT_NAME}.info"
+                  COMMAND "${LCOV_COMMAND}" ${LCOV_GCOV_ARG} -i -c -d "${PROJECT_BINARY_DIR}" -o "${COVERAGE_OUTPUT_DIR}/base.info"
+                  COMMAND "${LCOV_COMMAND}" ${LCOV_GCOV_ARG} -c -d "${PROJECT_BINARY_DIR}" -o "${COVERAGE_OUTPUT_DIR}/coverage.info"
+                  COMMAND "${LCOV_COMMAND}" ${LCOV_GCOV_ARG} -a "${COVERAGE_OUTPUT_DIR}/base.info" -a "${COVERAGE_OUTPUT_DIR}/coverage.info" -o "${COVERAGE_OUTPUT_DIR}/${CMAKE_PROJECT_NAME}.info"
+                  COMMAND "${LCOV_COMMAND}" ${LCOV_GCOV_ARG} -r "${COVERAGE_OUTPUT_DIR}/${CMAKE_PROJECT_NAME}.info" "/usr/include/*" -o "${COVERAGE_OUTPUT_DIR}/${CMAKE_PROJECT_NAME}.info"
                   COMMAND "${CMAKE_COMMAND}" -E chdir "${COVERAGE_OUTPUT_DIR}" "${GENHTML_COMMAND}" -p "${PROJECT_SOURCE_DIR}" "${CMAKE_PROJECT_NAME}.info"
                   WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
                   COMMENT "Collect coverage data and generate HTML."
@@ -99,8 +98,9 @@ add_custom_target(covGenerate
 )
 
 add_custom_target(coverage
+                  COMMAND "${CMAKE_COMMAND}" "--build" "." "--target" "suite"
                   COMMAND "${CMAKE_COMMAND}" "--build" "." "--target" "covReset"
-                  COMMAND "${CMAKE_CTEST_COMMAND}"
+                  COMMAND "${CMAKE_COMMAND}" -D "PROGRAM:STRING=${CMAKE_CTEST_COMMAND}" -D "RETURN_VALUE:STRING=ZERO" -P "${PROJECT_SOURCE_DIR}/cmake/scripts/run.cmake"
                   COMMAND "${CMAKE_COMMAND}" "--build" "." "--target" "covGenerate"
                   WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
                   VERBATIM

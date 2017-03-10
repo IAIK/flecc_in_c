@@ -30,22 +30,22 @@ include(versionSupport)              # build up version strings
 #------------------------------------------------------------------------------
 # Project config
 #------------------------------------------------------------------------------
-set(CPACK_GENERATOR "TGZ")
-set(CPACK_SOURCE_GENERATOR "TGZ")
-set(CPACK_SOURCE_IGNORE_FILES "${PROJECT_BINARY_DIR}/" "/[.]git/")
-include(CPack)
-
-option(INSTALL_DOXYGEN "Install the doxygen documentation with the library." OFF)
-if(INSTALL_DOXYGEN)
-  # hack to build the doxygen documentation before installing
-  install_lib(CODE "execute_process(COMMAND ${CMAKE_COMMAND} --build . --target doxygen WORKING_DIRECTORY \"${CMAKE_CURRENT_BINARY_DIR}\")")
-  install_lib(DIRECTORY "${DOXYGEN_OUTPUT_DIR}/" DESTINATION "share/doc/flecc_in_c-${VERSION_FULL}/doxygen")
-endif()
-
 add_subdirectory(include)
 add_subdirectory(src)
 
 if(NOT SUB_PROJECT)
+  set(CPACK_GENERATOR "TGZ")
+  set(CPACK_SOURCE_GENERATOR "TGZ")
+  set(CPACK_SOURCE_IGNORE_FILES "${PROJECT_BINARY_DIR}/" "/[.]git/")
+  include(CPack)
+
+  option(INSTALL_DOXYGEN "Install the doxygen documentation with the library." OFF)
+  if(INSTALL_DOXYGEN)
+    # hack to build the doxygen documentation before installing
+    install_lib(CODE "execute_process(COMMAND ${CMAKE_COMMAND} --build . --target doxygen WORKING_DIRECTORY \"${CMAKE_CURRENT_BINARY_DIR}\")")
+    install_lib(DIRECTORY "${DOXYGEN_OUTPUT_DIR}/" DESTINATION "share/doc/flecc_in_c-${VERSION_FULL}/doxygen")
+  endif()
+
   add_subdirectory(testrunner EXCLUDE_FROM_ALL)
 
   # generate a test target

@@ -30,6 +30,7 @@ set(GIT_SHORT_HASH  "")
 set(GIT_COMBINED_SHORT_HASH "")
 
 if(GIT_COMMAND)
+  SET(ENV{LC_ALL} "C")
   # fetch the hash from the last commit
   execute_process(COMMAND "${GIT_COMMAND}" "log" "--pretty=format:%h" "-1"
                   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}

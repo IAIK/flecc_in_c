@@ -32,14 +32,6 @@
 #   DEFAULT_SHARED_LINKER_FLAGS_GCC.....flags for linking shared libs with GCC
 #   DEFAULT_SHARED_LINKER_FLAGS_MSVC....flags for linking shared libs with MSVC
 #
-# * Enables optional features when the variable is set
-#   DEFAULT_ECLIPSE_SUPPORT_STATE.......(ON/OFF) adds compiler flags for better
-#                                       error parsing when using eclipse
-#                                       (GCC only)
-#   DEFAULT_32BIT_COMPILE_STATE.........(ON/OFF) adds compiler flags for doing
-#                                       a cross compile to 32-bit while using
-#                                       a 64-bit compiler (GCC only)
-#
 # Provided targets:
 #   ---
 #
@@ -76,7 +68,7 @@ macro(cache_new_with_default name default type description)
 endmacro()
 
 # determine if the project is built as subproject of another project
-if("SUB_PROJECT_${PROJECT_NAME}" OR NOT "${PROJECT_NAME}" STREQUAL "${CMAKE_PROJECT_NAME}")
+if(SUB_PROJECT_${PROJECT_NAME} OR NOT "${PROJECT_NAME}" STREQUAL "${CMAKE_PROJECT_NAME}")
   set(SUB_PROJECT TRUE)
   cache_with_default("SUB_PROJECT_${PROJECT_NAME}"
                      "TRUE"
@@ -223,37 +215,17 @@ endif()
 #------------------------------------------------------------------------------
 # Enable optional features
 #------------------------------------------------------------------------------
-# add option to enable eclipse support (GCC only)
-if(CMAKE_COMPILER_IS_GNUCC AND CMAKE_COMPILER_IS_GNUCXX AND DEFINED DEFAULT_ECLIPSE_SUPPORT_STATE)
-  option(ENABLE_ECLIPSE_SUPPORT "Adds compile flags for easier error parsing." "${DEFAULT_ECLIPSE_SUPPORT_STATE}")
-endif()
-
-# when building with eclipse support add the specific compile flag
-if(CMAKE_COMPILER_IS_GNUCC AND CMAKE_COMPILER_IS_GNUCXX AND ENABLE_ECLIPSE_SUPPORT)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
-endif()
-
-# add option to cross compile to 32-bit on a 64-bit mashine (GCC only)
-if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND (CMAKE_COMPILER_IS_GNUCC OR CLANG) AND DEFINED DEFAULT_32BIT_COMPILE_STATE)
-  option(BUILD_32_BITS "Cross compile to 32-bit artifacts." "${DEFAULT_32BIT_COMPILE_STATE}")
-endif()
-
-# when building for 32 bits add the specific compile flag (-m32 for gcc)
-if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND (CMAKE_COMPILER_IS_GNUCC OR CLANG) AND BUILD_32_BITS)
-  message(STATUS "Building executables and libraries in 32 bits.")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
-endif()
-
 # add an option to specifiy a library install suffix
-# only on 64bit unix maschines
 set(DEFAULT_LIBDIR_INSTALL_SUFFIX_INT "")
-if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND UNIX)
-  set(DEFAULT_LIBDIR_INSTALL_SUFFIX_INT "64")
+if(NOT CMAKE_CROSSCOMPILING AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND EXISTS "/usr/lib64")
+    set(DEFAULT_LIBDIR_INSTALL_SUFFIX_INT "64")
+  elseif(CMAKE_SIZEOF_VOID_P EQUAL 4 AND EXISTS "/usr/lib32")
+    set(DEFAULT_LIBDIR_INSTALL_SUFFIX_INT "32")
+  endif()
 endif()
 
 cache_new_with_default(LIBDIR_INSTALL_SUFFIX
                        "${DEFAULT_LIBDIR_INSTALL_SUFFIX_INT}"
                        "STRING"
-                       "Define suffix of library directory name (32/64)")
+                       "Define suffix of library directory name (e.g., 32 or 64)")
