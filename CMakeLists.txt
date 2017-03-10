@@ -43,24 +43,6 @@ set(CPACK_SOURCE_GENERATOR "TGZ")
 set(CPACK_SOURCE_IGNORE_FILES "${PROJECT_BINARY_DIR}/" "/[.]git/")
 include(CPack)
 
-find_package( StandardMathLibrary REQUIRED )
-
-# build the flecc_in_c library
-#-----------------------------------------
-file(GLOB_RECURSE FleccLibSources "flecc_in_c/*.c")
-set(LIBNAME "${CMAKE_PROJECT_NAME}-${ARCHITECTURE}")
-add_library("${LIBNAME}" ${FleccLibSources})
-target_compile_definitions("${LIBNAME}" INTERFACE "ARCHITECTURE=${ARCHITECTURE}")
-target_link_libraries("${LIBNAME}" ${STANDARD_MATH_LIBRARY})
-target_include_directories("${LIBNAME}" PRIVATE "flecc_in_c"
-  PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
-         $<INSTALL_INTERFACE:include>)
-
-install_lib(TARGETS "${LIBNAME}" EXPORT "${CMAKE_PROJECT_NAME}" DESTINATION "lib${LIBDIR_INSTALL_SUFFIX}")
-install_lib(DIRECTORY "flecc_in_c/" DESTINATION "include/flecc_in_c"
-                         FILES_MATCHING PATTERN "*.h")
-export_and_install_config("${CMAKE_PROJECT_NAME}")
-
 option(INSTALL_DOXYGEN "Install the doxygen documentation with the library." OFF)
 if(INSTALL_DOXYGEN)
   # hack to build the doxygen documentation before installing
@@ -68,27 +50,21 @@ if(INSTALL_DOXYGEN)
   install_lib(DIRECTORY "${DOXYGEN_OUTPUT_DIR}/" DESTINATION "share/doc/flecc_in_c-${VERSION_FULL}/doxygen")
 endif()
 
-# build the test runner
-#-----------------------------------------
-file(GLOB TestrunnerSources "testrunner/*.c")
-add_executable("testrunner" EXCLUDE_FROM_ALL ${TestrunnerSources})
-target_link_libraries("testrunner" "${LIBNAME}")
-add_to_suite("testrunner")
+find_package( StandardMathLibrary REQUIRED )
 
-# build the test ecdlp
-#-----------------------------------------
-find_package( Threads REQUIRED )
-file(GLOB TestrunnerSources "test_ecdlp/*.c")
-add_executable("test_ecdlp" EXCLUDE_FROM_ALL ${TestrunnerSources})
-target_link_libraries("test_ecdlp" "${LIBNAME}" ${CMAKE_THREAD_LIBS_INIT})
+add_subdirectory(flecc_in_c)
 
-# generate a test target
-#-----------------------------------------
-file(GLOB FleccLibSources "tests/*.tst")
-foreach(loop ${FleccLibSources})
-  get_filename_component(name "${loop}" NAME_WE)
-  add_stdin_test("${name}" "testrunner" "${loop}")
-endforeach()
+if(NOT SUB_PROJECT)
+  add_subdirectory(testrunner EXCLUDE_FROM_ALL)
+
+  # generate a test target
+  #-----------------------------------------
+  file(GLOB FleccLibSources "tests/*.tst")
+  foreach(loop ${FleccLibSources})
+    get_filename_component(name "${loop}" NAME_WE)
+    add_stdin_test("${name}" testrunner "${loop}")
+  endforeach()
+endif()
 
 # register source files for reformating
 set(FormatBlacklist "${CMAKE_SOURCE_DIR}/flecc_in_c/utils/param_const.c")

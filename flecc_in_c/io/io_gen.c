@@ -78,7 +78,7 @@ char *print_uint_to_buffer( char *buffer, const uint_t u ) {
 void io_gen_write( const char *buffer, const int length ) {
     int i;
     for( i = 0; i < length; i++ ) {
-        io_write_byte( buffer[i] );
+        putchar( buffer[i] );
     }
 }
 
@@ -94,35 +94,11 @@ int io_gen_readline( char *buffer, const int length ) {
     uint8_t byte;
 
     do {
-        byte = io_read_byte();
-        // happens only in netbeans copy-paste
-        if(byte == 255)
-            continue;
+        byte = getchar();
         buffer[i++] = byte;
     } while( byte != '\n' && i < length );
 
     return i;
-}
-
-/**
- * Prints a NULL-terminated character string to the default output.
- * @param buffer the character string to be printed
- */
-void io_print( const char *buffer ) {
-    while( *buffer ) {
-        io_write_byte( *buffer++ );
-    }
-}
-
-/**
- * Prints a NULL-terminated character string to the default
- * output and appends a newline.
- * @param buffer the character string to be printed
- */
-void io_println( const char *buffer ) {
-    io_print( buffer );
-    //	io_print("\r\n");
-    io_print( "\n" );
 }
 
 /**
@@ -149,7 +125,8 @@ void io_sprint_bytes_var( char *buffer, const uint8_t *value, const int length )
 void io_print_bigint_var( const uint_t *value, const int length ) {
     char buffer[BYTES_PER_GFP * 4 + WORDS_PER_GFP * 2 + 10];
     bigint_print_var( buffer, value, length );
-    io_println( buffer );
+    puts( buffer );
+    putchar('\n');
 }
 
 /**
@@ -160,7 +137,8 @@ void io_print_bigint_var( const uint_t *value, const int length ) {
 void io_print_bytes_var( const uint8_t *value, const int length ) {
     char buffer[BYTES_PER_GFP * 2 + WORDS_PER_GFP + 1]; // TODO: correct size
     io_sprint_bytes_var( buffer, value, length );
-    io_println( buffer );
+    puts( buffer );
+    putchar('\n');
 }
 
 /**
@@ -171,7 +149,8 @@ void io_print_integer( const uint_t value ) {
     char buffer[BYTES_PER_WORD * 2 + 1];
     print_uint_to_buffer( buffer, value );
     buffer[2 * BYTES_PER_WORD] = 0;
-    io_println( buffer );
+    puts( buffer );
+    putchar('\n');
 }
 
 /**

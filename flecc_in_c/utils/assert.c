@@ -35,8 +35,9 @@
 **
 ****************************************************************************/
 
-#include "../io/io.h"
 #include "../bi/bi.h"
+#include "../io/io.h"
+#include <stdio.h>
 
 /**
  * Compares two byte arrays of defined length.
@@ -67,13 +68,13 @@ int compare_bytes( const uint8_t *a, const uint8_t *b, const int length ) {
  * @return false (=0) on success, true (!=0) on error
  */
 int assert( const char *test_id, const int condition ) {
-    io_print( "Test " );
-    io_print( test_id );
+    puts( "Test " );
+    puts( test_id );
     if( condition ) {
-        io_println( ": success" );
+        puts( ": success\n" );
         return 0;
     } else {
-        io_println( ": error" );
+        puts( ": error\n" );
         return 1;
     }
 }
@@ -94,11 +95,11 @@ int assert_bigint( const char *test_id, const uint_t *expected, const uint_t *to
     if( comp != 0 ) {
         uint_t diff[2 * WORDS_PER_GFP];
         bigint_xor_var( diff, expected, to_test, length );
-        io_print( "    expected: " );
+        puts( "    expected: " );
         io_print_bigint_var( expected, length );
-        io_print( "    actual:   " );
+        puts( "    actual:   " );
         io_print_bigint_var( to_test, length );
-        io_print( "    diff:     " );
+        puts( "    diff:     " );
         io_print_bigint_var( diff, length );
         return 1;
     }
@@ -117,9 +118,9 @@ int assert_integer( const char *test_id, const int expected, const int to_test )
     int comp = ( expected == to_test );
     assert( test_id, comp );
     if( comp == 0 ) {
-        io_print( "    expected: " );
+        puts( "    expected: " );
         io_print_integer( expected );
-        io_print( "    actual:   " );
+        puts( "    actual:   " );
         io_print_integer( to_test );
         return 1;
     }
@@ -139,9 +140,9 @@ int assert_byte_array( const char *test_id, const uint8_t *expected, const uint8
     int comp = compare_bytes( expected, to_test, length );
     assert( test_id, comp == 0 );
     if( comp != 0 ) {
-        io_print( "    expected: " );
+        puts( "    expected: " );
         io_print_bytes_var( expected, length );
-        io_print( "    actual:   " );
+        puts( "    actual:   " );
         io_print_bytes_var( to_test, length );
         return 1;
     }

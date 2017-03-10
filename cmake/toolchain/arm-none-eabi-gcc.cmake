@@ -24,5 +24,5 @@ SET(ARCHITECTURE "ARCH_CORTEXM0"
 # extend the compile flags with the needed parameters
 SET(TOOLCHAIN_C_FLAGS      "-mcpu=${CPU} -mthumb -ffunction-sections -fdata-sections")
 SET(TOOLCHAIN_CXX_FLAGS    "-mcpu=${CPU} -mthumb -ffunction-sections -fdata-sections")
-SET(TOOLCHAIN_LINKER_FLAGS "-mcpu=${CPU} -mthumb -Wl,-static -u _sbrk -Wl,-gc-sections -Wl,-lnosys -Wl,-T../linker/cortexm0.ld -nostartfiles --specs=nano.specs")
+SET(TOOLCHAIN_LINKER_FLAGS "-mcpu=${CPU} -mthumb -Wl,-gc-sections")
 # SET(TOOLCHAIN_LINKER_FLAGS "-mcpu=${CPU} -mthumb -Wl,-static -Wl,-gc-sections -Wl,-Tsrc/arch/arm_cortex_m0_gcc/cm0.ld --specs=nano.specs")
