@@ -43,8 +43,8 @@ extern "C" {
 #endif
 
 #include "../types.h"
-    
-void gfp_opt_3_init(gfp_prime_data_t *prime_data_local);
+
+void gfp_opt_3_init( gfp_prime_data_t *prime_data_local );
 void gfp_opt_3_add( gfp_t res, const gfp_t a, const gfp_t b );
 void gfp_opt_3_subtract( gfp_t res, const gfp_t a, const gfp_t b );
 void gfp_opt_3_multiply( gfp_t res, const gfp_t a, const gfp_t b );

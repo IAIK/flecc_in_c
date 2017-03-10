@@ -119,16 +119,19 @@ typedef struct {
 typedef enum _curve_type_t { UNKNOWN, SECP192R1, SECP224R1, SECP256R1, SECP384R1, SECP521R1, CUSTOM } curve_type_t;
 
 /** function point to a gfp operation (TODO: integrate into eccp_parameters_t) */
-typedef void (*gfp_operation_t)(gfp_t, const gfp_t, const gfp_t, const gfp_prime_data_t*);
+typedef void ( *gfp_operation_t )( gfp_t, const gfp_t, const gfp_t, const gfp_prime_data_t * );
 
 /** Parameters needed to do elliptic curve computations. */
 struct _eccp_parameters_t_;
 
 /** typedef of function pointer to an optimized eccp scalar multiplication (used in eccp_parameters_t) */
-typedef void (*eccp_mul_t)(eccp_point_affine_t *,const eccp_point_affine_t*,const gfp_t,const struct _eccp_parameters_t_*);
+typedef void ( *eccp_mul_t )( eccp_point_affine_t *,
+                              const eccp_point_affine_t *,
+                              const gfp_t,
+                              const struct _eccp_parameters_t_ * );
 
 /** typedef of function pointer to an optimized scalar multiplication with constant point (used in eccp_parameters_t). */
-typedef void (*eccp_mul_const_t)(eccp_point_affine_t *,const gfp_t,const struct _eccp_parameters_t_*);
+typedef void ( *eccp_mul_const_t )( eccp_point_affine_t *, const gfp_t, const struct _eccp_parameters_t_ * );
 
 /** Parameters needed to do elliptic curve computations. */
 typedef struct _eccp_parameters_t_ {

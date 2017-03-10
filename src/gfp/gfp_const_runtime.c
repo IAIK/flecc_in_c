@@ -49,11 +49,10 @@
 void gfp_cr_add( gfp_t res, const gfp_t a, const gfp_t b, const gfp_prime_data_t *prime_data ) {
     gfp_t temp;
     int carry = bigint_add_var( res, a, b, prime_data->words );
-    int carry2 = 1 + bigint_subtract_var(temp, res, prime_data->prime, prime_data->words);
-    
-    bigint_cr_select_2(res, res, temp, carry | carry2, prime_data->words);
-}
+    int carry2 = 1 + bigint_subtract_var( temp, res, prime_data->prime, prime_data->words );
 
+    bigint_cr_select_2( res, res, temp, carry | carry2, prime_data->words );
+}
 
 /**
  * Subtract b from a, store it in res, use the modulo IN CONSTANT TIME.
@@ -67,8 +66,8 @@ void gfp_cr_subtract( gfp_t res, const gfp_t a, const gfp_t b, const gfp_prime_d
     gfp_t temp;
     int carry = -bigint_subtract_var( res, a, b, prime_data->words );
     bigint_add_var( temp, res, prime_data->prime, prime_data->words );
-    
-    bigint_cr_select_2(res, res, temp, carry, prime_data->words);
+
+    bigint_cr_select_2( res, res, temp, carry, prime_data->words );
 }
 
 /**
@@ -120,8 +119,8 @@ void gfp_cr_mont_multiply_sos( gfp_t res, const gfp_t a, const gfp_t b, const gf
         }
         global_carry += carry;
     }
-    carry = 1 + bigint_subtract_var(temp_buffer, temp_buffer + length, prime_data->prime, length);
-    bigint_cr_select_2(res, temp_buffer + length, temp_buffer, global_carry | carry, prime_data->words);
+    carry = 1 + bigint_subtract_var( temp_buffer, temp_buffer + length, prime_data->prime, length );
+    bigint_cr_select_2( res, temp_buffer + length, temp_buffer, global_carry | carry, prime_data->words );
 }
 
 /**
@@ -136,7 +135,7 @@ void gfp_cr_halving( gfp_t res, const gfp_t a, const gfp_prime_data_t *prime_dat
     uint_t do_addition = a[0] & 1;
     gfp_t temp;
     uint_t carry = bigint_add_var( temp, a, prime_data->prime, prime_data->words );
-    bigint_cr_select_2(res, a, temp, do_addition, prime_data->words);
+    bigint_cr_select_2( res, a, temp, do_addition, prime_data->words );
 
     bigint_shift_right_one_var( res, res, prime_data->words );
     carry &= do_addition;
@@ -152,6 +151,6 @@ void gfp_cr_halving( gfp_t res, const gfp_t a, const gfp_prime_data_t *prime_dat
 void gfp_cr_negate( gfp_t res, const gfp_t a, const gfp_prime_data_t *prime_data ) {
     gfp_t temp;
     bigint_subtract_var( temp, prime_data->prime, a, prime_data->words );
-    int is_zero = bigint_cr_is_zero_var(a, prime_data->words);
-    bigint_cr_select_2(res, temp, a, is_zero, prime_data->words);
+    int is_zero = bigint_cr_is_zero_var( a, prime_data->words );
+    bigint_cr_select_2( res, temp, a, is_zero, prime_data->words );
 }

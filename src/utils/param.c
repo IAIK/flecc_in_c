@@ -101,23 +101,23 @@ const uint_t SECP521R1_PRIME[17] = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFF
  * @param length2 length of second buffer
  * @return
  */
-int string_max_buffer_match(const char *buffer1, const size_t length1, const char *buffer2, const size_t length2) {
+int string_max_buffer_match( const char *buffer1, const size_t length1, const char *buffer2, const size_t length2 ) {
     size_t i, min_length;
-    char *buffer1_ = (char*) buffer1;
-    char *buffer2_ = (char*) buffer2;
-    
+    char *buffer1_ = (char *)buffer1;
+    char *buffer2_ = (char *)buffer2;
+
     min_length = length1;
-    if (length2 < length1) {
+    if( length2 < length1 ) {
         min_length = length2;
     }
-    
-    for(i = 0; i < min_length-1; i++) {
-        if(*buffer1_ != *buffer2_)
+
+    for( i = 0; i < min_length - 1; i++ ) {
+        if( *buffer1_ != *buffer2_ )
             break;
         buffer1_++;
         buffer2_++;
     }
-    
+
     return *buffer1_ - *buffer2_;
 }
 
@@ -126,13 +126,13 @@ int string_max_buffer_match(const char *buffer1, const size_t length1, const cha
  * @param buffer the string defining the type of curve
  * @return type of curve
  */
-curve_type_t param_get_curve_type_from_name( const char *buffer , const int buffer_length ) {
+curve_type_t param_get_curve_type_from_name( const char *buffer, const int buffer_length ) {
     curve_type_t curve = UNKNOWN;
 
-    if(buffer_length == 0) {
+    if( buffer_length == 0 ) {
         return curve;
     }
-    
+
     if( string_max_buffer_match( buffer, buffer_length, "secp192r1", 9 ) == 0 ) {
         curve = SECP192R1;
     } else if( string_max_buffer_match( buffer, buffer_length, "secp224r1", 9 ) == 0 ) {
@@ -328,13 +328,12 @@ void param_load( eccp_parameters_t *param, const curve_type_t type ) {
         bigint_copy_var( param->base_point.y, SECP521R1_BASE_Y, bi_length );
         param->base_point.identity = 0;
     } else {
-        memset(param, 0, sizeof(eccp_parameters_t));
+        memset( param, 0, sizeof( eccp_parameters_t ) );
     }
-    
+
     param->curve_type = type;
     param->eccp_mul = &eccp_protected_point_multiply;
     param->eccp_mul_base_point = NULL;
     param->base_point_precomputed_table = NULL;
     param->base_point_precomputed_table_width = 0;
-    
 }

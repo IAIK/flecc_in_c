@@ -320,7 +320,7 @@ int bigint_is_zero_var( const uint_t *a, const int length ) {
  */
 int bigint_is_one_var( const uint_t *a, const int length ) {
     int i;
-    if( a[0] != 1)
+    if( a[0] != 1 )
         return 0;
     for( i = 1; i < length; i++ ) {
         if( a[i] != 0 )

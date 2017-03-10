@@ -47,7 +47,7 @@ typedef struct {
     uint_t order_n_bits;
 } eccp_param_in_const_mem_t;
 
-curve_type_t param_get_curve_type_from_name( const char *buffer, const int buffer_length);
+curve_type_t param_get_curve_type_from_name( const char *buffer, const int buffer_length );
 void param_load( eccp_parameters_t *param, const curve_type_t type );
 
 void param_load_from_const_mem( eccp_parameters_t *param, eccp_param_in_const_mem_t *param_in_mem );

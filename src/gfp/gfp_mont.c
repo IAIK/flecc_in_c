@@ -187,16 +187,16 @@ void gfp_mont_inverse_binary( gfp_t res, const gfp_t a, const gfp_prime_data_t *
  * @param to_invert the number to invert
  * @param prime_data the prime number data to reduce the result
  */
-void gfp_mont_inverse_fermat( gfp_t result, const gfp_t to_invert, const gfp_prime_data_t *prime_data) {
+void gfp_mont_inverse_fermat( gfp_t result, const gfp_t to_invert, const gfp_prime_data_t *prime_data ) {
     gfp_t exponent;
     gfp_t two;
-    
-    bigint_copy_var(exponent, prime_data->prime, prime_data->words);
-    bigint_clear_var(two, prime_data->words);
+
+    bigint_copy_var( exponent, prime_data->prime, prime_data->words );
+    bigint_clear_var( two, prime_data->words );
     two[0] = 2;
-    bigint_subtract_var(exponent, exponent, two, prime_data->words);
-    
-    gfp_mont_exponent(result, to_invert, exponent, prime_data->words, prime_data);
+    bigint_subtract_var( exponent, exponent, two, prime_data->words );
+
+    gfp_mont_exponent( result, to_invert, exponent, prime_data->words, prime_data );
 }
 
 /**
@@ -207,7 +207,8 @@ void gfp_mont_inverse_fermat( gfp_t result, const gfp_t to_invert, const gfp_pri
  * @param exponent_length the number of words needed to represent the exponent
  * @param prime_data the used prime data needed to do the multiplication
  */
-void gfp_mont_exponent( gfp_t res, const gfp_t a, const uint_t *exponent, const int exponent_length, const gfp_prime_data_t *prime_data ) {
+void gfp_mont_exponent(
+    gfp_t res, const gfp_t a, const uint_t *exponent, const int exponent_length, const gfp_prime_data_t *prime_data ) {
     gfp_t temp;
     int bit;
 
@@ -218,7 +219,7 @@ void gfp_mont_exponent( gfp_t res, const gfp_t a, const uint_t *exponent, const 
             gfp_mont_multiply( temp, temp, a, prime_data );
         }
     }
-    bigint_copy_var(res, temp, prime_data->words);
+    bigint_copy_var( res, temp, prime_data->words );
 }
 
 /**
@@ -246,7 +247,7 @@ void gfp_mont_compute_R_squared( gfp_t res, gfp_prime_data_t *prime_data ) {
     bigint_clear_var( res, prime_data->words );
     bigint_set_bit_var( res, prime_data->bits - 1, 1, prime_data->words );
 
-    for( i = prime_data->bits - 1; i < (2 * prime_data->words * BITS_PER_WORD); i++ ) {
+    for( i = prime_data->bits - 1; i < ( 2 * prime_data->words * BITS_PER_WORD ); i++ ) {
         gfp_gen_add( res, res, res, prime_data );
     }
 }
@@ -281,4 +282,3 @@ void gfp_mult_two_mont( gfp_t res, const gfp_t a, const gfp_t b, const gfp_prime
     gfp_mont_multiply( res, a, b, prime_data );
     gfp_mont_multiply( res, res, prime_data->r_squared, prime_data );
 }
-

@@ -67,18 +67,18 @@ int eccp_std_projective_point_is_valid( const eccp_point_projective_t *a, const 
 
     /* calculate the right side */
     /* use left as additional temp */
-    gfp_multiply(temp, param->param_a, a->x); /* aX                         */
-    gfp_multiply(left, param->param_b, a->z); /* bZ                         */
-    gfp_add(temp, temp, left);                /* aX + bZ                    */
-    gfp_square(left, a->z);                   /* Z^2                        */
-    gfp_multiply(right, temp, left);          /* aXZ^2 + bZ^3               */
-    gfp_square(left, a->x);                   /* X^2                        */
-    gfp_multiply(temp, left, a->x);           /* X^3                        */
-    gfp_add(right, right, temp);              /* X^3 + aXZ^2 + bZ^3         */
+    gfp_multiply( temp, param->param_a, a->x ); /* aX                         */
+    gfp_multiply( left, param->param_b, a->z ); /* bZ                         */
+    gfp_add( temp, temp, left );                /* aX + bZ                    */
+    gfp_square( left, a->z );                   /* Z^2                        */
+    gfp_multiply( right, temp, left );          /* aXZ^2 + bZ^3               */
+    gfp_square( left, a->x );                   /* X^2                        */
+    gfp_multiply( temp, left, a->x );           /* X^3                        */
+    gfp_add( right, right, temp );              /* X^3 + aXZ^2 + bZ^3         */
 
     /* calculate the left side */
-    gfp_square( temp, a->y );                 /* Y^2                        */
-    gfp_multiply( left, temp, a->z);          /* ZY^2                       */
+    gfp_square( temp, a->y );         /* Y^2                        */
+    gfp_multiply( left, temp, a->z ); /* ZY^2                       */
 
     /* check if Y^2*Z == X^3 + a*X*Z^2 + b*Z^3 */
     return gfp_is_equal( left, right );
@@ -92,8 +92,8 @@ int eccp_std_projective_point_is_valid( const eccp_point_projective_t *a, const 
  * @return 1 if equal, otherwise 0
  */
 int eccp_std_projective_point_equals( const eccp_point_projective_t *a,
-                                const eccp_point_projective_t *b,
-                                const eccp_parameters_t *param ) {
+                                      const eccp_point_projective_t *b,
+                                      const eccp_parameters_t *param ) {
     gfp_t temp_a, temp_b;
 
     if( a->identity == 1 ) {
@@ -124,8 +124,8 @@ int eccp_std_projective_point_equals( const eccp_point_projective_t *a,
  *  @param param elliptic curve parameters
  */
 void eccp_std_projective_point_copy( eccp_point_projective_t *dest,
-                               const eccp_point_projective_t *src,
-                               const eccp_parameters_t *param ) {
+                                     const eccp_point_projective_t *src,
+                                     const eccp_parameters_t *param ) {
     dest->identity = src->identity;
     gfp_copy( dest->x, src->x );
     gfp_copy( dest->y, src->y );
@@ -164,9 +164,9 @@ void eccp_std_projective_to_affine( eccp_point_affine_t *res, const eccp_point_p
  */
 void eccp_affine_to_std_projective( eccp_point_projective_t *res, const eccp_point_affine_t *a, const eccp_parameters_t *param ) {
 #if 1
-    gfp_copy(res->x, a->x);
-    gfp_copy(res->y, a->y);
-    gfp_copy(res->z, param->prime_data.gfp_one);
+    gfp_copy( res->x, a->x );
+    gfp_copy( res->y, a->y );
+    gfp_copy( res->z, param->prime_data.gfp_one );
     res->identity = a->identity;
 #else
     /* randomized projective coordinates (just for testing) */
@@ -183,12 +183,11 @@ void eccp_affine_to_std_projective( eccp_point_projective_t *res, const eccp_poi
  * @param P   the point to negate
  * @param param elliptic curve parameters
  */
-void eccp_std_projective_point_negate( eccp_point_projective_t *res, const eccp_point_projective_t *P, const eccp_parameters_t *param ) {
+void eccp_std_projective_point_negate( eccp_point_projective_t *res,
+                                       const eccp_point_projective_t *P,
+                                       const eccp_parameters_t *param ) {
     gfp_copy( res->x, P->x );
     gfp_negate( res->y, P->y );
     gfp_copy( res->z, P->z );
     res->identity = P->identity;
 }
-
-
-

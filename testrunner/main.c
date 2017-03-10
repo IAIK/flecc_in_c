@@ -41,7 +41,7 @@
 #include <stdlib.h>
 
 int main( void ) {
-    puts("testrunner started\n");
+    puts( "testrunner started\n" );
     unsigned errors = test_ser();
 
     return errors == 0 ? EXIT_SUCCESS : EXIT_FAILURE;

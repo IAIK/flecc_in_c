@@ -103,7 +103,7 @@ int line_starts_with( const char *line, const char *to_compare ) {
  */
 curve_type_t read_curve_type( char *buffer, const int buf_length ) {
     int length = io_gen_readline( buffer, buf_length );
-    return param_get_curve_type_from_name( buffer, length);
+    return param_get_curve_type_from_name( buffer, length );
 }
 
 /**
@@ -162,48 +162,48 @@ void read_eccp_affine_point( char *buffer,
  * @param buf_length the length of the buffer to be used
  * @param param the to-be-initialized elliptic curve parameters
  */
-void read_elliptic_curve_parameters (char *buffer, const int buf_length, eccp_parameters_t *param) {
+void read_elliptic_curve_parameters( char *buffer, const int buf_length, eccp_parameters_t *param ) {
     // 1. name of curve as string (discarded)
-    io_gen_readline(buffer, buf_length);
+    io_gen_readline( buffer, buf_length );
 
     // 2. number of bits of prime field
-    read_bigint(buffer, buf_length, &param->prime_data.bits, WORDS_PER_BITS(32));
-    if(param->prime_data.bits > BITS_PER_GFP) {
+    read_bigint( buffer, buf_length, &param->prime_data.bits, WORDS_PER_BITS( 32 ) );
+    if( param->prime_data.bits > BITS_PER_GFP ) {
         return;
     }
-    param->prime_data.words = WORDS_PER_BITS(param->prime_data.bits);
+    param->prime_data.words = WORDS_PER_BITS( param->prime_data.bits );
     param->prime_data.montgomery_domain = 1;
 
     // 3. init the prime field
-    read_bigint(buffer, buf_length, param->prime_data.prime, param->prime_data.words);
+    read_bigint( buffer, buf_length, param->prime_data.prime, param->prime_data.words );
     gfp_mont_compute_R( param->prime_data.gfp_one, &( param->prime_data ) );
     gfp_mont_compute_R_squared( param->prime_data.r_squared, &( param->prime_data ) );
     param->prime_data.n0 = gfp_mont_compute_n0( &( param->prime_data ) );
 
     // 4. number of bits of group order
-    read_bigint(buffer, buf_length, &param->order_n_data.bits, WORDS_PER_BITS(32));
-    if(param->order_n_data.bits > BITS_PER_GFP) {
+    read_bigint( buffer, buf_length, &param->order_n_data.bits, WORDS_PER_BITS( 32 ) );
+    if( param->order_n_data.bits > BITS_PER_GFP ) {
         return;
     }
-    param->order_n_data.words = WORDS_PER_BITS(param->order_n_data.bits);
+    param->order_n_data.words = WORDS_PER_BITS( param->order_n_data.bits );
     param->order_n_data.montgomery_domain = 0;
 
     // 5. init the prime field for the group order
-    read_bigint(buffer, buf_length, param->order_n_data.prime, param->order_n_data.words);
+    read_bigint( buffer, buf_length, param->order_n_data.prime, param->order_n_data.words );
     gfp_mont_compute_R( param->order_n_data.gfp_one, &( param->order_n_data ) );
     gfp_mont_compute_R_squared( param->order_n_data.r_squared, &( param->order_n_data ) );
     param->order_n_data.n0 = gfp_mont_compute_n0( &( param->order_n_data ) );
 
     // 6. elliptic curve parameters
-    read_gfp(buffer, buf_length, param->param_a, &param->prime_data, 1);
-    read_gfp(buffer, buf_length, param->param_b, &param->prime_data, 1);
+    read_gfp( buffer, buf_length, param->param_a, &param->prime_data, 1 );
+    read_gfp( buffer, buf_length, param->param_b, &param->prime_data, 1 );
 
     // 7. the co-factor
-    read_bigint(buffer, buf_length, &param->h, WORDS_PER_BITS(32));
+    read_bigint( buffer, buf_length, &param->h, WORDS_PER_BITS( 32 ) );
 
     // 8. the base point
-    read_gfp(buffer, buf_length, param->base_point.x, &param->prime_data, 1);
-    read_gfp(buffer, buf_length, param->base_point.y, &param->prime_data, 1);
+    read_gfp( buffer, buf_length, param->base_point.x, &param->prime_data, 1 );
+    read_gfp( buffer, buf_length, param->base_point.y, &param->prime_data, 1 );
     param->base_point.identity = 0;
 
     // 9. finalize
@@ -262,20 +262,20 @@ unsigned test_ser() {
     eccp_point_projective_t ecproj_var_c;
 
     curve_params.curve_type = read_curve_type( buffer, READ_BUFFER_SIZE );
-    if(curve_params.curve_type == CUSTOM) {
-        read_elliptic_curve_parameters(buffer, READ_BUFFER_SIZE, param);
+    if( curve_params.curve_type == CUSTOM ) {
+        read_elliptic_curve_parameters( buffer, READ_BUFFER_SIZE, param );
     } else {
         param_load( param, curve_params.curve_type );
     }
     length = curve_params.prime_data.words;
 
     // TODO: BEAUTIFY!!!
-    gfp_opt_3_init(&param->prime_data);
+    gfp_opt_3_init( &param->prime_data );
 
-    eccp_point_affine_t comb_table[JCB_COMB_WOZ_TBL_SIZE(TBL_WIDTH)];
+    eccp_point_affine_t comb_table[JCB_COMB_WOZ_TBL_SIZE( TBL_WIDTH )];
     param->base_point_precomputed_table = comb_table;
     param->base_point_precomputed_table_width = TBL_WIDTH;
-    eccp_jacobian_point_multiply_COMB_WOZ_precompute(param);
+    eccp_jacobian_point_multiply_COMB_WOZ_precompute( param );
 
     while( 1 ) {
         io_gen_readline( buffer, READ_BUFFER_SIZE );
@@ -465,8 +465,8 @@ unsigned test_ser() {
             errors
                 += assert_bigint( test_id, bi_var_expected, curve_params.order_n_data.gfp_one, curve_params.order_n_data.words );
             read_bigint( buffer, READ_BUFFER_SIZE, bi_var_expected, curve_params.order_n_data.words );
-            errors += assert_bigint(
-                test_id, bi_var_expected, curve_params.order_n_data.r_squared, curve_params.order_n_data.words );
+            errors += assert_bigint( test_id, bi_var_expected, curve_params.order_n_data.r_squared,
+                                     curve_params.order_n_data.words );
             read_bigint( buffer, READ_BUFFER_SIZE, bi_var_expected, curve_params.order_n_data.words );
             errors += assert_integer( test_id, bi_var_expected[0], curve_params.order_n_data.n0 );
         } else if( line_starts_with( buffer, "gfp_mont_multiply" ) ) {
@@ -880,10 +880,10 @@ unsigned test_ser() {
             hash_sha256_to_byte_array( hash, &sha2_state );
 
             errors += assert_byte_array( test_id, expected_hash, hash, 32 );
-        } else if(line_starts_with( buffer, "performance_test_eccp_mul" ) ) {
-            performance_test_eccp_mul(param);
-        } else if(line_starts_with( buffer, "performance_test_gfp_mul" ) ) {
-            performance_test_gfp_mul(param);
+        } else if( line_starts_with( buffer, "performance_test_eccp_mul" ) ) {
+            performance_test_eccp_mul( param );
+        } else if( line_starts_with( buffer, "performance_test_gfp_mul" ) ) {
+            performance_test_gfp_mul( param );
         }
     }
     return errors;

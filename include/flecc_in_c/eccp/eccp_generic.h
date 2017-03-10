@@ -40,7 +40,9 @@
 
 #include "../types.h"
 
-void eccp_generic_mul_wrapper( eccp_point_affine_t *result, const eccp_point_affine_t *P,
-                               const gfp_t scalar, const eccp_parameters_t *param );
+void eccp_generic_mul_wrapper( eccp_point_affine_t *result,
+                               const eccp_point_affine_t *P,
+                               const gfp_t scalar,
+                               const eccp_parameters_t *param );
 
 #endif /* ECCP_GENERIC_H_ */

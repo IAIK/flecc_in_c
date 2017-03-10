@@ -44,8 +44,8 @@ extern "C" {
 
 #include "../types.h"
 
-void performance_test_eccp_mul(eccp_parameters_t *param);
-void performance_test_gfp_mul(eccp_parameters_t *param);
+void performance_test_eccp_mul( eccp_parameters_t *param );
+void performance_test_gfp_mul( eccp_parameters_t *param );
 
 #ifdef __cplusplus
 }

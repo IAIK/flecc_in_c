@@ -68,7 +68,7 @@ int eccp_affine_point_is_valid( const eccp_point_affine_t *A, const eccp_paramet
     gfp_square( left, A->y );
 
     /* check if y^2 == x^3 + a*x + b */
-    return gfp_is_equal(left, right);
+    return gfp_is_equal( left, right );
 }
 
 /**
@@ -164,12 +164,12 @@ void eccp_affine_point_add( eccp_point_affine_t *res,
  * @param param elliptic curve parameters
  */
 void eccp_affine_point_subtract( eccp_point_affine_t *res,
-                            const eccp_point_affine_t *minuend,
-                            const eccp_point_affine_t *subtrahend,
-                            const eccp_parameters_t *param ) {
+                                 const eccp_point_affine_t *minuend,
+                                 const eccp_point_affine_t *subtrahend,
+                                 const eccp_parameters_t *param ) {
     eccp_point_affine_t temp;
-    eccp_affine_point_negate(&temp, subtrahend, param);
-    eccp_affine_point_add(res, minuend, &temp, param);
+    eccp_affine_point_negate( &temp, subtrahend, param );
+    eccp_affine_point_add( res, minuend, &temp, param );
 }
 
 /**
