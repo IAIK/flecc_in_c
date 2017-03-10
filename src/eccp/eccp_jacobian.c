@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Stiftung Secure Information and 
+** Copyright (C) 2014 Stiftung Secure Information and
 **                    Communication Technologies SIC and
 **                    Graz University of Technology
 ** Contact: http://opensource.iaik.tugraz.at
@@ -22,7 +22,7 @@
 ** packaging of this file.  Please review the following information to
 ** ensure the GNU General Public License version 3.0 requirements will be
 ** met: http://www.gnu.org/copyleft/gpl.html.
-** 
+**
 ** This software is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
@@ -36,10 +36,10 @@
 ****************************************************************************/
 
 #include "flecc_in_c/eccp/eccp_jacobian.h"
-#include "flecc_in_c/gfp/gfp.h"
 #include "flecc_in_c/bi/bi.h"
-#include "flecc_in_c/utils/rand.h"
 #include "flecc_in_c/eccp/eccp_affine.h"
+#include "flecc_in_c/gfp/gfp.h"
+#include "flecc_in_c/utils/rand.h"
 
 /**
  * Tests if the given affine point fulfills the elliptic curve equation.
@@ -252,7 +252,7 @@ void
  * @param A
  * @param B
  * @param param elliptic curve parameters
- 
+
     Cost: 11M + 5S + 9add + 4*2.
     Cost: 10M + 4S + 9add + 4*2 dependent upon the first point.
     Source: 2007 Bernstein-Lange; note that the improvement from 12M+4S to 11M+5S was already mentioned in 2001 Bernstein
@@ -589,15 +589,15 @@ void eccp_jacobian_point_multiply_COMB_precompute( eccp_parameters_t *param ) {
 }
 
 /**
- * Performs a point scalar multiplication with a fixed base point. 
+ * Performs a point scalar multiplication with a fixed base point.
  * Should be constant time. Should perform point additions width identity (except initialization).
  * @param result the resulting point
  * @param scalar the multiplicant
  * @param param elliptic curve parameters (includes pre-computation table)
  *
- * Based on Algorithm 2 in 
+ * Based on Algorithm 2 in
  * Zhe Liu, Erich Wenger, Johann Großschädl - "MoTE-ECC: Energy-Scalable Elliptic Curve Cryptography for Wireless Sensor Networks"
- * 
+ *
  * TODO: UNTESTED!!
  */
 void eccp_jacobian_point_multiply_COMB_WOZ( eccp_point_affine_t *result, const gfp_t scalar, const eccp_parameters_t *param ) {
@@ -650,11 +650,11 @@ void eccp_jacobian_point_multiply_COMB_WOZ( eccp_point_affine_t *result, const g
  * Initializes the pre-computation table for eccp_jacobian_point_multiply_COMB_WOZ
  * @param param elliptic curve parameters
  *
- * Based on Algorithm 2 in 
+ * Based on Algorithm 2 in
  * Zhe Liu, Erich Wenger, Johann Großschädl - "MoTE-ECC: Energy-Scalable Elliptic Curve Cryptography for Wireless Sensor Networks"
- * 
+ *
  * (Alg 2 contains some errors. Unlucky me.)
- * 
+ *
  * computes (2^(d*(w-1)) +/- 2^(d*(w-2)) +/- ... +/- 2^(d) +/- 2^) * P
  */
 void eccp_jacobian_point_multiply_COMB_WOZ_precompute( eccp_parameters_t *param ) {

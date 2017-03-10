@@ -35,25 +35,18 @@
 **
 ****************************************************************************/
 
-/*
- * test_ser.c
- *
- *  Created on: 14.03.2014
- *      Author: Thomas Unterluggauer
- */
-
-#include <stdio.h>
-#include <flecc_in_c/io/io.h>
 #include <flecc_in_c/bi/bi.h>
-#include <flecc_in_c/gfp/gfp.h>
-#include <flecc_in_c/utils/param.h>
-#include <flecc_in_c/utils/assert.h>
-#include <flecc_in_c/utils/performance.h>
 #include <flecc_in_c/eccp/eccp.h>
-#include <flecc_in_c/utils/parse.h>
-#include <flecc_in_c/protocols/protocols.h>
+#include <flecc_in_c/gfp/gfp.h>
 #include <flecc_in_c/hash/sha1.h>
 #include <flecc_in_c/hash/sha2.h>
+#include <flecc_in_c/io/io.h>
+#include <flecc_in_c/protocols/protocols.h>
+#include <flecc_in_c/utils/assert.h>
+#include <flecc_in_c/utils/param.h>
+#include <flecc_in_c/utils/parse.h>
+#include <flecc_in_c/utils/performance.h>
+#include <stdio.h>
 
 //#define READ_BUFFER_SIZE 4*BYTES_PER_GFP+2*WORDS_PER_GFP+10
 #define READ_BUFFER_SIZE 10000

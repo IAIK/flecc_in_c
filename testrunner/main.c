@@ -35,10 +35,10 @@
 **
 ****************************************************************************/
 
+#include "test_ser.h"
+#include <flecc_in_c/io/io.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <flecc_in_c/io/io.h>
-#include "test_ser.h"
 
 int main( void ) {
     puts("testrunner started\n");

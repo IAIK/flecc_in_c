@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Stiftung Secure Information and 
+** Copyright (C) 2014 Stiftung Secure Information and
 **                    Communication Technologies SIC and
 **                    Graz University of Technology
 ** Contact: http://opensource.iaik.tugraz.at
@@ -22,7 +22,7 @@
 ** packaging of this file.  Please review the following information to
 ** ensure the GNU General Public License version 3.0 requirements will be
 ** met: http://www.gnu.org/copyleft/gpl.html.
-** 
+**
 ** This software is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
@@ -35,12 +35,12 @@
 **
 ****************************************************************************/
 
-#include "flecc_in_c/eccp/eccp.h"
-#include "flecc_in_c/utils/rand.h"
 #include "flecc_in_c/bi/bi_gen.h"
+#include "flecc_in_c/eccp/eccp.h"
 #include "flecc_in_c/gfp/gfp.h"
-#include <stdio.h>
+#include "flecc_in_c/utils/rand.h"
 #include <math.h>
+#include <stdio.h>
 #include <time.h>
 
 #define NUM_ITERATIONS 1000

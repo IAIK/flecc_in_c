@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Stiftung Secure Information and 
+** Copyright (C) 2014 Stiftung Secure Information and
 **                    Communication Technologies SIC and
 **                    Graz University of Technology
 ** Contact: http://opensource.iaik.tugraz.at
@@ -22,7 +22,7 @@
 ** packaging of this file.  Please review the following information to
 ** ensure the GNU General Public License version 3.0 requirements will be
 ** met: http://www.gnu.org/copyleft/gpl.html.
-** 
+**
 ** This software is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
@@ -40,7 +40,7 @@
 #include <stdlib.h> // for the definition of the NULL pointer
 
 /**
- * wraps a generic point/scalar multiplication to one of the optimized 
+ * wraps a generic point/scalar multiplication to one of the optimized
  * methods (param->eccp_mul_base_point or param->eccp_mul)
  * @param result the resulting point
  * @param P the point to multiply with the scalar

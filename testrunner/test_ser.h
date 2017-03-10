@@ -35,13 +35,6 @@
 **
 ****************************************************************************/
 
-/*
- * test_ser.h
- *
- *  Created on: 14.03.2014
- *      Author: Erich Wenger
- */
-
 #ifndef TEST_SER_H_
 #define TEST_SER_H_
 

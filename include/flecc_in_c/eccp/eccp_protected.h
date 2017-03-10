@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Stiftung Secure Information and 
+** Copyright (C) 2014 Stiftung Secure Information and
 **                    Communication Technologies SIC and
 **                    Graz University of Technology
 ** Contact: http://opensource.iaik.tugraz.at
@@ -22,7 +22,7 @@
 ** packaging of this file.  Please review the following information to
 ** ensure the GNU General Public License version 3.0 requirements will be
 ** met: http://www.gnu.org/copyleft/gpl.html.
-** 
+**
 ** This software is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
@@ -35,17 +35,10 @@
 **
 ****************************************************************************/
 
-/* 
- * File:   eccp_protected.h
- * Author: erichwenger
- *
- * Created on March 20, 2015, 1:35 PM
- */
-
 #ifndef ECCP_PROTECTED_H
-#define	ECCP_PROTECTED_H
+#define ECCP_PROTECTED_H
 
-#ifdef	__cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -56,9 +49,8 @@ void eccp_protected_point_multiply( eccp_point_affine_t *result,
                                     const gfp_t scalar,
                                     const eccp_parameters_t *param );
 
-#ifdef	__cplusplus
+#ifdef __cplusplus
 }
 #endif
 
-#endif	/* ECCP_PROTECTED_H */
-
+#endif /* ECCP_PROTECTED_H */

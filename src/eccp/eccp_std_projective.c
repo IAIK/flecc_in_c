@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Stiftung Secure Information and 
+** Copyright (C) 2014 Stiftung Secure Information and
 **                    Communication Technologies SIC and
 **                    Graz University of Technology
 ** Contact: http://opensource.iaik.tugraz.at
@@ -22,7 +22,7 @@
 ** packaging of this file.  Please review the following information to
 ** ensure the GNU General Public License version 3.0 requirements will be
 ** met: http://www.gnu.org/copyleft/gpl.html.
-** 
+**
 ** This software is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
@@ -36,10 +36,10 @@
 ****************************************************************************/
 
 #include "flecc_in_c/eccp/eccp_std_projective.h"
-#include "flecc_in_c/gfp/gfp.h"
 #include "flecc_in_c/bi/bi.h"
-#include "flecc_in_c/utils/rand.h"
 #include "flecc_in_c/eccp/eccp_affine.h"
+#include "flecc_in_c/gfp/gfp.h"
+#include "flecc_in_c/utils/rand.h"
 
 /**
  * Tests if the given affine point fulfills the elliptic curve equation.
@@ -48,7 +48,7 @@
  * @param P the point to test
  * @param param the used elliptic curve parameters
  * @return 1 if the point is valid
- * 
+ *
  * Y^2*Z = X^3 + aXZ^2 + bZ^3
  */
 int eccp_std_projective_point_is_valid( const eccp_point_projective_t *a, const eccp_parameters_t *param ) {

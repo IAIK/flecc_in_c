@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Stiftung Secure Information and 
+** Copyright (C) 2014 Stiftung Secure Information and
 **                    Communication Technologies SIC and
 **                    Graz University of Technology
 ** Contact: http://opensource.iaik.tugraz.at
@@ -22,7 +22,7 @@
 ** packaging of this file.  Please review the following information to
 ** ensure the GNU General Public License version 3.0 requirements will be
 ** met: http://www.gnu.org/copyleft/gpl.html.
-** 
+**
 ** This software is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
@@ -36,10 +36,10 @@
 ****************************************************************************/
 
 #include "flecc_in_c/eccp/eccp_protected.h"
-#include "flecc_in_c/gfp/gfp.h"
 #include "flecc_in_c/bi/bi.h"
-#include "flecc_in_c/utils/rand.h"
 #include "flecc_in_c/eccp/eccp_affine.h"
+#include "flecc_in_c/gfp/gfp.h"
+#include "flecc_in_c/utils/rand.h"
 
 /**
  * Checks the given x, y and z coordinate, if they are a valid combination.
@@ -74,14 +74,14 @@ int eccp_protected_std_projective_point_is_valid(const gfp_t px, const gfp_t py,
     return gfp_is_equal(left, right);
 }
 
-/** can be set to zero on cache-less microprocessor architectures 
+/** can be set to zero on cache-less microprocessor architectures
  *  (faster on cache-less microprocessor architectures)
  */
 #define AVOID_CACHE_TIMING_ATTACKS 1
 
 /**
  * Performs a point scalar multiplication based on "8/16/32 shades of ECC on embedded microprocessors"
- * @param result the resulting point (set to identity when error happens) 
+ * @param result the resulting point (set to identity when error happens)
  * @param P The base point to multiply
  * @param scalar the multiplicant
  * @param param elliptic curve parameters

@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Stiftung Secure Information and 
+** Copyright (C) 2014 Stiftung Secure Information and
 **                    Communication Technologies SIC and
 **                    Graz University of Technology
 ** Contact: http://opensource.iaik.tugraz.at
@@ -22,7 +22,7 @@
 ** packaging of this file.  Please review the following information to
 ** ensure the GNU General Public License version 3.0 requirements will be
 ** met: http://www.gnu.org/copyleft/gpl.html.
-** 
+**
 ** This software is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
@@ -35,11 +35,11 @@
 **
 ****************************************************************************/
 
-#include "flecc_in_c/gfp/gfp_gen.h"
 #include "flecc_in_c/bi/bi.h"
+#include "flecc_in_c/gfp/gfp_gen.h"
 
 /**
- * Adds two numbers a,b and stores the result in res IN CONSTANT TIME. 
+ * Adds two numbers a,b and stores the result in res IN CONSTANT TIME.
  * A finite field reduction is automatically performed.
  * @param res the result
  * @param a the first parameter to add
@@ -56,7 +56,7 @@ void gfp_cr_add( gfp_t res, const gfp_t a, const gfp_t b, const gfp_prime_data_t
 
 
 /**
- * Subtract b from a, store it in res, use the modulo IN CONSTANT TIME. 
+ * Subtract b from a, store it in res, use the modulo IN CONSTANT TIME.
  * res = (a - b) mod modulo.
  * @param a the minuend
  * @param b the subtrahend

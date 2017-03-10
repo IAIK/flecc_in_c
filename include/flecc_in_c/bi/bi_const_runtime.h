@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Stiftung Secure Information and 
+** Copyright (C) 2014 Stiftung Secure Information and
 **                    Communication Technologies SIC and
 **                    Graz University of Technology
 ** Contact: http://opensource.iaik.tugraz.at
@@ -22,7 +22,7 @@
 ** packaging of this file.  Please review the following information to
 ** ensure the GNU General Public License version 3.0 requirements will be
 ** met: http://www.gnu.org/copyleft/gpl.html.
-** 
+**
 ** This software is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
@@ -36,9 +36,9 @@
 ****************************************************************************/
 
 #ifndef BI_CONST_RUNTIME_H
-#define	BI_CONST_RUNTIME_H
+#define BI_CONST_RUNTIME_H
 
-#ifdef	__cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -51,10 +51,8 @@ void bigint_cr_select_2(uint_t *result, const uint_t *var0, const uint_t *var1, 
 int bigint_cr_is_equal_var( const uint_t *a, const uint_t *b, const int length );
 int bigint_cr_is_zero_var( const uint_t *a, const int length );
 
-
-#ifdef	__cplusplus
+#ifdef __cplusplus
 }
 #endif
 
-#endif	/* BI_CONST_RUNTIME_H */
-
+#endif /* BI_CONST_RUNTIME_H */

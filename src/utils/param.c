@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Stiftung Secure Information and 
+** Copyright (C) 2014 Stiftung Secure Information and
 **                    Communication Technologies SIC and
 **                    Graz University of Technology
 ** Contact: http://opensource.iaik.tugraz.at
@@ -22,7 +22,7 @@
 ** packaging of this file.  Please review the following information to
 ** ensure the GNU General Public License version 3.0 requirements will be
 ** met: http://www.gnu.org/copyleft/gpl.html.
-** 
+**
 ** This software is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
@@ -36,10 +36,10 @@
 ****************************************************************************/
 
 #include "flecc_in_c/utils/param.h"
-#include <string.h>
 #include "flecc_in_c/bi/bi.h"
-#include "flecc_in_c/gfp/gfp.h"
 #include "flecc_in_c/eccp/eccp.h"
+#include "flecc_in_c/gfp/gfp.h"
+#include <string.h>
 
 // clang-format off
 const uint_t SECP192R1_COFACTOR = 1;
@@ -97,9 +97,9 @@ const uint_t SECP521R1_PRIME[17] = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFF
  * Compare two buffers which both have length limitations.
  * @param buffer1
  * @param length1 length of first buffer
- * @param buffer2 
+ * @param buffer2
  * @param length2 length of second buffer
- * @return 
+ * @return
  */
 int string_max_buffer_match(const char *buffer1, const size_t length1, const char *buffer2, const size_t length2) {
     size_t i, min_length;

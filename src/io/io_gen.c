@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Stiftung Secure Information and 
+** Copyright (C) 2014 Stiftung Secure Information and
 **                    Communication Technologies SIC and
 **                    Graz University of Technology
 ** Contact: http://opensource.iaik.tugraz.at
@@ -22,7 +22,7 @@
 ** packaging of this file.  Please review the following information to
 ** ensure the GNU General Public License version 3.0 requirements will be
 ** met: http://www.gnu.org/copyleft/gpl.html.
-** 
+**
 ** This software is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
@@ -35,10 +35,10 @@
 **
 ****************************************************************************/
 
-#include <stdio.h>
 #include "flecc_in_c/bi/bi.h"
 #include "flecc_in_c/io/io.h"
 #include "flecc_in_c/types.h"
+#include <stdio.h>
 
 /** Hex lookup for converting hexadecimal nibbles
  *  to string representation. */
@@ -156,7 +156,7 @@ void io_print_integer( const uint_t value ) {
 /**
  * Prints a point to the default output and appends a newline.
  * @param point the point to be printed
- * @param param elliptic curve parameters 
+ * @param param elliptic curve parameters
  */
 void io_print_affine_point( const eccp_point_affine_t *point, const eccp_parameters_t *param ) {
     io_print_bigint_var(point->x, param->prime_data.words);
