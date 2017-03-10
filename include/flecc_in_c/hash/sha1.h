@@ -41,7 +41,7 @@
 #include "../types.h"
 
 /** The state of SHA-1. */
-typedef struct _hash_sha1_t_ {
+typedef struct {
     uint32_t H0;
     uint32_t H1;
     uint32_t H2;

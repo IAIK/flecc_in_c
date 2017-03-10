@@ -40,7 +40,7 @@
 
 #include "../types.h"
 
-typedef struct _eccp_param_in_const_mem_t_ {
+typedef struct {
     uint_t *prime;
     uint_t prime_bits;
     uint_t *order_n;

@@ -41,7 +41,7 @@
 #include "../types.h"
 
 /** The state of SHA224 and SHA256. */
-typedef struct _hash_sha224_256_t_ { uint32_t hash[8]; } hash_sha224_256_t;
+typedef struct { uint32_t hash[8]; } hash_sha224_256_t;
 
 void hash_sha224_init( hash_sha224_256_t *state );
 void hash_sha256_init( hash_sha224_256_t *state );
