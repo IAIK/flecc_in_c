@@ -50,9 +50,8 @@ if(INSTALL_DOXYGEN)
   install_lib(DIRECTORY "${DOXYGEN_OUTPUT_DIR}/" DESTINATION "share/doc/flecc_in_c-${VERSION_FULL}/doxygen")
 endif()
 
-find_package( StandardMathLibrary REQUIRED )
-
-add_subdirectory(flecc_in_c)
+add_subdirectory(include)
+add_subdirectory(src)
 
 if(NOT SUB_PROJECT)
   add_subdirectory(testrunner EXCLUDE_FROM_ALL)
@@ -65,12 +64,6 @@ if(NOT SUB_PROJECT)
     add_stdin_test("${name}" testrunner "${loop}")
   endforeach()
 endif()
-
-# register source files for reformating
-set(FormatBlacklist "${CMAKE_SOURCE_DIR}/flecc_in_c/utils/param_const.c")
-file(GLOB_RECURSE Sources "flecc_in_c/*.h" "flecc_in_c/*.c" "testrunner/*.h" "testrunner/*.c")
-list(REMOVE_ITEM Sources ${FormatBlacklist})
-add_file_to_format(${Sources})
 
 #------------------------------------------------------------------------------
 # Print help dialog (assuming make based build system)
