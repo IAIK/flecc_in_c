@@ -47,8 +47,9 @@ if(NOT SUB_PROJECT)
   endif()
 
   add_subdirectory(testrunner EXCLUDE_FROM_ALL)
+  add_subdirectory(tests EXCLUDE_FROM_ALL)
 
-  # generate a test target
+  # register all testfiles as tests in ctest
   #-----------------------------------------
   file(GLOB FleccLibSources "testfiles/*.tst")
   foreach(loop ${FleccLibSources})

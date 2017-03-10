@@ -25,15 +25,15 @@ if(NOT SUB_PROJECT)
   # add uninstall target to the make file
   add_custom_target(uninstall
     "${CMAKE_COMMAND}" -P "${CMAKE_BINARY_DIR}/cmake_uninstall.cmake")
-
-  function(install_lib)
-    if(SUB_PROJECT)
-      return()
-    endif()
-
-    install(${ARGV})
-  endfunction()
 endif()
+
+function(install_lib)
+  if(SUB_PROJECT)
+    return()
+  endif()
+
+  install(${ARGV})
+endfunction()
 
 #
 # export_and_install_config( [ARGUMENTS] export_name)
