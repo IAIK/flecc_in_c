@@ -753,7 +753,7 @@ WARN_LOGFILE           =
 # spaces.
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = "@PROJECT_SOURCE_DIR@/src" \
+INPUT                  = "@PROJECT_SOURCE_DIR@/flecc_in_c" \
                          "@PROJECT_SOURCE_DIR@/doc" \
                          "@PROJECT_SOURCE_DIR@/README.md"
 
