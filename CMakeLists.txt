@@ -5,18 +5,10 @@ set(VERSION_MAJOR "1")
 set(VERSION_MINOR "1")
 set(VERSION_PATCH "1")
 
-enable_language(ASM)
+#enable_language(ASM)
 
 set(DEFAULT_BUILD_TYPE MinSizeRel)
-
 set(DEFAULT_C_FLAGS_GCC "-Wall")
-
-# set default Architecture
-if(NOT ARCHITECTURE)
-  set(ARCHITECTURE "ARCH_X86"
-  CACHE STRING "ARCH_X86, ARCH_X86_64, ARCH_CORTEXA8, ARCH_CORTEXA9, ARCH_CORTEXA11,..." FORCE)
-endif()
-
 set(DOXYGEN_CONFIG_IN_FILE "${PROJECT_SOURCE_DIR}/doc/template.doxy.in")
 
 #------------------------------------------------------------------------------
@@ -58,7 +50,7 @@ if(NOT SUB_PROJECT)
 
   # generate a test target
   #-----------------------------------------
-  file(GLOB FleccLibSources "tests/*.tst")
+  file(GLOB FleccLibSources "testfiles/*.tst")
   foreach(loop ${FleccLibSources})
     get_filename_component(name "${loop}" NAME_WE)
     add_stdin_test("${name}" testrunner "${loop}")
