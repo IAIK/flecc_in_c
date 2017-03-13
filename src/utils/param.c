@@ -133,15 +133,15 @@ curve_type_t param_get_curve_type_from_name( const char *buffer, const int buffe
         return curve;
     }
 
-    if( string_max_buffer_match( buffer, buffer_length, "secp192r1", 9 ) == 0 ) {
+    if( MIN_BITS_PER_GFP >= 192 && string_max_buffer_match( buffer, buffer_length, "secp192r1", 9 ) == 0 ) {
         curve = SECP192R1;
-    } else if( string_max_buffer_match( buffer, buffer_length, "secp224r1", 9 ) == 0 ) {
+    } else if( MIN_BITS_PER_GFP >= 224 && string_max_buffer_match( buffer, buffer_length, "secp224r1", 9 ) == 0 ) {
         curve = SECP224R1;
-    } else if( string_max_buffer_match( buffer, buffer_length, "secp256r1", 9 ) == 0 ) {
+    } else if( MIN_BITS_PER_GFP >= 256 && string_max_buffer_match( buffer, buffer_length, "secp256r1", 9 ) == 0 ) {
         curve = SECP256R1;
-    } else if( string_max_buffer_match( buffer, buffer_length, "secp384r1", 9 ) == 0 ) {
+    } else if( MIN_BITS_PER_GFP >= 384 && string_max_buffer_match( buffer, buffer_length, "secp384r1", 9 ) == 0 ) {
         curve = SECP384R1;
-    } else if( string_max_buffer_match( buffer, buffer_length, "secp521r1", 9 ) == 0 ) {
+    } else if( MIN_BITS_PER_GFP >= 521 && string_max_buffer_match( buffer, buffer_length, "secp521r1", 9 ) == 0 ) {
         curve = SECP521R1;
     } else if( string_max_buffer_match( buffer, buffer_length, "custom", 6 ) == 0 ) {
         curve = CUSTOM;
@@ -157,7 +157,7 @@ curve_type_t param_get_curve_type_from_name( const char *buffer, const int buffe
  * @param type the type of curve to be used
  */
 void param_load( eccp_parameters_t *param, const curve_type_t type ) {
-    if( type == SECP192R1 ) {
+    if( MIN_BITS_PER_GFP >= 192 && type == SECP192R1 ) {
         int bi_length = WORDS_PER_BITS( SECP192R1_PRIME_BITS );
 
         // set prime data
@@ -191,7 +191,7 @@ void param_load( eccp_parameters_t *param, const curve_type_t type ) {
         bigint_copy_var( param->base_point.x, SECP192R1_BASE_X, bi_length );
         bigint_copy_var( param->base_point.y, SECP192R1_BASE_Y, bi_length );
         param->base_point.identity = 0;
-    } else if( type == SECP224R1 ) {
+    } else if( MIN_BITS_PER_GFP >= 224 && type == SECP224R1 ) {
         int bi_length = WORDS_PER_BITS( SECP224R1_PRIME_BITS );
 
         // set prime data
@@ -225,7 +225,7 @@ void param_load( eccp_parameters_t *param, const curve_type_t type ) {
         bigint_copy_var( param->base_point.x, SECP224R1_BASE_X, bi_length );
         bigint_copy_var( param->base_point.y, SECP224R1_BASE_Y, bi_length );
         param->base_point.identity = 0;
-    } else if( type == SECP256R1 ) {
+    } else if( MIN_BITS_PER_GFP >= 256 && type == SECP256R1 ) {
         int bi_length = WORDS_PER_BITS( SECP256R1_PRIME_BITS );
 
         // set prime data
@@ -259,7 +259,7 @@ void param_load( eccp_parameters_t *param, const curve_type_t type ) {
         bigint_copy_var( param->base_point.x, SECP256R1_BASE_X, bi_length );
         bigint_copy_var( param->base_point.y, SECP256R1_BASE_Y, bi_length );
         param->base_point.identity = 0;
-    } else if( type == SECP384R1 ) {
+    } else if( MIN_BITS_PER_GFP >= 384 && type == SECP384R1 ) {
         int bi_length = WORDS_PER_BITS( SECP384R1_PRIME_BITS );
 
         // set prime data
@@ -293,7 +293,7 @@ void param_load( eccp_parameters_t *param, const curve_type_t type ) {
         bigint_copy_var( param->base_point.x, SECP384R1_BASE_X, bi_length );
         bigint_copy_var( param->base_point.y, SECP384R1_BASE_Y, bi_length );
         param->base_point.identity = 0;
-    } else if( type == SECP521R1 ) {
+    } else if( MIN_BITS_PER_GFP >= 521 && type == SECP521R1 ) {
         int bi_length = WORDS_PER_BITS( SECP521R1_PRIME_BITS );
 
         // set prime data

@@ -266,6 +266,10 @@ unsigned test_ser() {
         read_elliptic_curve_parameters( buffer, READ_BUFFER_SIZE, param );
     } else {
         param_load( param, curve_params.curve_type );
+        if( param->curve_type == UNKNOWN ) {
+            puts( "Error! Curve parameters could not be loaded!\n" );
+            return 1;
+        }
     }
     length = curve_params.prime_data.words;
 
