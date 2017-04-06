@@ -10,9 +10,6 @@ addons:
     - cmake
     - lcov
 
-before_install:
-  - gem install coveralls-lcov
-
 before_script:
   - mkdir _build
   - cd _build
@@ -26,4 +23,4 @@ script:
 # generate coverage reports
 after_script:
   - lcov -l _coverage/flecc_in_c.info
-  - coveralls-lcov _coverage/flecc_in_c.info
+  - bash <(curl -s https://codecov.io/bash) -f _coverage/flecc_in_c.info
