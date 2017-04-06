@@ -8,7 +8,7 @@ set(VERSION_PATCH "1")
 #enable_language(ASM)
 
 set(DEFAULT_BUILD_TYPE MinSizeRel)
-set(DEFAULT_C_FLAGS_GCC "-Wall")
+set(DEFAULT_C_FLAGS_GCC "-Wall -Wextra -pedantic")
 set(DOXYGEN_CONFIG_IN_FILE "${PROJECT_SOURCE_DIR}/doc/template.doxy.in")
 
 #------------------------------------------------------------------------------

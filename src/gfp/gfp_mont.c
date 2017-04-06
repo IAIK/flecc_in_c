@@ -228,7 +228,7 @@ void gfp_mont_exponent(
  * @param prime_data the prime number data to reduce the result
  */
 void gfp_mont_compute_R( gfp_t res, gfp_prime_data_t *prime_data ) {
-    int i;
+    uint32_t i;
     bigint_clear_var( res, prime_data->words );
     bigint_set_bit_var( res, prime_data->bits - 1, 1, prime_data->words );
 
@@ -243,7 +243,7 @@ void gfp_mont_compute_R( gfp_t res, gfp_prime_data_t *prime_data ) {
  * @param prime_data the prime number data to reduce the result
  */
 void gfp_mont_compute_R_squared( gfp_t res, gfp_prime_data_t *prime_data ) {
-    int i;
+    uint32_t i;
     bigint_clear_var( res, prime_data->words );
     bigint_set_bit_var( res, prime_data->bits - 1, 1, prime_data->words );
 

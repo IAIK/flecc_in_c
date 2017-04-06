@@ -62,7 +62,7 @@
  * @return the message length
  */
 int read_message( char *buffer, const int buf_length, uint8_t *message, const int message_length ) {
-    int nibbles = io_gen_readline( buffer, READ_BUFFER_SIZE );
+    int nibbles = io_gen_readline( buffer, buf_length );
     return parse_hex_message( (char *)message, message_length, buffer, nibbles );
 }
 

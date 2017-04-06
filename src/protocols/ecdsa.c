@@ -168,11 +168,11 @@ int ecdsa_is_valid( const ecdsa_signature_t *signature,
  * @param prime the prime data
  */
 void ecdsa_hash_to_gfp( gfp_t element, const uint8_t *hash, const int hash_bits, const gfp_prime_data_t *prime ) {
-    int hash_bytes = BYTES_PER_BITS( hash_bits );
-    int prime_bytes;
-    int i;
+    uint32_t hash_bytes = BYTES_PER_BITS( hash_bits );
+    uint32_t prime_bytes;
+    uint32_t i;
 
-    if( prime->bits >= hash_bits ) {
+    if( prime->bits >= (uint32_t) hash_bits ) {
         bigint_clear_var( element, prime->words );
         for( i = 0; i < hash_bytes; i++ ) {
             bigint_set_byte_var( element, prime->words, hash_bytes - 1 - i, hash[i] );

@@ -172,7 +172,7 @@ void gfp_binary_euclidean_inverse( gfp_t result, const gfp_t to_invert, const gf
             }
             bigint_shift_right_one_var( x1, x1, prime_data->words );
             if( carry == 1 ) {
-                x1[prime_data->words - 1] |= 1 << ( BITS_PER_WORD - 1 );
+                x1[prime_data->words - 1] |= ((uint_t)1) << ( BITS_PER_WORD - 1 );
             }
         }
 
@@ -184,7 +184,7 @@ void gfp_binary_euclidean_inverse( gfp_t result, const gfp_t to_invert, const gf
             }
             bigint_shift_right_one_var( x2, x2, prime_data->words );
             if( carry == 1 ) {
-                x2[prime_data->words - 1] |= 1 << ( BITS_PER_WORD - 1 );
+                x2[prime_data->words - 1] |= ((uint_t)1) << ( BITS_PER_WORD - 1 );
             }
         }
 
