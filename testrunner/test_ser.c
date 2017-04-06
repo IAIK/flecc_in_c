@@ -86,8 +86,9 @@ int line_starts_with( const char *line, const char *to_compare ) {
     const char *buffer = line;
 
     while( *to_compare != '\0' ) {
-        if( *buffer != *to_compare )
+        if( *buffer != *to_compare ) {
             return 0;
+        }
         buffer++;
         to_compare++;
     }
@@ -288,7 +289,9 @@ unsigned test_ser() {
 
         if( line_starts_with( buffer, "exit" ) ) {
             return errors;
-        } else if( line_starts_with( buffer, "bigint_add_carry" ) ) {
+        }
+
+        if( line_starts_with( buffer, "bigint_add_carry" ) ) {
 
             read_bigint( buffer, READ_BUFFER_SIZE, bi_var_a, length );
             read_bigint( buffer, READ_BUFFER_SIZE, bi_var_b, length );

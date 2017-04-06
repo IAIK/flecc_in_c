@@ -45,7 +45,7 @@
 
 #define NUM_ITERATIONS 1000
 
-void performance_print_statistics( clock_t *runtime ) {
+void performance_print_statistics( const clock_t *runtime ) {
     clock_t sum, min, max, templ;
     int run_number;
     double temp;
@@ -55,10 +55,12 @@ void performance_print_statistics( clock_t *runtime ) {
     for( run_number = 1; run_number < NUM_ITERATIONS; run_number++ ) {
         templ = runtime[run_number];
         sum += templ;
-        if( max < templ )
+        if( max < templ ) {
             max = templ;
-        if( min > templ )
+        }
+        if( min > templ ) {
             min = templ;
+        }
     }
     average = (double)sum / (double)NUM_ITERATIONS;
 

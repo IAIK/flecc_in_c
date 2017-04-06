@@ -51,25 +51,24 @@ inline int bigint_subtract( uint_t *res, const uint_t *a, const uint_t *b ) {
 }
 
 inline slong_t bigint_compare( const uint_t *a, const uint_t *b ) {
-    slong_t temp;
+    slong_t temp = (slong_t)a[2] - b[2];
+    if( temp != 0 ) {
+        return temp;
+    }
 
-    temp = (slong_t)a[2] - b[2];
-    if( temp != 0 )
-        return temp;
     temp = (slong_t)a[1] - b[1];
-    if( temp != 0 )
+    if( temp != 0 ) {
         return temp;
+    }
+
     temp = (slong_t)a[0] - b[0];
     return temp;
 }
 
 inline int bigint_is_zero( const uint_t *a ) {
-    if( a[2] != 0 )
+    if( a[2] != 0 || a[1] != 0 || a[0] != 0 ) {
         return 0;
-    if( a[1] != 0 )
-        return 0;
-    if( a[0] != 0 )
-        return 0;
+    }
     return 1;
 }
 

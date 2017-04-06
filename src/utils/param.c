@@ -112,8 +112,9 @@ int string_max_buffer_match( const char *buffer1, const size_t length1, const ch
     }
 
     for( i = 0; i < min_length - 1; i++ ) {
-        if( *buffer1_ != *buffer2_ )
+        if( *buffer1_ != *buffer2_ ) {
             break;
+        }
         buffer1_++;
         buffer2_++;
     }

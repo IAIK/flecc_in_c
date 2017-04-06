@@ -79,8 +79,9 @@ void gfp_mont_multiply_sos( gfp_t res, const gfp_t a, const gfp_t b, const gfp_p
     uint_t temp;
     uint_t temp_buffer[2 * WORDS_PER_GFP];
     int length = prime_data->words;
-    for( i = 0; i < length; i++ )
+    for( i = 0; i < length; i++ ) {
         temp_buffer[i] = 0;
+    }
     for( i = 0; i < length; i++ ) {
         carry = 0;
         temp = a[i];
@@ -183,11 +184,11 @@ void gfp_mont_inverse_binary( gfp_t res, const gfp_t a, const gfp_prime_data_t *
 
 /**
  * Invert a number by exponentiating it with (prime-2)
- * @param result the inverted number
+ * @param res the inverted number
  * @param to_invert the number to invert
  * @param prime_data the prime number data to reduce the result
  */
-void gfp_mont_inverse_fermat( gfp_t result, const gfp_t to_invert, const gfp_prime_data_t *prime_data ) {
+void gfp_mont_inverse_fermat( gfp_t res, const gfp_t to_invert, const gfp_prime_data_t *prime_data ) {
     gfp_t exponent;
     gfp_t two;
 
@@ -196,7 +197,7 @@ void gfp_mont_inverse_fermat( gfp_t result, const gfp_t to_invert, const gfp_pri
     two[0] = 2;
     bigint_subtract_var( exponent, exponent, two, prime_data->words );
 
-    gfp_mont_exponent( result, to_invert, exponent, prime_data->words, prime_data );
+    gfp_mont_exponent( res, to_invert, exponent, prime_data->words, prime_data );
 }
 
 /**

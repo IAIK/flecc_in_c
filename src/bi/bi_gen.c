@@ -172,10 +172,13 @@ void bigint_shift_left_var( uint_t *res, const uint_t *a, const int left, const 
     uint_t temp, temp2;
     int i, nWords, nBits;
 
-    if( length < 0 )
+    if( length < 0 ) {
         return;
-    if( left < 0 )
+    }
+
+    if( left < 0 ) {
         bigint_shift_right_var( res, a, -left, length );
+    }
 
     nWords = left >> LD_BITS_PER_WORD;
     nBits = left & ( BITS_PER_WORD - 1 );
@@ -196,8 +199,9 @@ void bigint_shift_left_var( uint_t *res, const uint_t *a, const int left, const 
             *res-- = *a--;
         }
     }
-    for( i = nWords - 1; i >= 0; --i )
+    for( i = nWords - 1; i >= 0; --i ) {
         *res-- = 0;
+    }
 }
 
 /**
@@ -211,10 +215,13 @@ void bigint_shift_right_var( uint_t *res, const uint_t *a, const int right, cons
     uint_t temp, temp2;
     int i, nWords, nBits;
 
-    if( length < 0 )
+    if( length < 0 ) {
         return;
-    if( right < 0 )
+    }
+
+    if( right < 0 ) {
         bigint_shift_left_var( res, a, -right, length );
+    }
 
     nWords = right >> LD_BITS_PER_WORD;
     nBits = right & ( BITS_PER_WORD - 1 );
@@ -235,8 +242,9 @@ void bigint_shift_right_var( uint_t *res, const uint_t *a, const int right, cons
         res[length - nWords - 1] = temp;
     }
 
-    for( i = length - nWords; i < length; i++ )
+    for( i = length - nWords; i < length; i++ ) {
         res[i] = 0;
+    }
 }
 
 /**
@@ -249,8 +257,9 @@ void bigint_shift_right_one_var( uint_t *res, const uint_t *a, const int length 
     uint_t temp, temp2;
     int i;
 
-    if( length < 0 )
+    if( length < 0 ) {
         return;
+    }
 
     temp = a[0] >> 1;
     for( i = 1; i < length; i++ ) {
@@ -272,11 +281,13 @@ void bigint_shift_right_one_var( uint_t *res, const uint_t *a, const int length 
 int bigint_compare_var( const uint_t *a, const uint_t *b, const int length ) {
     slong_t temp;
     int i = length - 1;
+
     for( ; i >= 0; i-- ) {
         temp = a[i];
         temp -= b[i];
-        if( temp != 0 )
+        if( temp != 0 ) {
             return ( temp > 0 ? 1 : -1 );
+        }
     }
     return 0;
 }
@@ -291,8 +302,9 @@ int bigint_compare_var( const uint_t *a, const uint_t *b, const int length ) {
 int bigint_is_equal_var( const uint_t *a, const uint_t *b, const int length ) {
     int i = length - 1;
     for( ; i >= 0; i-- ) {
-        if( a[i] != b[i] )
+        if( a[i] != b[i] ) {
             return 0;
+        }
     }
     return 1;
 }
@@ -306,8 +318,9 @@ int bigint_is_equal_var( const uint_t *a, const uint_t *b, const int length ) {
 int bigint_is_zero_var( const uint_t *a, const int length ) {
     int i;
     for( i = 0; i < length; i++ ) {
-        if( a[i] != 0 )
+        if( a[i] != 0 ) {
             return 0;
+        }
     }
     return 1;
 }
@@ -320,11 +333,15 @@ int bigint_is_zero_var( const uint_t *a, const int length ) {
  */
 int bigint_is_one_var( const uint_t *a, const int length ) {
     int i;
-    if( a[0] != 1 )
+
+    if( a[0] != 1 ) {
         return 0;
+    }
+
     for( i = 1; i < length; i++ ) {
-        if( a[i] != 0 )
+        if( a[i] != 0 ) {
             return 0;
+        }
     }
     return 1;
 }
@@ -342,10 +359,9 @@ void bigint_multiply_var( uint_t *result, const uint_t *a, const uint_t *b, cons
     ulong_t product;
     uint_t carry;
 
-    if( length_a < 0 )
+    if( length_a < 0 || length_b < 0 ) {
         return;
-    if( length_b < 0 )
-        return;
+    }
 
     // all results with index larger than length_b are written before read
     bigint_clear_var( result, length_b );
@@ -453,14 +469,16 @@ void bigint_set_bit_var( uint_t *a, const int bit, const int value, const int le
     int iWord, iBit;
     uint_t word;
 
-    if( bit < 0 )
+    if( bit < 0 ) {
         return;
+    }
 
     iWord = bit >> LD_BITS_PER_WORD;
     iBit = bit & ( BITS_PER_WORD - 1 );
 
-    if( iWord >= length )
+    if( iWord >= length ) {
         return;
+    }
 
     word = a[iWord];
     word &= ~( 1 << iBit );
@@ -478,14 +496,16 @@ void bigint_set_bit_var( uint_t *a, const int bit, const int value, const int le
 int bigint_test_bit_var( const uint_t *a, const int bit, const int length ) {
     int iWord, iBit;
 
-    if( bit < 0 )
+    if( bit < 0 ) {
         return 0;
+    }
 
     iWord = bit >> LD_BITS_PER_WORD;
     iBit = bit & ( BITS_PER_WORD - 1 );
 
-    if( iWord >= length )
+    if( iWord >= length ) {
         return 0;
+    }
 
     return ( a[iWord] >> iBit ) & 0x01;
 }
@@ -499,17 +519,23 @@ int bigint_test_bit_var( const uint_t *a, const int bit, const int length ) {
 int bigint_get_msb_var( const uint_t *a, const int length ) {
     int word, bit;
     uint_t temp;
-    if( length < 0 )
+
+    if( length < 0 ) {
         return -1;
+    }
+
     for( word = length - 1; word > 0; word-- ) {
         temp = a[word];
-        if( temp != 0 )
+        if( temp != 0 ) {
             break;
+        }
     }
+
     temp = a[word];
     for( bit = BITS_PER_WORD - 1; bit >= 0; bit-- ) {
-        if( ( ( temp >> bit ) & 0x01 ) == 1 )
+        if( ( ( temp >> bit ) & 0x01 ) == 1 ) {
             break;
+        }
     }
     return word * BITS_PER_WORD + bit;
 }
@@ -527,8 +553,9 @@ uint8_t bigint_get_byte_var( const uint_t *a, const int length, const int index 
     uint_t word;
 
     /* handle out of bounds */
-    if( ( wordIndex < 0 ) || ( wordIndex >= length ) )
+    if( wordIndex < 0 || wordIndex >= length ) {
         return 0;
+    }
 
     word = a[wordIndex];
 
@@ -552,8 +579,9 @@ void bigint_set_byte_var( uint_t *a, const int length, const int index, const ui
     uint_t word;
 
     /* handle out of bounds */
-    if( ( wordIndex < 0 ) || ( wordIndex >= length ) )
+    if( wordIndex < 0 || wordIndex >= length ) {
         return;
+    }
 
 #if( BYTES_PER_WORD == 1 )
     word = value;
@@ -580,10 +608,9 @@ int bigint_parse_hex_var( uint_t *a, const int length_a, const char *array, cons
     char character;
     char *array_pointer = (char *)array + array_length - 1;
 
-    if( array_length < 0 )
+    if( array_length < 0 || length_a < 0 ) {
         return 0;
-    if( length_a < 0 )
-        return 0;
+    }
 
     while( array_pointer != ( array - 1 ) ) {
         character = *array_pointer--;
@@ -602,14 +629,16 @@ int bigint_parse_hex_var( uint_t *a, const int length_a, const char *array, cons
 
         if( nibble_i == BITS_PER_WORD ) {
             a[a_index++] = word;
-            if( a_index == length_a )
+            if( a_index == length_a ) {
                 return a_index;
+            }
             nibble_i = 0;
             word = 0;
         }
     }
-    if( nibble_i > 0 )
+    if( nibble_i > 0 ) {
         a[a_index++] = word;
+    }
     return a_index;
 }
 
@@ -624,8 +653,9 @@ int bigint_hamming_weight_var( const uint_t *var, const int length ) {
     for( word = 0; word < length; word++ ) {
         temp = var[word];
         for( bit = 0; bit < BITS_PER_WORD; bit++ ) {
-            if( ( temp & ( 1 << bit ) ) > 0 )
+            if( ( temp & ( 1 << bit ) ) > 0 ) {
                 counter++;
+            }
         }
     }
     return counter;
@@ -641,8 +671,9 @@ int bigint_hamming_weight_var( const uint_t *var, const int length ) {
  */
 void bigint_divide_simple_var( uint_t *Q, uint_t *R, const uint_t *N, const uint_t *D, const int words ) {
     int i;
-    if( bigint_is_zero_var( D, words ) )
+    if( bigint_is_zero_var( D, words ) ) {
         return;
+    }
 
     bigint_clear_var( Q, words );
     bigint_clear_var( R, words );

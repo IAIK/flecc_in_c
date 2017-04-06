@@ -56,14 +56,15 @@ int eccp_std_projective_point_is_valid( const eccp_point_projective_t *a, const 
     gfp_t right;
     gfp_t temp;
 
-    if( a->identity == 1 )
+    if( a->identity == 1 ) {
         return 1;
-    if( bigint_compare_var( a->x, param->prime_data.prime, param->prime_data.words ) >= 0 )
+    }
+
+    if( bigint_compare_var( a->x, param->prime_data.prime, param->prime_data.words ) >= 0
+        || bigint_compare_var( a->y, param->prime_data.prime, param->prime_data.words ) >= 0
+        || bigint_compare_var( a->z, param->prime_data.prime, param->prime_data.words ) >= 0 ) {
         return 0;
-    if( bigint_compare_var( a->y, param->prime_data.prime, param->prime_data.words ) >= 0 )
-        return 0;
-    if( bigint_compare_var( a->z, param->prime_data.prime, param->prime_data.words ) >= 0 )
-        return 0;
+    }
 
     /* calculate the right side */
     /* use left as additional temp */
@@ -97,19 +98,21 @@ int eccp_std_projective_point_equals( const eccp_point_projective_t *a,
     gfp_t temp_a, temp_b;
 
     if( a->identity == 1 ) {
-        if( b->identity == 1 )
+        if( b->identity == 1 ) {
             return 1;
-        else
-            return 0;
-    }
-    if( b->identity == 1 )
+        }
         return 0;
+    }
+    if( b->identity == 1 ) {
+        return 0;
+    }
 
     gfp_multiply( temp_a, a->z, b->x );
     gfp_multiply( temp_b, b->z, a->x );
 
-    if( !gfp_is_equal( temp_a, temp_b ) )
+    if( !gfp_is_equal( temp_a, temp_b ) ) {
         return 0;
+    }
 
     gfp_multiply( temp_a, a->z, b->y );
     gfp_multiply( temp_b, b->z, a->y );

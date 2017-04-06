@@ -50,10 +50,12 @@ int compare_bytes( const uint8_t *a, const uint8_t *b, const int length ) {
     int i = length - 1;
 
     while( i >= 0 ) {
-        if( *( a + i ) > *( b + i ) )
+        if( *( a + i ) > *( b + i ) ) {
             return 1;
-        if( *( a + i ) < *( b + i ) )
+        }
+        if( *( a + i ) < *( b + i ) ) {
             return -1;
+        }
         i--;
     }
 
@@ -73,10 +75,9 @@ int assert( const char *test_id, const int condition ) {
     if( condition ) {
         puts( ": success\n" );
         return 0;
-    } else {
-        puts( ": error\n" );
-        return 1;
     }
+    puts( ": error\n" );
+    return 1;
 }
 
 /**

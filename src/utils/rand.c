@@ -59,11 +59,14 @@ void bigint_rand_insecure_var( uint_t *dest, const int length ) {
 void gfp_rand( gfp_t dest, const gfp_prime_data_t *prime_data ) {
     int msb;
     uint_t mask;
+
     msb = prime_data->bits & ( BITS_PER_WORD - 1 );
-    if( msb == 0 )
+    if( msb == 0 ) {
         mask = UINT_T_MAX;
-    else
+    } else {
         mask = ( 1 << msb ) - 1;
+    }
+
     do {
         // TODO: to be replaced with an external library or something more secure
         bigint_rand_insecure_var( dest, prime_data->words );

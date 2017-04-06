@@ -48,10 +48,10 @@ void gfp_mont_compute_R( gfp_t res, gfp_prime_data_t *prime_data );
 void gfp_mont_compute_R_squared( gfp_t res, gfp_prime_data_t *prime_data );
 uint_t gfp_mont_compute_n0( gfp_prime_data_t *prime_data );
 void gfp_mont_multiply_sos( gfp_t res, const gfp_t a, const gfp_t b, const gfp_prime_data_t *prime_data );
-void gfp_mont_inverse_binary( gfp_t result, const gfp_t a, const gfp_prime_data_t *prime_data );
+void gfp_mont_inverse_binary( gfp_t res, const gfp_t a, const gfp_prime_data_t *prime_data );
 void gfp_mont_exponent(
     gfp_t res, const gfp_t a, const uint_t *exponent, const int exponent_length, const gfp_prime_data_t *prime_data );
-void gfp_mont_inverse_fermat( gfp_t result, const gfp_t to_invert, const gfp_prime_data_t *prime_data );
+void gfp_mont_inverse_fermat( gfp_t res, const gfp_t to_invert, const gfp_prime_data_t *prime_data );
 
 void gfp_mult_two_mont( gfp_t res, const gfp_t a, const gfp_t b, const gfp_prime_data_t *prime_data );
 

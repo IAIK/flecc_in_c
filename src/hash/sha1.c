@@ -181,8 +181,9 @@ void hash_sha1_final( hash_sha1_t *state, const uint8_t *message, const int rema
     } else {
         hash_sha1_process_block( state, w );
 
-        for( i = 0; i < 15; i++ )
+        for( i = 0; i < 15; i++ ) {
             w[i] = 0;
+        }
 
         w[15] = total_length * 8;
         hash_sha1_process_block( state, w );

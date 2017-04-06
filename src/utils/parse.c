@@ -112,8 +112,9 @@ int parse_hex_message( char *message, const int max_message_length, const char *
         num_words++;
         buffer += 2;
         _buffer_length_ -= 2;
-        if( num_words == max_message_length )
+        if( num_words == max_message_length ) {
             break;
+        }
     }
 
     return num_words;

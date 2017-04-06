@@ -54,14 +54,15 @@ int eccp_jacobian_point_is_valid( const eccp_point_projective_t *a, const eccp_p
     gfp_t right;
     gfp_t temp;
 
-    if( a->identity == 1 )
+    if( a->identity == 1 ) {
         return 1;
-    if( bigint_compare_var( a->x, param->prime_data.prime, param->prime_data.words ) >= 0 )
+    }
+
+    if( bigint_compare_var( a->x, param->prime_data.prime, param->prime_data.words ) >= 0
+        || bigint_compare_var( a->y, param->prime_data.prime, param->prime_data.words ) >= 0
+        || bigint_compare_var( a->z, param->prime_data.prime, param->prime_data.words ) >= 0 ) {
         return 0;
-    if( bigint_compare_var( a->y, param->prime_data.prime, param->prime_data.words ) >= 0 )
-        return 0;
-    if( bigint_compare_var( a->z, param->prime_data.prime, param->prime_data.words ) >= 0 )
-        return 0;
+    }
 
     /* calculate the right side */
     /* use left as additional temp */
@@ -97,21 +98,23 @@ int eccp_jacobian_point_equals( const eccp_point_projective_t *a,
     gfp_t temp_a, temp_b;
 
     if( a->identity == 1 ) {
-        if( b->identity == 1 )
+        if( b->identity == 1 ) {
             return 1;
-        else
-            return 0;
-    }
-    if( b->identity == 1 )
+        }
         return 0;
+    }
+    if( b->identity == 1 ) {
+        return 0;
+    }
 
     gfp_square( temp_a_z2, a->z );
     gfp_square( temp_b_z2, b->z );
     gfp_multiply( temp_a, temp_a_z2, b->x );
     gfp_multiply( temp_b, temp_b_z2, a->x );
 
-    if( !gfp_is_equal( temp_a, temp_b ) )
+    if( !gfp_is_equal( temp_a, temp_b ) ) {
         return 0;
+    }
 
     gfp_multiply( temp_a, temp_a_z2, a->z );
     gfp_multiply( temp_b, temp_b_z2, b->z );
@@ -312,12 +315,11 @@ void eccp_jacobian_point_add( eccp_point_projective_t *res,
             // CASE: A is equal to B
             eccp_jacobian_point_double( res, a, param );
             return;
-        } else {
-            // CASE: -A is equal to B
-            // NOTE: There are only two possible values for y per x coordinate.
-            res->identity = 1;
-            return;
         }
+        // CASE: -A is equal to B
+        // NOTE: There are only two possible values for y per x coordinate.
+        res->identity = 1;
+        return;
     }
 
     gfp_subtract( T4, T4, T3 ); // H = U2-U1
@@ -387,12 +389,11 @@ void eccp_jacobian_point_add_affine( eccp_point_projective_t *res,
             // TODO: optimized formulas using b
             eccp_jacobian_point_double( res, a, param );
             return;
-        } else {
-            // CASE: -A is equal to B
-            // NOTE: There are only two possible values for y per x coordinate.
-            res->identity = 1;
-            return;
         }
+        // CASE: -A is equal to B
+        // NOTE: There are only two possible values for y per x coordinate.
+        res->identity = 1;
+        return;
     }
 
     gfp_multiply( T2, a->z, T3 );

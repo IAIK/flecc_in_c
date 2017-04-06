@@ -108,14 +108,12 @@ int ecdsa_is_valid( const ecdsa_signature_t *signature,
 
     /* Verify that r and s are integers in the interval [1,n-1]. If any
      * verification fails then reject the signature */
-    if( bigint_is_zero_var( signature->r, param->order_n_data.words ) == 1 )
+    if( bigint_is_zero_var( signature->r, param->order_n_data.words ) == 1
+        || bigint_is_zero_var( signature->s, param->order_n_data.words ) == 1
+        || bigint_compare_var( signature->r, param->order_n_data.prime, param->order_n_data.words ) >= 0
+        || bigint_compare_var( signature->s, param->order_n_data.prime, param->order_n_data.words ) >= 0 ) {
         return 0;
-    if( bigint_is_zero_var( signature->s, param->order_n_data.words ) == 1 )
-        return 0;
-    if( bigint_compare_var( signature->r, param->order_n_data.prime, param->order_n_data.words ) >= 0 )
-        return 0;
-    if( bigint_compare_var( signature->s, param->order_n_data.prime, param->order_n_data.words ) >= 0 )
-        return 0;
+    }
 
     /* Verify the validity of the public key (just to be sure) */
     eccp_affine_point_copy( &P1, public_key, param );
@@ -123,10 +121,9 @@ int ecdsa_is_valid( const ecdsa_signature_t *signature,
         gfp_normal_to_montgomery( P1.x, public_key->x, &param->prime_data );
         gfp_normal_to_montgomery( P1.y, public_key->y, &param->prime_data );
     }
-    if( eccp_affine_point_is_valid( &P1, param ) == 0 )
+    if( eccp_affine_point_is_valid( &P1, param ) == 0 || P1.identity == 1 ) {
         return 0;
-    if( P1.identity == 1 )
-        return 0;
+    }
 
     gfp_normal_to_montgomery( w, signature->s, &param->order_n_data ); // s*R
     gfp_mont_inverse( w, w, &param->order_n_data );                    // s^-1*R
@@ -139,8 +136,9 @@ int ecdsa_is_valid( const ecdsa_signature_t *signature,
     eccp_generic_mul_wrapper( &P1, &param->base_point, u1, param );
     eccp_affine_point_add( &P1, &P1, &P2, param );
 
-    if( P1.identity == 1 )
+    if( P1.identity == 1 ) {
         return 0;
+    }
 
     // in case order n and prime have a different length
     w[param->order_n_data.words - 1] = 0;
@@ -154,9 +152,8 @@ int ecdsa_is_valid( const ecdsa_signature_t *signature,
 
     if( bigint_compare_var( w, signature->r, param->order_n_data.words ) == 0 ) {
         return 1;
-    } else {
-        return 0;
     }
+    return 0;
 }
 
 /**
@@ -172,7 +169,7 @@ void ecdsa_hash_to_gfp( gfp_t element, const uint8_t *hash, const int hash_bits,
     uint32_t prime_bytes;
     uint32_t i;
 
-    if( prime->bits >= (uint32_t) hash_bits ) {
+    if( prime->bits >= (uint32_t)hash_bits ) {
         bigint_clear_var( element, prime->words );
         for( i = 0; i < hash_bytes; i++ ) {
             bigint_set_byte_var( element, prime->words, hash_bytes - 1 - i, hash[i] );

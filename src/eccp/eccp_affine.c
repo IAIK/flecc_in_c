@@ -49,12 +49,14 @@
 int eccp_affine_point_is_valid( const eccp_point_affine_t *A, const eccp_parameters_t *param ) {
     gfp_t left, right;
 
-    if( A->identity == 1 )
+    if( A->identity == 1 ) {
         return 1;
-    if( bigint_compare_var( A->x, param->prime_data.prime, param->prime_data.words ) >= 0 )
+    }
+
+    if( bigint_compare_var( A->x, param->prime_data.prime, param->prime_data.words ) >= 0 ||
+        bigint_compare_var( A->y, param->prime_data.prime, param->prime_data.words ) >= 0 ) {
         return 0;
-    if( bigint_compare_var( A->y, param->prime_data.prime, param->prime_data.words ) >= 0 )
-        return 0;
+    }
 
     /* calculate the right side */
     /* use left as additional temp */
@@ -81,19 +83,19 @@ int eccp_affine_point_is_valid( const eccp_point_affine_t *A, const eccp_paramet
 int eccp_affine_point_compare( const eccp_point_affine_t *A, const eccp_point_affine_t *B, const eccp_parameters_t *param ) {
     int compare;
     if( A->identity == 1 ) {
-        if( B->identity == 1 )
+        if( B->identity == 1 ) {
             return 0;
-        else
-            return -1;
+        }
+        return -1;
     }
-    if( B->identity == 1 )
+    if( B->identity == 1 ) {
         return 1;
+    }
     compare = bigint_compare_var( A->x, B->x, param->prime_data.words );
     if( compare != 0 ) {
         return compare;
-    } else {
-        return bigint_compare_var( A->y, B->y, param->prime_data.words );
     }
+    return bigint_compare_var( A->y, B->y, param->prime_data.words );
 }
 
 /**
@@ -134,12 +136,11 @@ void eccp_affine_point_add( eccp_point_affine_t *res,
             // CASE: A is equal to B
             eccp_affine_point_double( res, A, param );
             return;
-        } else {
-            // CASE: -A is equal to B
-            // NOTE: There are only two possible values for y per x coordinate.
-            res->identity = 1;
-            return;
         }
+        // CASE: -A is equal to B
+        // NOTE: There are only two possible values for y per x coordinate.
+        res->identity = 1;
+        return;
     }
 
     gfp_subtract( temp2, B->x, A->x );
