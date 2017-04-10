@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.1.0)
 
 project(flecc_in_c C)
 set(VERSION_MAJOR "1")
@@ -10,6 +10,9 @@ set(VERSION_PATCH "1")
 set(DEFAULT_BUILD_TYPE MinSizeRel)
 set(DEFAULT_C_FLAGS_GCC "-Wall -Wextra -pedantic")
 set(DOXYGEN_CONFIG_IN_FILE "${PROJECT_SOURCE_DIR}/doc/template.doxy.in")
+
+set(CMAKE_C_STANDARD     99)
+set(CMAKE_C_EXTENSIONS   OFF)
 
 #------------------------------------------------------------------------------
 # General config
