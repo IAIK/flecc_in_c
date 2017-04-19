@@ -13,10 +13,11 @@
 #   PRINT_OUTPUT_FILE...................If an OUTPUT_FILE is used the output it after the PROGRAM execution
 #   PRINT_ERROR_FILE....................If an ERROR_FILE is used the output it after the PROGRAM execution
 #
-#   RETURN_VALUE........................Controls the return value of the script is specified
-#    - ZERO.............................Always return zero
+#   RETURN_VALUE........................Controls the return value of the script
+#    - EXECUTION........................Zero if execution returned 0, non zero otherwhise (default)
 #    - COMPARISON.......................Zero if comparison was successful, non zero otherwhise
 #    - COMBINED.........................Zero if execution returned 0 and comparison was successful, non zero otherwhise
+#    - ZERO.............................Always return zero
 #
 #   COMPARE_FILES.......................List of files which should be compared against some reference
 #   REFERENCE_FILES.....................List of reference files
@@ -25,7 +26,7 @@
 # Example for adding a target using this script:
 #  add_custom_target( foobar COMMAND "${CMAKE_COMMAND}"
 #                 -D "PROGRAM:STRING=${PROGRAM}"
-#                 -P "${PROJECT_SOURCE_DIR}/cmake/scripts/run.cmake" ) 
+#                 -P "${PROJECT_SOURCE_DIR}/cmake/scripts/run.cmake" )
 cmake_minimum_required(VERSION 3.0.0)
 
 #
@@ -38,10 +39,13 @@ if(NOT PROGRAM)
 endif()
 
 # Validate that a valid option for the RETURN_VALUE parameter has been specified
-set(RETURN_VALUE_OPTIONS ZERO COMPARISON COMBINED)
+set(RETURN_VALUE_OPTIONS EXECUTION COMPARISON COMBINED ZERO)
 list(FIND RETURN_VALUE_OPTIONS "${RETURN_VALUE}" idx)
 if(RETURN_VALUE AND idx EQUAL -1)
   message(SEND_ERROR "Invalid option (${RETURN_VALUE}) specified as RETURN_VALUE!")
+endif()
+if(NOT RETURN_VALUE)
+  set(RETURN_VALUE EXECUTION)
 endif()
 
 # validate that there are as many reference as compare files
@@ -73,8 +77,7 @@ foreach(element IN ITEMS ${PROGRAM})
 endforeach()
 
 # build up parameters for execute process
-set(EXEC_PARAMETERS "")
-list(APPEND EXEC_PARAMETERS RESULT_VARIABLE execution_result)
+set(EXEC_PARAMETERS RESULT_VARIABLE execution_result)
 if(INPUT_FILE)
   list(APPEND EXEC_PARAMETERS INPUT_FILE ${INPUT_FILE})
 endif()
@@ -131,6 +134,8 @@ if(compare_files_length GREATER 0)
   endforeach()
 endif()
 
-if((NOT RETURN_VALUE AND execution_result) OR ( RETURN_VALUE STREQUAL "COMPARISON" AND compare_result ) OR ( RETURN_VALUE STREQUAL "COMBINED" AND compare_result AND execution_result ) )
+if( ( RETURN_VALUE STREQUAL EXECUTION AND execution_result ) OR
+    ( RETURN_VALUE STREQUAL COMPARISON AND compare_result ) OR
+    ( RETURN_VALUE STREQUAL COMBINED AND compare_result AND execution_result ) )
   message(SEND_ERROR "Run failed!")
 endif()

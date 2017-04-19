@@ -30,10 +30,11 @@ if(SUB_PROJECT)
   return()
 endif()
 
+set(LCOV_GCOV_ARG --rc lcov_branch_coverage=1)
 if(CLANG) # "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang"
   find_program(LLVM_COV_COMMAND NAMES llvm-cov)
   mark_as_advanced(LLVM_COV_COMMAND)
-  set(LCOV_GCOV_ARG --gcov-tool "${PROJECT_SOURCE_DIR}/cmake/scripts/llvm-gcov.sh")
+  list(APPEND LCOV_GCOV_ARG --gcov-tool "${PROJECT_SOURCE_DIR}/cmake/scripts/llvm-gcov.sh")
 endif()
 
 # Search for lcov and genhtml and skip coverage support on error.
@@ -91,7 +92,7 @@ add_custom_target(covGenerate
                   COMMAND "${LCOV_COMMAND}" ${LCOV_GCOV_ARG} -c -d "${PROJECT_BINARY_DIR}" -o "${COVERAGE_OUTPUT_DIR}/coverage.info"
                   COMMAND "${LCOV_COMMAND}" ${LCOV_GCOV_ARG} -a "${COVERAGE_OUTPUT_DIR}/base.info" -a "${COVERAGE_OUTPUT_DIR}/coverage.info" -o "${COVERAGE_OUTPUT_DIR}/${CMAKE_PROJECT_NAME}.info"
                   COMMAND "${LCOV_COMMAND}" ${LCOV_GCOV_ARG} -r "${COVERAGE_OUTPUT_DIR}/${CMAKE_PROJECT_NAME}.info" "/usr/include/*" -o "${COVERAGE_OUTPUT_DIR}/${CMAKE_PROJECT_NAME}.info"
-                  COMMAND "${CMAKE_COMMAND}" -E chdir "${COVERAGE_OUTPUT_DIR}" "${GENHTML_COMMAND}" -p "${PROJECT_SOURCE_DIR}" "${CMAKE_PROJECT_NAME}.info"
+                  COMMAND "${CMAKE_COMMAND}" -E chdir "${COVERAGE_OUTPUT_DIR}" "${GENHTML_COMMAND}" -p "${PROJECT_SOURCE_DIR}" "${CMAKE_PROJECT_NAME}.info" --branch-coverage
                   WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
                   COMMENT "Collect coverage data and generate HTML."
                   VERBATIM
