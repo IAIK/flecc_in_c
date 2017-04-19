@@ -13,7 +13,7 @@
 #   PRINT_OUTPUT_FILE...................If an OUTPUT_FILE is used the output it after the PROGRAM execution
 #   PRINT_ERROR_FILE....................If an ERROR_FILE is used the output it after the PROGRAM execution
 #
-#   RETURN_VALUE........................Controls the return value of the script is specified
+#   RETURN_VALUE........................Controls the return value of the script
 #    - ZERO.............................Always return zero
 #    - COMPARISON.......................Zero if comparison was successful, non zero otherwhise
 #    - COMBINED.........................Zero if execution returned 0 and comparison was successful, non zero otherwhise
@@ -74,7 +74,9 @@ endforeach()
 
 # build up parameters for execute process
 set(EXEC_PARAMETERS "")
-list(APPEND EXEC_PARAMETERS RESULT_VARIABLE execution_result)
+if(RETURN_VALUE)
+  list(APPEND EXEC_PARAMETERS RESULT_VARIABLE execution_result)
+endif()
 if(INPUT_FILE)
   list(APPEND EXEC_PARAMETERS INPUT_FILE ${INPUT_FILE})
 endif()
@@ -96,7 +98,9 @@ endif()
 
 message(STATUS "Executing \"${PROGRAM_STR}\"" )
 execute_process(COMMAND ${PROGRAM} ${EXEC_PARAMETERS})
-message(STATUS "Return Code: ${execution_result}" )
+if(RETURN_VALUE)
+  message(STATUS "Return Code: ${execution_result}" )
+endif()
 
 if(PRINT_OUTPUT_FILE AND OUTPUT_FILE)
   file(READ "${OUTPUT_FILE}" output_data)
@@ -131,6 +135,6 @@ if(compare_files_length GREATER 0)
   endforeach()
 endif()
 
-if((NOT RETURN_VALUE AND execution_result) OR ( RETURN_VALUE STREQUAL "COMPARISON" AND compare_result ) OR ( RETURN_VALUE STREQUAL "COMBINED" AND compare_result AND execution_result ) )
+if( ( RETURN_VALUE STREQUAL "COMPARISON" AND compare_result ) OR ( RETURN_VALUE STREQUAL "COMBINED" AND compare_result AND execution_result ) )
   message(SEND_ERROR "Run failed!")
 endif()

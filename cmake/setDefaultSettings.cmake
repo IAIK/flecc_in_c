@@ -17,7 +17,8 @@
 #   TOOLCHAIN_BUILD_TYPE or
 #   DEFAULT_BUILD_TYPE..................usually Debug or Release
 #
-# * Defining the C and CXX compiler flags:
+# * Defining the ASM, C, and CXX compiler flags:
+#   TOOLCHAIN_ASM_FLAGS
 #   TOOLCHAIN_C_FLAGS or
 #   DEFAULT_C_FLAGS_GCC.................flags when gcc and clang is used (C)
 #   DEFAULT_C_FLAGS_MSVC................flags when cl is used (C)
