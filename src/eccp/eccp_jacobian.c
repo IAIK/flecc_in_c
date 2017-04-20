@@ -556,7 +556,12 @@ void eccp_jacobian_point_multiply_COMB( eccp_point_affine_t *result, const gfp_t
         eccp_jacobian_point_double( &result_projective, &result_projective, param );
         j = 0;
         for( j_cnt = 0; j_cnt < width; j_cnt++ ) {
-            j |= bigint_test_bit_var( scalar, comb_param_d * j_cnt + digit, param->order_n_data.words ) << j_cnt;
+            int bit = comb_param_d * j_cnt + digit;
+            // bit can, depending on the window width, be greater than the
+            // number of bits in an big integer. We check for this case instead
+            // of requiring a special zero padding.
+            if( bit >= 0 && bit < (int)param->order_n_data.bits )
+                j |= bigint_test_bit_var( scalar, bit, param->order_n_data.words ) << j_cnt;
         }
 
         if( j > 0 ) {
@@ -607,7 +612,6 @@ void eccp_jacobian_point_multiply_COMB_precompute( eccp_parameters_t *param ) {
  * Based on Algorithm 2 in
  * Zhe Liu, Erich Wenger, Johann Großschädl - "MoTE-ECC: Energy-Scalable Elliptic Curve Cryptography for Wireless Sensor Networks"
  *
- * TODO: UNTESTED!!
  */
 void eccp_jacobian_point_multiply_COMB_WOZ( eccp_point_affine_t *result, const gfp_t scalar, const eccp_parameters_t *param ) {
     int width = param->base_point_precomputed_table_width;
@@ -617,7 +621,6 @@ void eccp_jacobian_point_multiply_COMB_WOZ( eccp_point_affine_t *result, const g
     eccp_point_projective_t result_projective;
     eccp_point_affine_t temp;
     int digit, index, j;
-    int to_invert;
     result_projective.identity = 1;
 
     digit = comb_param_d;
@@ -633,7 +636,13 @@ void eccp_jacobian_point_multiply_COMB_WOZ( eccp_point_affine_t *result, const g
         for( j = 0; j < ( width - 1 ); j++ ) {
             index |= bigint_test_bit_var( scalar, comb_param_d * j + digit, param->order_n_data.words ) << j;
         }
-        to_invert = bigint_test_bit_var( scalar, comb_param_d * ( width - 1 ) + digit, param->order_n_data.words );
+        int bit = comb_param_d * ( width - 1 ) + digit;
+        // bit can, depending on the window width, be greater than the
+        // number of bits in an big integer. We check for this case instead
+        // of requiring a special zero padding.
+        int to_invert = 0;
+        if( bit >= 0 && bit < (int)param->order_n_data.bits )
+            to_invert = bigint_test_bit_var( scalar, bit, param->order_n_data.words );
 
         if( !to_invert ) {
             index = tbl_size - index - 1;
