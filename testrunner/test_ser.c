@@ -274,13 +274,15 @@ unsigned test_ser() {
     }
     length = curve_params.prime_data.words;
 
-    // TODO: BEAUTIFY!!!
-    gfp_opt_3_init( &param->prime_data );
+    param->base_point_precomputed_table_width = TBL_WIDTH;
 
     eccp_point_affine_t comb_table[JCB_COMB_WOZ_TBL_SIZE( TBL_WIDTH )];
     param->base_point_precomputed_table = comb_table;
-    param->base_point_precomputed_table_width = TBL_WIDTH;
     eccp_jacobian_point_multiply_COMB_WOZ_precompute( param );
+
+    // eccp_point_affine_t comb_table[JCB_COMB_TBL_SIZE( TBL_WIDTH )];
+    // param->base_point_precomputed_table = comb_table;
+    // eccp_jacobian_point_multiply_COMB_precompute( param );
 
     while( 1 ) {
         io_gen_readline( buffer, READ_BUFFER_SIZE );

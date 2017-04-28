@@ -50,7 +50,6 @@
 #include "gfp_const_runtime.h"
 #include "gfp_gen.h"
 #include "gfp_mont.h"
-#include "gfp_opt_3.h"
 
 /* performance optimized vs. constant runtime implementations */
 #if 0
@@ -86,29 +85,6 @@
 #define gfp_copy( dest, src ) bigint_copy_var( dest, src, param->prime_data.words )
 #define gfp_is_equal( a, b ) bigint_cr_is_equal_var( a, b, param->prime_data.words )
 #define gfp_is_zero( a ) bigint_cr_is_zero_var( a, param->prime_data.words )
-
-#endif
-
-#if 0
-
-#undef gfp_add
-#undef gfp_subtract
-#undef gfp_multiply
-#undef gfp_mont_multiply
-#undef gfp_inverse
-#undef gfp_mont_inverse
-
-void gfp_opt_3_add( gfp_t res, const gfp_t a, const gfp_t b );
-void gfp_opt_3_subtract( gfp_t res, const gfp_t a, const gfp_t b );
-void gfp_opt_3_multiply( gfp_t res, const gfp_t a, const gfp_t b );
-void gfp_opt_3_inverse( gfp_t res, const gfp_t a );
-
-#define gfp_add( res, a, b ) gfp_opt_3_add( res, a, b )
-#define gfp_subtract( res, a, b ) gfp_opt_3_subtract( res, a, b )
-#define gfp_multiply( res, a, b ) gfp_opt_3_multiply( res, a, b )
-#define gfp_mont_multiply( res, a, b, prime_data ) gfp_opt_3_multiply( res, a, b )
-#define gfp_inverse( res, a ) gfp_opt_3_inverse( res, a )
-#define gfp_mont_inverse( res, a, prime_data ) gfp_opt_3_inverse( res, a )
 
 #endif
 

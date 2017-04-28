@@ -42,17 +42,46 @@
 extern "C" {
 #endif
 
-#include "../types.h"
+#include "flecc_in_c/types.h"
 
-void bigint_cr_tbl_access( uint_t *result,
-                           const uint_t *table,
-                           const int index,
-                           const int tbl_entries,
-                           const int words_per_entry,
-                           const int words_result );
-void bigint_cr_switch( uint_t *var1, uint_t *var2, const int switch_vars, const int words );
-void bigint_cr_select_2( uint_t *result, const uint_t *var0, const uint_t *var1, const int var_sel, const int words );
+/**
+ * Switch two big integers with configurable length in constant time and with constant access pattern.
+ *
+ * @param var1 the first big integer
+ * @param var2 the second big integer
+ * @param condition if 1, variables are switched; if 0, no switch is performed
+ * @param length the number of uint_t elements in the big integers (>= 1)
+ */
+void bigint_cr_switch( uint_t *var1, uint_t *var2, const int condition, const int length );
+
+/**
+ * Copy one of two big integers with configurable length to the destination in constant time.
+ *
+ * @param result the resulting big integer
+ * @param var0 the first big integer
+ * @param var1 the second big integer
+ * @param condition if 0, selects var0, if 1, selects var1 (0 || 1)
+ * @param length the number of uint_t elements in the big integers (>= 1)
+ */
+void bigint_cr_select_2( uint_t *result, const uint_t *var0, const uint_t *var1, const int condition, const int length );
+
+/**
+ * Compares two big integers for equality with configurable length in constant time.
+ *
+ * @param a the first operand for the comparison
+ * @param b the second operand for the comparison
+ * @param length the number of uint_t elements in the big integers (>= 1)
+ * @return 1 if equal; 0 if not equal
+ */
 int bigint_cr_is_equal_var( const uint_t *a, const uint_t *b, const int length );
+
+/**
+ * Checks if a big integer is zero.
+ *
+ * @param a the big integer for the check
+ * @param length the number of uint_t elements in the big integer (>= 1)
+ * @return 1 if zero; otherwise 0.
+ */
 int bigint_cr_is_zero_var( const uint_t *a, const int length );
 
 #ifdef __cplusplus

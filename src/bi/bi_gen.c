@@ -37,204 +37,123 @@
 
 #include "flecc_in_c/bi/bi_gen.h"
 
-/**
- * Adds two big integers with variable length
- * @param a the first parameter to add
- * @param b the second parameter to add
- * @param res the result
- * @param length the number of uint_t to add
- * @return the carry flag
- */
+#include <assert.h>
+
 int bigint_add_var( uint_t *res, const uint_t *a, const uint_t *b, const int length ) {
+    assert( length > 0 );
+
     ulong_t temp = 0;
-    int i = 0;
-    for( ; i < length; i++ ) {
+    for( int i = 0; i < length; ++i, ++a, ++b, ++res ) {
         temp += *a;
         temp += *b;
         *res = (uint_t)temp;
         temp >>= BITS_PER_WORD;
-        a++;
-        b++;
-        res++;
     }
     return temp;
 }
 
-/**
- * Adds two big integers with variable length
- * @param a the first parameter to add
- * @param b the second parameter to add
- * @param res the result
- * @param length the number of uint_t to add
- * @param carry input carry flag
- * @return the carry flag
- */
 int bigint_add_carry_var( uint_t *res, const uint_t *a, const uint_t *b, const int length, const int carry ) {
+    assert( length > 0 );
+
     slong_t temp = carry;
-    int i = 0;
-    for( ; i < length; i++ ) {
+    for( int i = 0; i < length; ++i, ++a, ++b, ++res ) {
         temp += *a;
         temp += *b;
         *res = (uint_t)temp;
         temp >>= BITS_PER_WORD;
-        a++;
-        b++;
-        res++;
     }
     return temp;
 }
 
-/**
- * Subtracts two big integers with variable length: res = a - b
- * @param a the minuend
- * @param b the subtrahend
- * @param res the difference
- * @param length the number of uint_t elements to subtract
- * @return the carry flag (0 or -1)
- */
 int bigint_subtract_var( uint_t *res, const uint_t *a, const uint_t *b, const int length ) {
+    assert( length > 0 );
+
     slong_t temp = 0;
-    int i = 0;
-    for( ; i < length; i++ ) {
+    for( int i = 0; i < length; ++i, ++a, ++b, ++res ) {
         temp += *a;
         temp -= *b;
         *res = (uint_t)temp;
         temp >>= BITS_PER_WORD;
-        a++;
-        b++;
-        res++;
     }
     return temp;
 }
 
-/**
- * Subtracts two big integers with variable length: res = a - b
- * @param a the minuend
- * @param b the subtrahend
- * @param res the difference
- * @param length the number of uint_t elements to subtract
- * @return the carry flag
- */
 int bigint_subtract_carry_var( uint_t *res, const uint_t *a, const uint_t *b, const int length, const int carry ) {
+    assert( length > 0 );
+
     slong_t temp = carry;
-    int i = 0;
-    for( ; i < length; i++ ) {
+    for( int i = 0; i < length; ++i, ++a, ++b, ++res ) {
         temp += *a;
         temp -= *b;
         *res = (uint_t)temp;
         temp >>= BITS_PER_WORD;
-        a++;
-        b++;
-        res++;
     }
     return temp;
 }
 
-/**
- * Clears the biginteger
- * @param a the data to clear
- * @param length how many uint_t to clear
- */
 void bigint_clear_var( uint_t *a, const int length ) {
-    int i;
-    for( i = 0; i < length; i++ ) {
+    assert( length > 0 );
+
+    for( int i = 0; i < length; i++ ) {
         a[i] = 0;
     }
 }
 
-/**
- * Xors two big integers
- * @param a the first parameter to xor
- * @param b the second parameter to xor
- * @param res the result
- * @param length the number of words per uint_t*
- */
 void bigint_xor_var( uint_t *res, const uint_t *a, const uint_t *b, const int length ) {
-    uint_t temp;
-    int i = 0;
-    for( ; i < length; i++ ) {
-        temp = *a ^ *b;
-        *res = temp;
-        a++;
-        b++;
-        res++;
+    assert( length > 0 );
+
+    for( int i = 0; i < length; ++i, ++a, ++b, ++res ) {
+        *res = *a ^ *b;
     }
 }
 
-/**
- * Shifts a biginteger to the left
- * @param res destination big integer
- * @param a the data to shift
- * @param left the number of bits to shift
- * @param length number of words which should be shifted (size of a & res)
- */
 void bigint_shift_left_var( uint_t *res, const uint_t *a, const int left, const int length ) {
-    uint_t temp, temp2;
-    int i, nWords, nBits;
+    assert( length > 0 );
+    assert( left >= 0 && left < BITS_PER_WORD * length );
 
-    if( length < 0 ) {
-        return;
-    }
+    int nWords = left >> LD_BITS_PER_WORD;
+    int nBits = left & ( BITS_PER_WORD - 1 );
 
-    if( left < 0 ) {
-        bigint_shift_right_var( res, a, -left, length );
-    }
-
-    nWords = left >> LD_BITS_PER_WORD;
-    nBits = left & ( BITS_PER_WORD - 1 );
-
+    // shift is performed from the most significant word downwards
     res += length - 1;
     a += length - 1 - nWords;
     if( nBits != 0 ) {
-        temp = *a-- << nBits;
-        for( i = length - 2 - nWords; i >= 0; i-- ) {
-            temp2 = *a--;
+        uint_t temp = *a-- << nBits;
+        for( int i = length - 2 - nWords; i >= 0; i-- ) {
+            uint_t temp2 = *a--;
             temp |= temp2 >> ( BITS_PER_WORD - nBits );
             *res-- = temp;
             temp = temp2 << nBits;
         }
         *res-- = temp;
     } else {
-        for( i = length - 1; i >= nWords; i-- ) {
+        for( int i = length - 1; i >= nWords; i-- ) {
             *res-- = *a--;
         }
     }
-    for( i = nWords - 1; i >= 0; --i ) {
+
+    // fill the remaining words with zeros
+    for( int i = nWords - 1; i >= 0; --i ) {
         *res-- = 0;
     }
 }
 
-/**
- * Shifts a biginteger to the right
- * @param res the destination big integer
- * @param a the data to shift
- * @param right the number of bits to shift
- * @param length number of words in a and res
- */
 void bigint_shift_right_var( uint_t *res, const uint_t *a, const int right, const int length ) {
-    uint_t temp, temp2;
-    int i, nWords, nBits;
+    assert( length > 0 );
+    assert( right >= 0 && right < BITS_PER_WORD * length );
 
-    if( length < 0 ) {
-        return;
-    }
+    int nWords = right >> LD_BITS_PER_WORD;
+    int nBits = right & ( BITS_PER_WORD - 1 );
 
-    if( right < 0 ) {
-        bigint_shift_left_var( res, a, -right, length );
-    }
-
-    nWords = right >> LD_BITS_PER_WORD;
-    nBits = right & ( BITS_PER_WORD - 1 );
-
+    // shift is performed from the least significant word upwards
     if( nBits == 0 ) {
-        for( i = 0; i < ( length - nWords ); i++ ) {
+        for( int i = 0; i < ( length - nWords ); i++ ) {
             res[i] = a[i + nWords];
         }
     } else {
-        temp = a[nWords] >> nBits;
-        for( i = 1; i < ( length - nWords ); i++ ) {
-            temp2 = a[nWords + i];
-            /* WARNING gcc has a problem with (uint_t) << BITS_PER_WORD !! */
+        uint_t temp = a[nWords] >> nBits;
+        for( int i = 1; i < ( length - nWords ); i++ ) {
+            uint_t temp2 = a[nWords + i];
             temp |= temp2 << ( BITS_PER_WORD - nBits );
             res[i - 1] = temp;
             temp = temp2 >> nBits;
@@ -242,28 +161,18 @@ void bigint_shift_right_var( uint_t *res, const uint_t *a, const int right, cons
         res[length - nWords - 1] = temp;
     }
 
-    for( i = length - nWords; i < length; i++ ) {
+    // fill the remaining words with zeros
+    for( int i = length - nWords; i < length; i++ ) {
         res[i] = 0;
     }
 }
 
-/**
- * Shifts a biginteger to the right by one bit
- * @param a the data to shift
- * @param res destination big integer
- * @param length word count which should be shifted
- */
 void bigint_shift_right_one_var( uint_t *res, const uint_t *a, const int length ) {
-    uint_t temp, temp2;
-    int i;
+    assert( length > 0 );
 
-    if( length < 0 ) {
-        return;
-    }
-
-    temp = a[0] >> 1;
-    for( i = 1; i < length; i++ ) {
-        temp2 = a[i];
+    uint_t temp = a[0] >> 1;
+    for( int i = 1; i < length; i++ ) {
+        uint_t temp2 = a[i];
         temp |= temp2 << ( BITS_PER_WORD - 1 );
         res[i - 1] = temp;
         temp = temp2 >> 1;
@@ -271,19 +180,11 @@ void bigint_shift_right_one_var( uint_t *res, const uint_t *a, const int length 
     res[length - 1] = temp;
 }
 
-/**
- * Compares two big integers with variable length.
- * @param a
- * @param b
- * @param length the size of a and b in words
- * @return -1, 0 or 1 as *a* is numerically less than, equal to, or greater than *b*.
- */
 int bigint_compare_var( const uint_t *a, const uint_t *b, const int length ) {
-    slong_t temp;
-    int i = length - 1;
+    assert( length > 0 );
 
-    for( ; i >= 0; i-- ) {
-        temp = a[i];
+    for( int i = length - 1; i >= 0; i-- ) {
+        slong_t temp = a[i];
         temp -= b[i];
         if( temp != 0 ) {
             return ( temp > 0 ? 1 : -1 );
@@ -292,16 +193,10 @@ int bigint_compare_var( const uint_t *a, const uint_t *b, const int length ) {
     return 0;
 }
 
-/**
- * Returns 1 if the two biginteger are equal.
- * @param a
- * @param b
- * @param length the size of a and b in words
- * @return 1 if equal; 0 if not equal
- */
 int bigint_is_equal_var( const uint_t *a, const uint_t *b, const int length ) {
-    int i = length - 1;
-    for( ; i >= 0; i-- ) {
+    assert( length > 0 );
+
+    for( int i = length - 1; i >= 0; i-- ) {
         if( a[i] != b[i] ) {
             return 0;
         }
@@ -309,15 +204,10 @@ int bigint_is_equal_var( const uint_t *a, const uint_t *b, const int length ) {
     return 1;
 }
 
-/**
- * Checks if a number is zero.
- * @param a
- * @param length the size of a in words
- * @return 1 if zero otherwise 0.
- */
 int bigint_is_zero_var( const uint_t *a, const int length ) {
-    int i;
-    for( i = 0; i < length; i++ ) {
+    assert( length > 0 );
+
+    for( int i = 0; i < length; i++ ) {
         if( a[i] != 0 ) {
             return 0;
         }
@@ -325,20 +215,14 @@ int bigint_is_zero_var( const uint_t *a, const int length ) {
     return 1;
 }
 
-/**
- * Checks if a number is one.
- * @param a
- * @param length the size of a in words
- * @return 1 if one otherwise 0.
- */
 int bigint_is_one_var( const uint_t *a, const int length ) {
-    int i;
+    assert( length > 0 );
 
     if( a[0] != 1 ) {
         return 0;
     }
 
-    for( i = 1; i < length; i++ ) {
+    for( int i = 1; i < length; i++ ) {
         if( a[i] != 0 ) {
             return 0;
         }
@@ -346,274 +230,176 @@ int bigint_is_one_var( const uint_t *a, const int length ) {
     return 1;
 }
 
-/**
- * Multiply two big integers with variable length
- * @param a first multiplicant
- * @param b second multiplicant
- * @param result An buffer (array) with (length_a+length_b) entries is required.
- * @param length_a the size of array a
- * @param length_b the size of array b
- */
-void bigint_multiply_var( uint_t *result, const uint_t *a, const uint_t *b, const int length_a, const int length_b ) {
-    int i, j;
-    ulong_t product;
-    uint_t carry;
+void bigint_multiply_var( uint_t *res, const uint_t *a, const uint_t *b, const int lengthA, const int lengthB ) {
+    assert( lengthA > 0 );
+    assert( lengthB > 0 );
 
-    if( length_a < 0 || length_b < 0 ) {
-        return;
-    }
-
-    // all results with index larger than length_b are written before read
-    bigint_clear_var( result, length_b );
-    for( i = 0; i < length_a; i++ ) {
-        carry = 0;
-        for( j = 0; j < length_b; j++ ) {
-            product = result[i + j];
+    // all results with index larger than lengthB are written before read
+    bigint_clear_var( res, lengthB );
+    for( int i = 0; i < lengthA; i++ ) {
+        uint_t carry = 0;
+        for( int j = 0; j < lengthB; j++ ) {
+            ulong_t product = res[i + j];
             product += (ulong_t)a[i] * (ulong_t)b[j];
             product += carry;
-            result[i + j] = ( product & UINT_T_MAX );
-            carry = product >> ( 8 * sizeof( uint_t ) );
+            res[i + j] = ( product & UINT_T_MAX );
+            carry = product >> BITS_PER_WORD;
         }
-        result[i + length_b] = carry;
+        res[i + lengthB] = carry;
     }
 }
 
-/**
- * Copy length elements from the source array to the destination array.
- * @param source
- * @param dest
- * @param length the number of elements to copy
- */
-void bigint_copy_var( uint_t *dest, const uint_t *source, const int length ) {
-    int i;
-    for( i = 0; i < length; i++ ) {
-        dest[i] = source[i];
+void bigint_copy_var( uint_t *res, const uint_t *a, const int length ) {
+    assert( length > 0 );
+
+    for( int i = 0; i < length; i++ ) {
+        res[i] = a[i];
     }
 }
 
-/**
- * Prints the big integer in hex format to the char buffer.
- * @param to_print the big integer to print
- * @param buffer the destination buffer (must be sufficiently large)
- * @param length the number of elements stored within to_print
- */
-void bigint_print_var( char *buffer, const uint_t *to_print, const int length ) {
-    static const char lookup[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
-    int index;
+void bigint_print_var( char *buffer, const uint_t *toPrint, const int length ) {
+    assert( length > 0 );
+
+    const char lookup[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+
 #if BYTES_PER_WORD == 1
-    for( index = length - 1; index >= 0; index-- ) {
-        *buffer++ = lookup[to_print[index] >> 4];
-        *buffer++ = lookup[to_print[index] & 0xF];
+    for( int index = length - 1; index >= 0; index-- ) {
+        *buffer++ = lookup[toPrint[index] >> 4];
+        *buffer++ = lookup[toPrint[index] & 0xF];
         if( index % 4 == 0 ) {
             *buffer++ = ' ';
         }
     }
 #endif
 #if BYTES_PER_WORD == 2
-    for( index = length - 1; index >= 0; index-- ) {
-        *buffer++ = lookup[to_print[index] >> 12];
-        *buffer++ = lookup[( to_print[index] >> 8 ) & 0xF];
-        *buffer++ = lookup[( to_print[index] >> 4 ) & 0xF];
-        *buffer++ = lookup[to_print[index] & 0xF];
+    for( int index = length - 1; index >= 0; index-- ) {
+        *buffer++ = lookup[toPrint[index] >> 12];
+        *buffer++ = lookup[( toPrint[index] >> 8 ) & 0xF];
+        *buffer++ = lookup[( toPrint[index] >> 4 ) & 0xF];
+        *buffer++ = lookup[toPrint[index] & 0xF];
         if( index % 2 == 0 ) {
             *buffer++ = ' ';
         }
     }
 #endif
 #if BYTES_PER_WORD == 4
-    for( index = length - 1; index >= 0; index-- ) {
-        *buffer++ = lookup[to_print[index] >> 28];
-        *buffer++ = lookup[( to_print[index] >> 24 ) & 0xF];
-        *buffer++ = lookup[( to_print[index] >> 20 ) & 0xF];
-        *buffer++ = lookup[( to_print[index] >> 16 ) & 0xF];
-        *buffer++ = lookup[( to_print[index] >> 12 ) & 0xF];
-        *buffer++ = lookup[( to_print[index] >> 8 ) & 0xF];
-        *buffer++ = lookup[( to_print[index] >> 4 ) & 0xF];
-        *buffer++ = lookup[to_print[index] & 0xF];
+    for( int index = length - 1; index >= 0; index-- ) {
+        *buffer++ = lookup[toPrint[index] >> 28];
+        *buffer++ = lookup[( toPrint[index] >> 24 ) & 0xF];
+        *buffer++ = lookup[( toPrint[index] >> 20 ) & 0xF];
+        *buffer++ = lookup[( toPrint[index] >> 16 ) & 0xF];
+        *buffer++ = lookup[( toPrint[index] >> 12 ) & 0xF];
+        *buffer++ = lookup[( toPrint[index] >> 8 ) & 0xF];
+        *buffer++ = lookup[( toPrint[index] >> 4 ) & 0xF];
+        *buffer++ = lookup[toPrint[index] & 0xF];
         *buffer++ = ' ';
     }
 #endif
 #if BYTES_PER_WORD == 8
-    for( index = length - 1; index >= 0; index-- ) {
-        *buffer++ = lookup[to_print[index] >> 60];
-        *buffer++ = lookup[( to_print[index] >> 56 ) & 0xF];
-        *buffer++ = lookup[( to_print[index] >> 52 ) & 0xF];
-        *buffer++ = lookup[( to_print[index] >> 48 ) & 0xF];
-        *buffer++ = lookup[( to_print[index] >> 44 ) & 0xF];
-        *buffer++ = lookup[( to_print[index] >> 40 ) & 0xF];
-        *buffer++ = lookup[( to_print[index] >> 36 ) & 0xF];
-        *buffer++ = lookup[( to_print[index] >> 32 ) & 0xF];
+    for( int index = length - 1; index >= 0; index-- ) {
+        *buffer++ = lookup[toPrint[index] >> 60];
+        *buffer++ = lookup[( toPrint[index] >> 56 ) & 0xF];
+        *buffer++ = lookup[( toPrint[index] >> 52 ) & 0xF];
+        *buffer++ = lookup[( toPrint[index] >> 48 ) & 0xF];
+        *buffer++ = lookup[( toPrint[index] >> 44 ) & 0xF];
+        *buffer++ = lookup[( toPrint[index] >> 40 ) & 0xF];
+        *buffer++ = lookup[( toPrint[index] >> 36 ) & 0xF];
+        *buffer++ = lookup[( toPrint[index] >> 32 ) & 0xF];
         *buffer++ = ' ';
-        *buffer++ = lookup[( to_print[index] >> 28 ) & 0xF];
-        *buffer++ = lookup[( to_print[index] >> 24 ) & 0xF];
-        *buffer++ = lookup[( to_print[index] >> 20 ) & 0xF];
-        *buffer++ = lookup[( to_print[index] >> 16 ) & 0xF];
-        *buffer++ = lookup[( to_print[index] >> 12 ) & 0xF];
-        *buffer++ = lookup[( to_print[index] >> 8 ) & 0xF];
-        *buffer++ = lookup[( to_print[index] >> 4 ) & 0xF];
-        *buffer++ = lookup[to_print[index] & 0xF];
+        *buffer++ = lookup[( toPrint[index] >> 28 ) & 0xF];
+        *buffer++ = lookup[( toPrint[index] >> 24 ) & 0xF];
+        *buffer++ = lookup[( toPrint[index] >> 20 ) & 0xF];
+        *buffer++ = lookup[( toPrint[index] >> 16 ) & 0xF];
+        *buffer++ = lookup[( toPrint[index] >> 12 ) & 0xF];
+        *buffer++ = lookup[( toPrint[index] >> 8 ) & 0xF];
+        *buffer++ = lookup[( toPrint[index] >> 4 ) & 0xF];
+        *buffer++ = lookup[toPrint[index] & 0xF];
         *buffer++ = ' ';
     }
 #endif
-    *buffer = 0;
+    *--buffer = 0;
 }
 
-/**
- * Sets a single specific big in a
- * @param a big integer to modify
- * @param bit bit to set
- * @param value the bit value
- * @param length the maximum size of a in words
- */
 void bigint_set_bit_var( uint_t *a, const int bit, const int value, const int length ) {
-    int iWord, iBit;
-    uint_t word;
+    assert( length > 0 );
+    assert( bit >= 0 && bit < BITS_PER_WORD * length );
+    assert( value == 0 || value == 1 );
 
-    if( bit < 0 ) {
-        return;
-    }
+    int iWord = bit >> LD_BITS_PER_WORD;
+    int iBit = bit & ( BITS_PER_WORD - 1 );
 
-    iWord = bit >> LD_BITS_PER_WORD;
-    iBit = bit & ( BITS_PER_WORD - 1 );
-
-    if( iWord >= length ) {
-        return;
-    }
-
-    word = a[iWord];
+    uint_t word = a[iWord];
     word &= ~( 1 << iBit );
     word |= value << iBit;
     a[iWord] = word;
 }
 
-/**
- * Returns the state of a specific bit.
- * @param a big integer to test
- * @param bit bit to test
- * @param length the maximum size of a in words
- * @return 1 if bit is 1, 0 if bit is 0, and 0 if out of bounds.
- */
 int bigint_test_bit_var( const uint_t *a, const int bit, const int length ) {
-    int iWord, iBit;
+    assert( length > 0 );
+    assert( bit >= 0 && bit < BITS_PER_WORD * length );
 
-    if( bit < 0 ) {
-        return 0;
-    }
-
-    iWord = bit >> LD_BITS_PER_WORD;
-    iBit = bit & ( BITS_PER_WORD - 1 );
-
-    if( iWord >= length ) {
-        return 0;
-    }
+    int iWord = bit >> LD_BITS_PER_WORD;
+    int iBit = bit & ( BITS_PER_WORD - 1 );
 
     return ( a[iWord] >> iBit ) & 0x01;
 }
 
-/**
- * Get the bit index of the most significant bit
- * @param a the big integer to test
- * @param param the size of the uint_t-array in words
- * @return 0 <= index < ECC_NUM_BITS, -1 if no bit is set
- */
 int bigint_get_msb_var( const uint_t *a, const int length ) {
-    int word, bit;
-    uint_t temp;
+    assert( length > 0 );
 
-    if( length < 0 ) {
-        return -1;
-    }
-
-    for( word = length - 1; word > 0; word-- ) {
-        temp = a[word];
-        if( temp != 0 ) {
-            break;
+    // iterate over the words to find the first one which is not zero
+    for( int word = length - 1; word >= 0; --word ) {
+        uint_t temp = a[word];
+        if( temp == 0 ) {
+            continue;
+        }
+        // found non zero word, iterate over the bits
+        for( int bit = BITS_PER_WORD - 1; bit >= 0; --bit ) {
+            if( ( ( temp >> bit ) & 0x01 ) == 1 ) {
+                return word * BITS_PER_WORD + bit;
+            }
         }
     }
 
-    temp = a[word];
-    for( bit = BITS_PER_WORD - 1; bit >= 0; bit-- ) {
-        if( ( ( temp >> bit ) & 0x01 ) == 1 ) {
-            break;
-        }
-    }
-    return word * BITS_PER_WORD + bit;
+    // no set bit found
+    return -1;
 }
 
-/**
- * Access a single byte of the big integer
- * @param a the big integer to investigate
- * @param length the length of the uint_t array
- * @param index the byte index to access
- * @return the byte to access (zero if index is out of bounds)
- */
 uint8_t bigint_get_byte_var( const uint_t *a, const int length, const int index ) {
+    assert( length > 0 );
+    assert( index >= 0 && index < BYTES_PER_WORD * length );
+
     int wordIndex = index >> LD_BYTES_PER_WORD;
     int byteIndex = index & ( BYTES_PER_WORD - 1 );
-    uint_t word;
 
-    /* handle out of bounds */
-    if( wordIndex < 0 || wordIndex >= length ) {
-        return 0;
-    }
-
-    word = a[wordIndex];
-
-#if( BYTES_PER_WORD == 1 )
-    return word;
-#else
+    uint_t word = a[wordIndex];
     return ( word >> ( byteIndex << 3 ) ) & 0xFF;
-#endif
 }
 
-/**
- * Set a single byte of a big integer
- * @param a the big integer to set
- * @param length the length of the uint_t array
- * @param index the byte index to access
- * @param value the byte to write to the specified index
- */
 void bigint_set_byte_var( uint_t *a, const int length, const int index, const uint8_t value ) {
+    assert( length > 0 );
+    assert( index >= 0 && index < BYTES_PER_WORD * length );
+
     int wordIndex = index >> LD_BYTES_PER_WORD;
     int byteIndex = index & ( BYTES_PER_WORD - 1 );
-    uint_t word;
 
-    /* handle out of bounds */
-    if( wordIndex < 0 || wordIndex >= length ) {
-        return;
-    }
-
-#if( BYTES_PER_WORD == 1 )
-    word = value;
-#else
-    word = a[wordIndex];
-    byteIndex <<= 3;
-    word &= ~( 0xFF << byteIndex );
-    word |= value << byteIndex;
-#endif
+    uint_t word = a[wordIndex];
+    word &= ~( 0xFF << ( byteIndex * 8 ) );
+    word |= value << ( byteIndex * 8 );
     a[wordIndex] = word;
 }
 
-/**
- * Parses a hex array and returns a uint_t array
- * @param a the resulting uint_t array
- * @param length_a the maximum length of a (in words)
- * @param array the data to parse
- * @param array_length the number of chars to parse
- * @return the number of elements in a used after parsing finished
- */
-int bigint_parse_hex_var( uint_t *a, const int length_a, const char *array, const int array_length ) {
-    int nibble_i = 0, a_index = 0;
-    uint_t word = 0, char_converted;
-    char character;
-    char *array_pointer = (char *)array + array_length - 1;
+int bigint_parse_hex_var( uint_t *res, const int length, const char *string, const int string_length ) {
+    assert( length > 0 );
+    assert( string_length > 0 );
 
-    if( array_length < 0 || length_a < 0 ) {
-        return 0;
-    }
+    int nibble_i = 0, index = 0;
+    uint_t word = 0;
 
-    while( array_pointer != ( array - 1 ) ) {
-        character = *array_pointer--;
+    // iterate over the characters of the string
+    for( const char *ptr = string + string_length - 1; ptr >= string; --ptr ) {
+        char character = *ptr;
+        uint_t char_converted;
         if( ( character >= '0' ) && ( character <= '9' ) ) {
             char_converted = character - '0';
         } else if( ( character >= 'a' ) && ( character <= 'f' ) ) {
@@ -624,35 +410,34 @@ int bigint_parse_hex_var( uint_t *a, const int length_a, const char *array, cons
             continue;
         }
 
+        // found a valid character, add it to the current word
         word |= char_converted << nibble_i;
-        nibble_i += 4; /* 4 bits are necessary to represent a nibble */
+        nibble_i += 4;
 
+        // check if the current word is finished and write it to the big integer
+        // if it is the case
         if( nibble_i == BITS_PER_WORD ) {
-            a[a_index++] = word;
-            if( a_index == length_a ) {
-                return a_index;
+            res[index++] = word;
+            if( index == length ) {
+                return index;
             }
             nibble_i = 0;
             word = 0;
         }
     }
     if( nibble_i > 0 ) {
-        a[a_index++] = word;
+        res[index++] = word;
     }
-    return a_index;
+    return index;
 }
 
-/**
- * Returns the number of set bits in the given big integer.
- * @param var
- * @param length the number of elements in the uint_t array
- */
 int bigint_hamming_weight_var( const uint_t *var, const int length ) {
-    int word, bit, counter = 0;
-    uint_t temp;
-    for( word = 0; word < length; word++ ) {
-        temp = var[word];
-        for( bit = 0; bit < BITS_PER_WORD; bit++ ) {
+    assert( length > 0 );
+
+    int counter = 0;
+    for( int word = 0; word < length; word++ ) {
+        uint_t temp = var[word];
+        for( int bit = 0; bit < BITS_PER_WORD; bit++ ) {
             if( ( temp & ( 1 << bit ) ) > 0 ) {
                 counter++;
             }
@@ -661,28 +446,18 @@ int bigint_hamming_weight_var( const uint_t *var, const int length ) {
     return counter;
 }
 
-/**
- * Simple bit-wise long division algorithm. Not fast nor optimal but simple.
- * @param Q Quotient
- * @param R Remainder
- * @param N Dividend
- * @param D Divisor
- * @param len
- */
-void bigint_divide_simple_var( uint_t *Q, uint_t *R, const uint_t *N, const uint_t *D, const int words ) {
-    int i;
-    if( bigint_is_zero_var( D, words ) ) {
-        return;
-    }
+void bigint_divide_simple_var( uint_t *Q, uint_t *R, const uint_t *N, const uint_t *D, const int length ) {
+    assert( length > 0 );
+    assert( !bigint_is_zero_var( D, length ) );
 
-    bigint_clear_var( Q, words );
-    bigint_clear_var( R, words );
-    for( i = BITS_PER_WORD * words - 1; i >= 0; i-- ) {
-        bigint_shift_left_var( R, R, 1, words );
-        R[0] |= bigint_test_bit_var( N, i, words );
-        if( bigint_compare_var( R, D, words ) >= 0 ) {
-            bigint_subtract_var( R, R, D, words );
-            bigint_set_bit_var( Q, i, 1, words );
+    bigint_clear_var( Q, length );
+    bigint_clear_var( R, length );
+    for( int i = BITS_PER_WORD * length - 1; i >= 0; i-- ) {
+        bigint_shift_left_var( R, R, 1, length );
+        R[0] |= bigint_test_bit_var( N, i, length );
+        if( bigint_compare_var( R, D, length ) >= 0 ) {
+            bigint_subtract_var( R, R, D, length );
+            bigint_set_bit_var( Q, i, 1, length );
         }
     }
 }
