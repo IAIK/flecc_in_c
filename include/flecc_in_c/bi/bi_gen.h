@@ -50,7 +50,7 @@
  *
  * Semantic: (res_carry, res) = a + b
  *
- * @param res the result
+ * @param res the resulting big integer
  * @param a the first parameter to add
  * @param b the second parameter to add
  * @param length the number of uint_t elements in the big integers (>= 1)
@@ -63,7 +63,7 @@ int bigint_add_var( uint_t *res, const uint_t *a, const uint_t *b, const int len
  *
  * Semantic: (res_carry, res) = a + b + carry
  *
- * @param res the result
+ * @param res the resulting big integer
  * @param a the first parameter to add
  * @param b the second parameter to add
  * @param length the number of uint_t elements in the big integers (>= 1)

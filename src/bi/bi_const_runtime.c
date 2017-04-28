@@ -38,143 +38,67 @@
 #include "flecc_in_c/bi/bi_const_runtime.h"
 #include "flecc_in_c/bi/bi_gen.h"
 
-/**
- * Accesses all elements in table and moves one entry to the destination memory.
- * @param result the destination buffer
- * @param table pointer to two-dimensional array
- * @param index the index in the table to access
- * @param tbl_entries the number of entries in the table
- * @param words_per_entry the number of words per table entry
- * @param words_result the number of words copied to result
- */
-void bigint_cr_tbl_access( uint_t *result,
-                           const uint_t *table,
-                           const int index,
-                           const int tbl_entries,
-                           const int words_per_entry,
-                           const int words_result ) {
-    int i, j, k, right_entry, index2;
-    uint_t mask;
-    uint_t *table_ptr = (uint_t *)table;
+#include <assert.h>
 
-    bigint_clear_var( result, words_result );
+void bigint_cr_switch( uint_t *var1, uint_t *var2, const int condition, const int length ) {
+    assert( length > 0 );
+    assert( condition == 0 || condition == 1 );
 
-    index2 = -index;
-    for( i = 0; i < tbl_entries; i++ ) {
-        right_entry = index2;
-        j = 1;
-        while( j != ( sizeof( int ) * 8 ) ) {
-            right_entry |= ( right_entry >> j );
-            j <<= 1;
-        }
-        right_entry &= 1;
-        mask = -right_entry;
-        mask = ~mask;
+    uint_t M2 = -condition;
+    uint_t M1 = ~M2;
 
-        for( k = 0; k < words_result; k++ ) {
-            result[k] |= table_ptr[k] & mask;
-        }
-        table_ptr += words_per_entry;
-        index2++;
+    for( int i = 0; i < length; i++ ) {
+        uint_t V1 = var1[i];
+        uint_t V2 = var2[i];
+
+        var1[i] = ( V1 & M1 ) | ( V2 & M2 );
+        var2[i] = ( V1 & M2 ) | ( V2 & M1 );
     }
 }
 
-/**
- * Switch two variables in constant time and with constant access pattern.
- * @param var1
- * @param var2
- * @param switch_vars if 1, variables are switched; if 0, no switch is performed
- * @param words number of words to represent the two variables
- */
-void bigint_cr_switch( uint_t *var1, uint_t *var2, const int switch_vars, const int words ) {
-    uint_t M1, M2;
-    uint_t V1, V2, V3, V4;
-    int i;
+void bigint_cr_select_2( uint_t *result, const uint_t *var0, const uint_t *var1, const int condition, const int length ) {
+    assert( length > 0 );
+    assert( condition == 0 || condition == 1 );
 
-    M2 = -switch_vars;
-    M1 = ~M2;
+    uint_t M1 = -condition;
+    uint_t M0 = ~M1;
 
-    for( i = 0; i < words; i++ ) {
-        V1 = var1[i];
-        V2 = var2[i];
-        V3 = ( V1 & M1 ) | ( V2 & M2 );
-        V4 = ( V1 & M2 ) | ( V2 & M1 );
-        var1[i] = V3;
-        var2[i] = V4;
-    }
-}
-
-/**
- * Copy one of two variables to the destination memory in constant time.
- * @param result destination memory
- * @param var0
- * @param var1
- * @param var_sel if 0, selects var0, if 1, selects var1
- * @param words the number of words to copy
- */
-void bigint_cr_select_2( uint_t *result, const uint_t *var0, const uint_t *var1, const int var_sel, const int words ) {
-    uint_t M0, M1;
-    int i;
-
-    M1 = -var_sel;
-    M0 = ~M1;
-
-    for( i = 0; i < words; i++ ) {
+    for( int i = 0; i < length; i++ ) {
         result[i] = ( var0[i] & M0 ) | ( var1[i] & M1 );
     }
 }
 
-/**
- * Returns 1 if the two biginteger are equal IN CONSTANT TIME.
- * @param a
- * @param b
- * @param length the size of a and b in words
- * @return 1 if equal; 0 if not equal
- */
 int bigint_cr_is_equal_var( const uint_t *a, const uint_t *b, const int length ) {
+    assert( length > 0 );
+
+    // compress big integers differences into one word
     uint_t temp = 0;
-    int i = length - 1;
-    int j;
-    for( ; i >= 0; i-- ) {
+    for( int i = length - 1; i >= 0; i-- ) {
         temp |= a[i] ^ b[i];
     }
-
-    // at this point, temp is zero if equal
     temp = ~temp;
 
-    // if all bits are ored together, the LSB will be 1 if all bits are equal
-    j = 1;
-    while( j != ( sizeof( uint_t ) * 8 ) ) {
+    // if all bits are anded together, the LSB will be 1 if all bits are equal
+    for( int j = 1; j != BITS_PER_WORD; j <<= 1 ) {
         temp &= ( temp >> j );
-        j <<= 1;
     }
 
     return temp & 1;
 }
 
-/**
- * Returns 1 if the given biginteger is zero; IN CONSTANT TIME.
- * @param a
- * @param length the size of a and b in words
- * @return 1 if zero; 0 if not zero
- */
 int bigint_cr_is_zero_var( const uint_t *a, const int length ) {
+    assert( length > 0 );
+
+    // compress big integer into one word
     uint_t temp = 0;
-    int i = length - 1;
-    int j;
-    for( ; i >= 0; i-- ) {
+    for( int i = length - 1; i >= 0; i-- ) {
         temp |= a[i];
     }
-
-    // at this point, temp is zero if all bits are zero
     temp = ~temp;
-    // at this point, temp is all ones if all bits of a[] are zero
 
-    // if all bits are ored together, the LSB will be 1 if all bits are equal
-    j = 1;
-    while( j != ( sizeof( uint_t ) * 8 ) ) {
+    // if all bits are anded together, the LSB will be 1 the big integer is zero
+    for( int j = 1; j != BITS_PER_WORD; j <<= 1 ) {
         temp &= ( temp >> j );
-        j <<= 1;
     }
 
     return temp & 1;
