@@ -134,8 +134,8 @@ if(compare_files_length GREATER 0)
   endforeach()
 endif()
 
-if( ( RETURN_VALUE STREQUAL EXECUTION AND execution_result ) OR
-    ( RETURN_VALUE STREQUAL COMPARISON AND compare_result ) OR
-    ( RETURN_VALUE STREQUAL COMBINED AND compare_result AND execution_result ) )
+if( ( RETURN_VALUE STREQUAL "EXECUTION" AND execution_result ) OR
+    ( RETURN_VALUE STREQUAL "COMPARISON" AND compare_result ) OR
+    ( RETURN_VALUE STREQUAL "COMBINED" AND (compare_result OR execution_result ) ) )
   message(SEND_ERROR "Run failed!")
 endif()
