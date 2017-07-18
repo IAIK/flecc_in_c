@@ -126,7 +126,6 @@ void io_print_bigint_var( const uint_t *value, const int length ) {
     char buffer[BYTES_PER_GFP * 4 + WORDS_PER_GFP * 2 + 10];
     bigint_print_var( buffer, value, length );
     puts( buffer );
-    putchar( '\n' );
 }
 
 /**
@@ -138,7 +137,6 @@ void io_print_bytes_var( const uint8_t *value, const int length ) {
     char buffer[BYTES_PER_GFP * 2 + WORDS_PER_GFP + 1]; // TODO: correct size
     io_sprint_bytes_var( buffer, value, length );
     puts( buffer );
-    putchar( '\n' );
 }
 
 /**
@@ -150,7 +148,6 @@ void io_print_integer( const uint_t value ) {
     print_uint_to_buffer( buffer, value );
     buffer[2 * BYTES_PER_WORD] = 0;
     puts( buffer );
-    putchar( '\n' );
 }
 
 /**

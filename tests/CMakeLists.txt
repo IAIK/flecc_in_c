@@ -20,3 +20,16 @@ if(NOT TEST_COVERAGE)
     --build-makeprogram ${CMAKE_MAKE_PROGRAM}
     --build-options "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
 endif()
+
+# register every .c file in this folder as individual test
+file(GLOB Sources "*.c")
+foreach(loop ${Sources})
+  get_filename_component(name "${loop}" NAME_WE)
+  add_executable("${name}" "${loop}")
+  target_link_libraries("${name}" flecc_in_c)
+  add_to_suite("${name}")
+  add_test(NAME "${name}" COMMAND $<TARGET_FILE:${name}>)
+endforeach()
+
+# register source files for reformating
+add_file_to_format(${Sources})
