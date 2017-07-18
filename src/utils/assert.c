@@ -37,6 +37,7 @@
 
 #include "flecc_in_c/bi/bi.h"
 #include "flecc_in_c/io/io.h"
+
 #include <stdio.h>
 
 /**
@@ -70,13 +71,13 @@ int compare_bytes( const uint8_t *a, const uint8_t *b, const int length ) {
  * @return false (=0) on success, true (!=0) on error
  */
 int assert( const char *test_id, const int condition ) {
-    puts( "Test " );
-    puts( test_id );
+    fputs( "Test ", stdout );
+    fputs( test_id, stdout );
     if( condition ) {
-        puts( ": success\n" );
+        fputs( ": success\n", stdout );
         return 0;
     }
-    puts( ": error\n" );
+    fputs( ": error\n", stdout );
     return 1;
 }
 
@@ -96,11 +97,11 @@ int assert_bigint( const char *test_id, const uint_t *expected, const uint_t *to
     if( comp != 0 ) {
         uint_t diff[2 * WORDS_PER_GFP];
         bigint_xor_var( diff, expected, to_test, length );
-        puts( "    expected: " );
+        fputs( "    expected: ", stdout );
         io_print_bigint_var( expected, length );
-        puts( "    actual:   " );
+        fputs( "    actual:   ", stdout );
         io_print_bigint_var( to_test, length );
-        puts( "    diff:     " );
+        fputs( "    diff:     ", stdout );
         io_print_bigint_var( diff, length );
         return 1;
     }
@@ -119,9 +120,9 @@ int assert_integer( const char *test_id, const int expected, const int to_test )
     int comp = ( expected == to_test );
     assert( test_id, comp );
     if( comp == 0 ) {
-        puts( "    expected: " );
+        fputs( "    expected: ", stdout );
         io_print_integer( expected );
-        puts( "    actual:   " );
+        fputs( "    actual:   ", stdout );
         io_print_integer( to_test );
         return 1;
     }
@@ -141,9 +142,9 @@ int assert_byte_array( const char *test_id, const uint8_t *expected, const uint8
     int comp = compare_bytes( expected, to_test, length );
     assert( test_id, comp == 0 );
     if( comp != 0 ) {
-        puts( "    expected: " );
+        fputs( "    expected: ", stdout );
         io_print_bytes_var( expected, length );
-        puts( "    actual:   " );
+        fputs( "    actual:   ", stdout );
         io_print_bytes_var( to_test, length );
         return 1;
     }

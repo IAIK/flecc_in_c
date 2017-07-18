@@ -91,12 +91,12 @@ void io_gen_write( const char *buffer, const int length ) {
  */
 int io_gen_readline( char *buffer, const int length ) {
     int i = 0;
-    uint8_t byte;
-
-    do {
-        byte = getchar();
-        buffer[i++] = byte;
-    } while( byte != '\n' && i < length );
+    for( ; i < length; ++i ) {
+        uint8_t byte = getchar();
+        if( byte == '\n' )
+            break;
+        buffer[i] = byte;
+    }
 
     return i;
 }

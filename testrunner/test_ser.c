@@ -46,10 +46,12 @@
 #include <flecc_in_c/utils/param.h>
 #include <flecc_in_c/utils/parse.h>
 #include <flecc_in_c/utils/performance.h>
+
 #include <stdio.h>
+#include <string.h>
 
 //#define READ_BUFFER_SIZE 4*BYTES_PER_GFP+2*WORDS_PER_GFP+10
-#define READ_BUFFER_SIZE 10000
+#define READ_BUFFER_SIZE 1000
 
 /**
  * Reads a message in hexadecimal format from the default
@@ -73,7 +75,8 @@ int read_message( char *buffer, const int buf_length, uint8_t *message, const in
  * @return the integer that was read
  */
 int read_integer( char *buffer, const int buf_length ) {
-    io_gen_readline( buffer, buf_length );
+    int digits = io_gen_readline( buffer, buf_length - 1 );
+    buffer[digits] = 0;
     return parse_integer( buffer );
 }
 
@@ -215,25 +218,6 @@ void read_elliptic_curve_parameters( char *buffer, const int buf_length, eccp_pa
     param->base_point_precomputed_table_width = 0;
 }
 
-/**
- * Extracts the test_id from the read buffer and writes it to a pre-allocated
- * memory location.
- * @param test_id the destination for the test_id
- * @param id_length the length of the test_id
- * @param buffer the input read buffer
- */
-void extract_test_id( char *test_id, const int id_length, const char *buffer ) {
-    int i = 0;
-    while( i < id_length && buffer[i] ) {
-        if( ( buffer[i] == '\n' ) || ( buffer[i] == '\r' ) ) {
-            test_id[i] = '\0';
-        } else {
-            test_id[i] = buffer[i];
-        }
-        i++;
-    }
-}
-
 #define TBL_WIDTH 5
 
 /**
@@ -268,7 +252,7 @@ unsigned test_ser() {
     } else {
         param_load( param, curve_params.curve_type );
         if( param->curve_type == UNKNOWN ) {
-            puts( "Error! Curve parameters could not be loaded!\n" );
+            puts( "Error! Curve parameters could not be loaded!" );
             return 1;
         }
     }
@@ -285,9 +269,11 @@ unsigned test_ser() {
     // eccp_jacobian_point_multiply_COMB_precompute( param );
 
     while( 1 ) {
-        io_gen_readline( buffer, READ_BUFFER_SIZE );
+        int line_lenth = io_gen_readline( buffer, READ_BUFFER_SIZE - 1 );
+        buffer[line_lenth] = 0;
 
-        extract_test_id( test_id, 50, buffer );
+        strncpy( test_id, buffer, sizeof( test_id ) );
+        test_id[sizeof( test_id ) - 1] = 0;
 
         if( line_starts_with( buffer, "exit" ) ) {
             return errors;
