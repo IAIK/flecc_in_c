@@ -35,6 +35,9 @@
 **
 ****************************************************************************/
 
+#include "test_ser.h"
+#include "assert.h"
+
 #include <flecc_in_c/bi/bi.h>
 #include <flecc_in_c/eccp/eccp.h>
 #include <flecc_in_c/gfp/gfp.h>
@@ -42,7 +45,6 @@
 #include <flecc_in_c/hash/sha2.h>
 #include <flecc_in_c/io/io.h>
 #include <flecc_in_c/protocols/protocols.h>
-#include <flecc_in_c/utils/assert.h>
 #include <flecc_in_c/utils/param.h>
 #include <flecc_in_c/utils/parse.h>
 #include <flecc_in_c/utils/performance.h>

@@ -38,7 +38,7 @@
 #ifndef ASSERT_H_
 #define ASSERT_H_
 
-#include "../types.h"
+#include <flecc_in_c/types.h>
 
 int assert( const char *test_id, const int condition );
 int assert_bigint( const char *test_id, const uint_t *expected, const uint_t *to_test, const int length );

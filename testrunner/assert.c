@@ -35,8 +35,8 @@
 **
 ****************************************************************************/
 
-#include "flecc_in_c/bi/bi.h"
-#include "flecc_in_c/io/io.h"
+#include <flecc_in_c/bi/bi.h>
+#include <flecc_in_c/io/io.h>
 
 #include <stdio.h>
 
