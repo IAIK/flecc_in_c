@@ -330,6 +330,7 @@ void param_load( eccp_parameters_t *param, const curve_type_t type ) {
         param->base_point.identity = 0;
     } else {
         memset( param, 0, sizeof( eccp_parameters_t ) );
+        return;
     }
 
     param->curve_type = type;

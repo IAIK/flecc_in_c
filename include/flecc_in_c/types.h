@@ -116,7 +116,7 @@ typedef struct {
 } eccp_point_projective_t;
 
 /** specifies the used eccp_parameters_t */
-typedef enum { UNKNOWN, SECP192R1, SECP224R1, SECP256R1, SECP384R1, SECP521R1, CUSTOM } curve_type_t;
+typedef enum { UNKNOWN = 0, SECP192R1, SECP224R1, SECP256R1, SECP384R1, SECP521R1, CUSTOM } curve_type_t;
 
 /** function point to a gfp operation (TODO: integrate into eccp_parameters_t) */
 typedef void ( *gfp_operation_t )( gfp_t, const gfp_t, const gfp_t, const gfp_prime_data_t * );

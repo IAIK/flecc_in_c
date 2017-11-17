@@ -97,11 +97,6 @@ void performance_test_eccp_mul( eccp_parameters_t *param ) {
         stop_time = clock();
         runtime[run_number] = stop_time - start_time;
     }
-#if 0
-    for(run_number = 0; run_number < NUM_ITERATIONS; run_number++) {
-        printf("%lu\n", runtime[run_number]);
-    }
-#endif
     performance_print_statistics( runtime );
 }
 
@@ -126,10 +121,5 @@ void performance_test_gfp_mul( eccp_parameters_t *param ) {
         stop_time = clock();
         runtime[run_number] = stop_time - start_time;
     }
-#if 1
-    for( run_number = 0; run_number < NUM_ITERATIONS; run_number++ ) {
-        printf( "%lu\n", runtime[run_number] );
-    }
-#endif
     performance_print_statistics( runtime );
 }
