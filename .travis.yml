@@ -14,10 +14,11 @@ before_script:
 # configure, build and run the test suite with coverage support
 script:
   - cmake -DTEST_COVERAGE=1 ..
-  - make suite
-  - make coverage
+  - cmake --build . --target suite
+  - ctest
 
 # generate coverage reports
 after_script:
+  - cmake --build . --target covGenerate
   - lcov -l _coverage/flecc_in_c.info
   - bash <(curl -s https://codecov.io/bash) -f _coverage/flecc_in_c.info

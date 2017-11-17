@@ -29,6 +29,9 @@ nbproject
 # QtCreator project files
 CMakeLists.txt.user
 
+# VSCode project files
+.vscode/
+
 # ignore all _ prefixed directories (usually used for generated directories)
 _*/
 
